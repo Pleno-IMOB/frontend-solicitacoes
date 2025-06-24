@@ -1,0 +1,77 @@
+<mat-stepper
+  #stepper
+  linear="true">
+  <mat-step label="Cidade de operação">
+    <ng-template matStepContent>
+      <h2 class="text-center mb-4">Selecione uma cidade de operação</h2>
+      <div class="cidade-grid">
+        @for (cidadeOperacao of cidadesOperacao; track cidadeOperacao) {
+          <div class="w-100 d-flex justify-content-center">
+            <app-cidade-operacao-card
+              [empresa]="empresa"
+              (selecionarCidade)="selecionaCidadeOperacao($event)"
+              [cidadeOperacao]="cidadeOperacao">
+            </app-cidade-operacao-card>
+          </div>
+        }
+      </div>
+    </ng-template>
+  </mat-step>
+  <mat-step label="Tipo de vistoria">
+    <ng-template matStepContent>
+      <mat-form-field>
+        <mat-label>Address</mat-label>
+        <input matInput placeholder="Ex. 1 Main St, New York, NY" required>
+      </mat-form-field>
+      <div>
+        <button matButton matStepperPrevious>Back</button>
+        <button matButton matStepperNext>Next</button>
+      </div>
+    </ng-template>
+  </mat-step>
+  <mat-step label="Data e horário">
+    <ng-template matStepContent>
+      pagina 3
+      <div>
+        <button matButton matStepperPrevious>Back</button>
+        <button matButton matStepperNext>Next</button>
+      </div>
+    </ng-template>
+  </mat-step>
+  <mat-step label="Dados da solicitação">
+    <ng-template matStepContent>
+      pagina 3
+      <div>
+        <button matButton matStepperPrevious>Back</button>
+        <button matButton matStepperNext>Next</button>
+      </div>
+    </ng-template>
+  </mat-step>
+  <mat-step label="Dados da solicitação">
+    <ng-template matStepContent>
+      pagina 3
+      <div>
+        <button matButton matStepperPrevious>Back</button>
+        <button matButton matStepperNext>Next</button>
+      </div>
+    </ng-template>
+  </mat-step>
+  <mat-step label="Revisão">
+    <ng-template matStepContent>
+      pagina 3
+      <div>
+        <button matButton matStepperPrevious>Back</button>
+        <button matButton matStepperNext>Next</button>
+      </div>
+    </ng-template>
+  </mat-step>
+  <mat-step label="Confirmação">
+    <ng-template matStepContent>
+      pagina 3
+      <div>
+        <button matButton matStepperPrevious>Back</button>
+        <button matButton matStepperNext>Next</button>
+      </div>
+    </ng-template>
+  </mat-step>
+</mat-stepper>

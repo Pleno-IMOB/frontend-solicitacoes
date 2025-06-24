@@ -1,0 +1,20 @@
+<app-header></app-header>
+<div
+  class="d-flex flex-column w-100 h-100">
+  <div class="d-flex justify-content-center w-100">
+    <mat-card appearance="outlined" class="p-4 align-self-center mt-5">
+      <img
+        [alt]="'logo-' + currentHost"
+        [src]="'https://api.sistemaspleno.com/api/portalDoCliente/logo-imobiliaria?host=' + currentHost">
+      <mat-divider class="mt-4"></mat-divider>
+      <h3 class="text-center pt-3 pb-2 m-0">{{ empresa.imob_empresa }}</h3>
+      <p class="text-center m-0 pb-3">{{ formataEnderecoImobiliaria(empresa) }}</p>
+      <button (click)="openSolicitarVistoriaDialog()" class="btn-solicitar mb-1" color="primary" matButton="filled">
+        SOLICITAR VISTORIA
+        <mat-icon>calendar_month</mat-icon>
+      </button>
+    </mat-card>
+  </div>
+</div>
+<app-footer></app-footer>
+

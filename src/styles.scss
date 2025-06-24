@@ -1,19 +1,102 @@
-
 // Custom Theming for Angular Material
 // For more information: https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
+@use 'assets/theming' as *;
+@use 'assets/global' as *;
+@import 'assets/fonts/font';
 
-html {
-  @include mat.theme((
-    color: (
-      theme-type: light,
-      primary: mat.$azure-palette,
-      tertiary: mat.$blue-palette,
-    ),
-    typography: Roboto,
-    density: 0,
-  ));
-}/* You can add global styles to this file, and also import other style files */
+html, body {
+  height: 100%;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  padding: 110px 30px 30px;
+  margin: 0;
+  background-color: #ffffff;
+}
+
+h2 {
+  font-family: 'Mulish Bold', sans-serif !important;
+  color: #01426a;
+  font-size: 24px !important;
+  line-height: 24px !important;
+}
+
+h3 {
+  font-family: 'Mulish Bold', sans-serif !important;
+  color: #01426a;
+  font-size: 18px !important;
+  line-height: 18px !important;
+}
+
+p {
+  font-family: 'Mulish Light', sans-serif !important;
+  color: #01426a;
+  font-size: 14px !important;
+  line-height: 16px !important;
+}
+
+span {
+  font-family: 'Mulish Light', sans-serif !important;
+  font-size: 14px !important;
+  line-height: 16px !important;
+}
+
+small {
+  font-family: 'Mulish Light', sans-serif !important;
+  color: #01426a;
+  font-size: 11px !important;
+}
+
+.font-circular-book {
+  font-family: 'Circular Std Book', sans-serif !important;
+}
+
+.font-circular-bold {
+  font-family: 'Circular Std Bold', sans-serif !important;
+}
+
+.font-circular-black {
+  font-family: 'Circular Std Black', sans-serif !important;
+}
+
+.font-circular-medium {
+  font-family: 'Circular Std Medium', sans-serif !important;
+}
+
+.font-mulish-black {
+  font-family: 'Mulish Black', sans-serif !important;
+}
+
+.font-mulish-bold {
+  font-family: 'Mulish Bold', sans-serif !important;
+}
+
+.font-mulish-extralight {
+  font-family: 'Mulish ExtraLight', sans-serif !important;
+}
+
+.font-mulish-light {
+  font-family: 'Mulish Light', sans-serif !important;
+}
+
+.font-mulish-regular {
+  font-family: 'Mulish Regular', sans-serif !important;
+}
+
+@media (max-width: 1100px) {
+  h2 {
+    font-family: 'Mulish Bold', sans-serif !important;
+    color: #01426a;
+    font-size: 20px !important;
+  }
+}
+
+@media (max-width: 910px) {
+  h2 {
+    font-family: 'Mulish Bold', sans-serif !important;
+    color: #01426a;
+    font-size: 16px !important;
+  }
+}
+

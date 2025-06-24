@@ -1,0 +1,132 @@
+@use '@angular/material' as mat;
+@use 'sass:color';
+
+$custom-hex: #0d426a !default;
+$custom-primary: (
+        50: color.adjust($custom-hex, $lightness: 50%),
+        100: color.adjust($custom-hex, $lightness: 40%),
+        200: color.adjust($custom-hex, $lightness: 30%),
+        300: color.adjust($custom-hex, $lightness: 20%),
+        400: color.adjust($custom-hex, $lightness: 10%),
+        500: $custom-hex,
+        600: color.adjust($custom-hex, $lightness: -10%),
+        700: color.adjust($custom-hex, $lightness: -20%),
+        800: color.adjust($custom-hex, $lightness: -30%),
+        900: color.adjust($custom-hex, $lightness: -40%),
+        A100: color.adjust($custom-hex, $lightness: 50%),
+        A200: color.adjust($custom-hex, $lightness: 30%),
+        A400: color.adjust($custom-hex, $lightness: 10%),
+        A700: color.adjust($custom-hex, $lightness: -20%),
+        contrast: (
+                50: black,
+                100: black,
+                200: black,
+                300: black,
+                400: black,
+                500: white,
+                600: white,
+                700: white,
+                800: white,
+                900: white,
+                A100: black,
+                A200: black,
+                A400: black,
+                A700: white,
+        )
+);
+
+// Definição do tema
+//$primary: mat.define-palette($custom-primary);
+//$accent: mat.define-palette($custom-primary);
+//$warn: mat.define-palette(mat.$red-palette);
+
+//$theme: mat.define-light-theme($primary, $accent, $warn);
+
+// Incluindo estilos básicos e componentes do tema
+@include mat.core();
+//@include mat.all-component-themes($theme);
+
+body {
+  * {
+    .btn-primary {
+      color: #fff !important;
+      //border-color: darken($custom-hex, 5%) !important;
+      background-color: $custom-hex !important;
+      box-shadow: 0 4px 6px rgba(50, 50, 93, .11), 0 1px 3px rgba(0, 0, 0, .08) !important;
+      animation: .5s;
+      transition: .5s;
+
+      &:hover, &:focus {
+        color: #fff;
+        //border-color: darken($custom-hex, 5%) !important;
+        //background-color: darken($custom-hex, 5%) !important;
+      }
+
+      &.disabled, &:disabled {
+        color: rgba(0, 0, 0, 0.26);
+        //border-color: lighten($custom-hex, 5%) !important;
+        //background-color: lighten($custom-hex, 5%) !important;
+      }
+    }
+
+    .bg-gradient-primary {
+      background: linear-gradient(87deg, $custom-hex 0, $custom-hex 100%) !important;
+    }
+
+    .bg-primary {
+      background: $custom-hex !important;
+    }
+
+    .badge-default {
+      background: $custom-hex !important;
+    }
+
+    button.bg-primary {
+      background: $custom-hex !important;
+
+      &:hover, &:focus {
+        color: #fff;
+        border-color: darken($custom-hex, 5%) !important;
+        background-color: darken($custom-hex, 5%) !important;
+      }
+    }
+
+    .text-primary {
+      color: $custom-hex !important;
+    }
+
+    .btn-outline-primary {
+      color: $custom-hex;
+      border-color: $custom-hex;
+
+      &:hover, &:active {
+        color: #fff !important;
+        border-color: $custom-hex !important;
+        background-color: $custom-hex !important;
+      }
+    }
+
+    .btn-custom-primary {
+      color: #fff;
+      background-color: $custom-hex !important;
+      border-radius: 20px;
+
+      &:hover, &:active {
+        color: #fff !important;
+        border-color: $custom-hex !important;
+        background-color: $custom-hex !important;
+      }
+    }
+
+
+    .navbar-vertical .navbar-nav .nav-link > i {
+      color: $custom-hex !important;
+    }
+
+    .mat-simple-snackbar-action {
+      .mat-button-wrapper {
+        //color: lighten($custom-hex, 30%) !important;
+      }
+    }
+  }
+}
