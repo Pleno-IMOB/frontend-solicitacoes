@@ -1,0 +1,12 @@
+<div
+  [id]="'user-message-' + index"
+  class="main-container-user-message d-flex justify-content-end align-items-start w-100">
+  <div class="user-message d-flex flex-column align-items-center px-2 py-2">
+    <mat-icon (click)="openArquivo()" class="color-white archive-icon mb-2">file_present</mat-icon>
+    <p class="px-2">{{ anexo.name }}</p>
+    <small class="mb-0 pl-2 align-self-start">{{ anexo.time }}</small>
+  </div>
+  <img
+    [src]="authService.pessoa.value?.pes_logo || 'assets/images/logo-usuario.png'"
+    alt="logo-empresa">
+</div>
