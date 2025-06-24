@@ -1,0 +1,99 @@
+<div class="h-100 w-100 main-container">
+  <form
+    [formGroup]="form"
+    class="d-flex justify-content-center flex-column align-items-center">
+    <h4 class="text-center mb-1">Atualize seus dados</h4>
+    <p class="text-center py-1 mb-0">
+      Mantenha suas informações sempre atualizadas para garantir uma melhor comunicação</p>
+    <div (click)="inputFoto?.click()" class="usu-container pt-1 mb-3">
+      @if (form.get('pes_logo')?.value) {
+        <img
+          class="user-image"
+          [src]="form.get('pes_logo')?.value"
+          alt="foto-usuario">
+      } @else {
+        <mat-icon>account_circle</mat-icon>
+      }
+      <div
+        [class]="!form.get('pes_logo')?.value ? 'mat-icon-add' : ''"
+        class="position-absolute container-add">
+        <mat-icon>add_a_photo</mat-icon>
+      </div>
+      <input
+        #inputFoto
+        (change)="setaFotoUsuario($event)"
+        accept="image/*"
+        hidden
+        type="file">
+    </div>
+    <mat-form-field class="w-100 input-readonly">
+      <mat-label>Seu nome</mat-label>
+      <input
+        [readonly]="true"
+        formControlName="nome"
+        matInput
+        placeholder="Digite seu nome completo">
+    </mat-form-field>
+
+    <mat-form-field class="w-100 input-readonly">
+      <mat-label>Seu e-mail</mat-label>
+      <input
+        [readonly]="true"
+        formControlName="email"
+        matInput
+        placeholder="Digite seu e-mail">
+    </mat-form-field>
+
+    <mat-form-field class="w-100 input-readonly">
+      <mat-label>Seu celular</mat-label>
+      <input
+        [readonly]="true"
+        formControlName="telefone"
+        matInput
+        placeholder="(**) *****-****"
+        plenoMask="celularDDD">
+    </mat-form-field>
+
+    <h5 class="text-center mb-3">
+      Agora, informe o cliente (imobiliária ou proprietário) que você está representando:
+    </h5>
+
+    <mat-checkbox
+      class="mb-2"
+      formControlName="sou_cliente">
+      <h5 class="py-2">Eu sou o cliente</h5>
+    </mat-checkbox>
+
+    <mat-form-field class="w-100">
+      <mat-label>CPF ou CNPJ do cliente</mat-label>
+      <input
+        formControlName="cli_cpfCnpj"
+        matInput
+        placeholder="Digite o CPF ou CNPJ do cliente"
+        plenoMask="cpfCnpj">
+    </mat-form-field>
+
+    <mat-form-field class="w-100">
+      <mat-label class="text-wrap">Nome do cliente (imobiliária ou proprietário)</mat-label>
+      <input
+        [readonly]="souCliente"
+        formControlName="cli_nome"
+        matInput
+        placeholder="Digite o nome do cliente">
+    </mat-form-field>
+
+    <div class="w-100 d-flex btn-container">
+      <button
+        (click)="loginAgendamento()"
+        (keydown.enter)="form.valid && loginAgendamento()"
+        [disabled]="form.invalid"
+        class="w-100"
+        color="primary"
+        matButton="filled"
+        type="button">
+        <mat-icon class="color-white">task_alt</mat-icon>
+        <p class="mb-0 color-white">Salvar</p>
+      </button>
+    </div>
+  </form>
+</div>

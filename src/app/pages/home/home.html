@@ -1,0 +1,85 @@
+<app-header></app-header>
+
+<div #scrollContainer class="main-container">
+  @for (perguntaResposta of listaPerguntasRespostas; track perguntaResposta.index) {
+    <div>
+      @switch (true) {
+        @case (!!perguntaResposta?.userMessage?.message) {
+          <app-user-message
+            [messageObj]="perguntaResposta.userMessage"
+            [index]="perguntaResposta.index">
+          </app-user-message>
+        }
+        @case (perguntaResposta?.userMessage?.isAudio) {
+          <app-user-audio
+            [messageObj]="perguntaResposta.userMessage"
+            [index]="perguntaResposta.index">
+          </app-user-audio>
+        }
+        @case (!!perguntaResposta?.userMessage?.anexos) {
+          @for (anexo of perguntaResposta.userMessage.anexos; track anexo.index) {
+            <app-user-arquivo
+              [anexo]="anexo"
+              [index]="perguntaResposta.index">
+            </app-user-arquivo>
+          }
+        }
+      }
+      @if (perguntaResposta?.iaMessage) {
+        <app-ia-message
+          [messageObj]="perguntaResposta?.iaMessage"
+          [logoEmpresa]="getLogo()"
+          [index]="perguntaResposta?.index">
+        </app-ia-message>
+      }
+    </div>
+  }
+  @let logado = authService.usuario.value?.cli_codigo && authService.usuario.value?.usu_codigo;
+  @let podeConfirmar = finalizado && !solicitacaoFinalizada;
+  @switch (true) {
+    @case (podeConfirmar && !!logado) {
+      <button
+        class="btn-confirmar btn-agendamento"
+        color="primary"
+        matButton="filled"
+        type="button"
+        (click)="finalizarAgendamento()">
+        <div class="d-flex flex-row align-items-center">
+          <b>CONFIRMAR AGENDAMENTO</b>
+          <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
+        </div>
+      </button>
+    }
+    @case (podeConfirmar && !logado) {
+      <button
+        class="btn-confirmar"
+        color="primary"
+        matButton="filled"
+        type="button"
+        (click)="login()">
+        <div class="d-flex flex-row align-items-center">
+          <b>ACESSAR MINHA CONTA</b>
+          <mat-icon class="home-btn-icon">login</mat-icon>
+        </div>
+      </button>
+    }
+    @case (finalizado && solicitacaoFinalizada) {
+      <button
+        class="btn-confirmar btn-novo-agendamento"
+        matButton="outlined"
+        type="button"
+        (click)="iniciarNovaSolicitacao()">
+        <div class="d-flex flex-row align-items-center">
+          <b>INICIAR NOVO AGENDAMENTO</b>
+          <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
+        </div>
+      </button>
+    }
+  }
+</div>
+
+<app-footer
+  (enviaArquivoUsuario)="recebeArquivo($event)"
+  (enviaAudioUsuario)="recebeAudio($event)"
+  (enviaMensagemUsuario)="recebeMensagem($event)">
+</app-footer>

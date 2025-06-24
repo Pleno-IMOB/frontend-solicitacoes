@@ -1,0 +1,48 @@
+<footer id="footer">
+  <div [formGroup]="formIa" class="w-100 d-flex position-relative">
+    <mat-form-field class="w-100">
+      <mat-label>Digite aqui</mat-label>
+      <textarea
+        (keydown.enter)="enviarMensagem($event)"
+        class="text-area-pleno pb-2"
+        formControlName="prompt"
+        matInput
+        rows="4"></textarea>
+    </mat-form-field>
+    <div class="d-flex flex-column align-items-center justify-content-center button-container position-absolute">
+      <button
+        (click)="enviarMensagem($event)"
+        [disabled]="!formIa.get('prompt')?.value || (UtilsService.loading | async)"
+        matButton="filled">
+        <mat-icon class="send-icon">send</mat-icon>
+      </button>
+      <button
+        (click)="!isRecording ? startRecording() : stopRecording()"
+        [disabled]="(UtilsService.loading | async)"
+        matButton="filled">
+        <mat-icon>{{ !isRecording ? 'mic' : 'stop' }}</mat-icon>
+      </button>
+      <button (click)="selecionarArquivo()" [disabled]="(UtilsService.loading | async)" matButton="filled">
+        <mat-icon>attach_file</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div class="d-flex justify-content-between align-items-center">
+    <img
+      alt="Pleno sistemas para imobiliárias"
+      src="https://www.sistemaspleno.com/wp-content/themes/plenoimob/assets/img/logo.svg">
+    <div class="divider"></div>
+    <div class="social-media-container">
+      <a href="https://www.sistemaspleno.com" target="_blank">
+        <mat-icon>language</mat-icon>
+      </a>
+      <a href="https://www.youtube.com/@pleno_sistemas" target="_blank"><i class="fab fa-youtube"></i></a>
+      <a href="https://www.instagram.com/sistemaspleno" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://br.linkedin.com/company/plenosistemas" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+    </div>
+  </div>
+  <div class="pt-2">
+    <p class="m-0 dados-pleno">Pleno Sistemas</p>
+    <p class="m-0 dados-pleno">CNPJ: 18.742.753/0001-38</p>
+  </div>
+</footer>
