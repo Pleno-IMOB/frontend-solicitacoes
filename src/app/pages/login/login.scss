@@ -1,0 +1,58 @@
+.main-container {
+  padding: 2rem;
+
+  .imobiliaria-card {
+    width: 100%;
+
+    img {
+      max-width: 75%;
+      height: auto;
+      align-self: center;
+      max-height: 150px;
+    }
+  }
+
+  .btn-back {
+    width: 54px !important;
+    min-width: 54px !important;
+
+    mat-icon {
+      margin: 0;
+      color: #000000;
+    }
+  }
+
+  .btn-container {
+    gap: 10px;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 500px) {
+  .main-container {
+    padding: 1.5rem;
+  }
+}
+
+input::placeholder {
+  color: #a8a8a8 !important;
+}
+
+button:disabled {
+  background-color: rgba(0, 0, 0, 0.12) !important;
+  border: none;
+
+  p {
+    color: #ffffff !important;
+  }
+}
+
+button[mat-button][disabled] p,
+button[mat-button][disabled] mat-icon {
+  border: none;
+  color: rgba(0, 0, 0, 0.38) !important;
+}
+
+:host ::ng-deep .mdc-floating-label--float-above mat-label {
+  white-space: nowrap !important;
+}

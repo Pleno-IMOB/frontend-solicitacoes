@@ -1,0 +1,130 @@
+<div class="h-100 w-100 main-container">
+  @if (pageIndex !== 0) {
+    <button
+      (click)="voltar()"
+      class="w-100 btn-back"
+      matButton="filled"
+      type="button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+  }
+
+  <div class="d-flex align-items-center justify-content-center shadow-container flex-column imobiliaria-card pb-3">
+    <img [src]="getLogo()" alt="Logo da empresa">
+  </div>
+
+  <mat-divider class="pt-2 mx-3"></mat-divider>
+
+  <form [formGroup]="form" class="w-100 pt-2" plenoPrimeiroErro>
+    @if (pageIndex === 0) {
+      <h4 class="text-center mb-1">Entre com seu celular</h4>
+      <p class="text-center py-1">Enviaremos um código de verificação via SMS</p>
+
+      <mat-form-field class="w-100">
+        <mat-label>Digite seu celular</mat-label>
+        <input plenoMask="celularDDD" formControlName="celular" matInput placeholder="(**) *****-****">
+      </mat-form-field>
+
+      <button
+        [disabled]="!!form.get('celular')?.invalid"
+        (click)="avancar(form.get('celular'))"
+        class="w-100"
+        color="primary"
+        matButton="filled"
+        plenoMostrarErros
+        type="button">
+        <p class="mb-0 color-white">Continuar</p>
+      </button>
+    } @else if (pageIndex === 1) {
+      <h4 class="text-center mb-1">Verificação de código</h4>
+
+      <p class="text-center py-1">Enviamos um código para
+        <b class="font-mulish-bold">{{ form.get('celular')?.value | celularMask }}</b>
+      </p>
+
+      <mat-form-field class="w-100">
+        <mat-label>Código de verificação</mat-label>
+        <input formControlName="token" mask="0-0-0-0-0-0" matInput placeholder="******">
+      </mat-form-field>
+
+      <div class="counter-container d-flex justify-content-center align-items-center gap-1 pb-3">
+        <mat-icon>schedule</mat-icon>
+        <span class="text-center font-weight-bold">
+          {{ tempoRestante * 1000 | date: 'mm:ss':'UTC' }}
+        </span>
+      </div>
+
+      <div class="w-100 d-flex btn-container">
+        <button
+          (click)="avancar(form.get('token'))"
+          [disabled]="form.get('token')?.invalid"
+          class="w-100"
+          color="primary"
+          matButton="filled"
+          type="button">
+          <mat-icon class="color-white">task_alt</mat-icon>
+          <p class="mb-0 color-white">Verificar código</p>
+        </button>
+
+        <button
+          (click)="reenviarToken()"
+          [disabled]="!reenviarDisponivel"
+          class="w-100"
+          color="primary"
+          matButton="outlined"
+          type="button">
+          <p class="mb-0">Reenviar código</p>
+        </button>
+      </div>
+    } @else if (pageIndex === 2) {
+      <h4 class="text-center mb-1">Complete seus dados</h4>
+
+      <p class="text-center py-1">Precisamos de algumas informações para finalizar seu cadastro</p>
+
+      <mat-divider></mat-divider>
+
+      <mat-form-field class="w-100">
+        <mat-label>Nome do solicitante (você)</mat-label>
+        <input formControlName="nome" matInput placeholder="Digite seu nome completo">
+      </mat-form-field>
+
+      <mat-form-field class="w-100">
+        <mat-label>E-mail do solicitante</mat-label>
+        <input formControlName="email" matInput placeholder="Digite seu e-mail">
+      </mat-form-field>
+
+      <h5 class="text-center mb-3">
+        Agora, informe o cliente (imobiliária ou proprietário) que você está representando:
+      </h5>
+
+      <mat-form-field class="w-100">
+        <mat-label>CPF ou CNPJ do cliente</mat-label>
+        <input
+          formControlName="cli_cpfCnpj"
+          (keyup)="buscarPorCpfCnpj()"
+          (change)="buscarPorCpfCnpj()"
+          plenoMask="cpfCnpj"
+          matInput
+          placeholder="Digite o CPF ou CNPJ do cliente">
+      </mat-form-field>
+
+      <mat-form-field class="w-100">
+        <mat-label class="text-wrap">Nome do cliente (imobiliária ou proprietário)</mat-label>
+        <input formControlName="cli_nome" matInput placeholder="Digite o nome do cliente">
+      </mat-form-field>
+
+      <div class="w-100 d-flex btn-container">
+        <button
+          (click)="loginAgendamento()"
+          [disabled]="form.invalid"
+          class="w-100"
+          color="primary"
+          matButton="filled"
+          type="button">
+          <mat-icon class="color-white">task_alt</mat-icon>
+          <p class="mb-0 color-white">Finalizar cadastro</p>
+        </button>
+      </div>
+    }
+  </form>
+</div>

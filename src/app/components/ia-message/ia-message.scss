@@ -1,0 +1,24 @@
+.main-container-ia-message {
+  display: flex;
+  gap: 12px;
+  padding-right: 10vw;
+
+  img {
+    width: 45px;
+    height: 45px;
+    border-radius: 100%;
+    object-fit: contain;
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.2);
+    padding: 6px 6px;
+  }
+
+  .ia-message {
+    background-color: white;
+    border-radius: 24px 24px 24px 4px;
+    box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.15);
+    word-break: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+}
+

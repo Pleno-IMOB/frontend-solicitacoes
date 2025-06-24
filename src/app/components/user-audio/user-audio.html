@@ -1,0 +1,9 @@
+<div [id]="'user-message-' + index" class="main-container-user-message d-flex justify-content-end align-items-start w-100">
+  <div class="user-message px-2 py-2">
+    <app-audio-recorder [audioObj]="messageObj"></app-audio-recorder>
+    <small class="mb-0 pl-2">{{ messageObj.time }}</small>
+  </div>
+  <img
+    alt="logo-empresa"
+    [src]="logoUsuario || 'assets/images/logo-usuario.png'">
+</div>

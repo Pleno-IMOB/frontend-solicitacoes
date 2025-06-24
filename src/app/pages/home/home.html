@@ -1,0 +1,38 @@
+<app-header></app-header>
+
+<div #scrollContainer class="main-container">
+  @for (perguntaResposta of listaPerguntasRespostas; track perguntaResposta.index) {
+    <div>
+      @if (perguntaResposta?.userMessage?.message) {
+        <app-user-message
+          [messageObj]="perguntaResposta?.userMessage"
+          [index]="perguntaResposta?.index">
+        </app-user-message>
+      } @else if (perguntaResposta?.userMessage?.isAudio) {
+        <app-user-audio [messageObj]="perguntaResposta.userMessage" [index]="perguntaResposta?.index"></app-user-audio>
+      }
+      @if (perguntaResposta?.iaMessage) {
+        <app-ia-message
+          [messageObj]="perguntaResposta?.iaMessage"
+          [logoEmpresa]="getLogo()"
+          [index]="perguntaResposta?.index">
+        </app-ia-message>
+      }
+    </div>
+  }
+  @if (finalizado) {
+    <button
+      class="btn-confirmar"
+      color="primary"
+      matButton="filled"
+      type="button" (click)="confirmarAgendamento()">
+      CONFIRMAR AGENDAMENTO
+    </button>
+  }
+</div>
+
+<app-footer
+  (enviaAudioUsuario)="recebeDado($event)"
+  (enviaMensagemUsuario)="recebeDado($event)"
+  [loading]="loading">
+</app-footer>

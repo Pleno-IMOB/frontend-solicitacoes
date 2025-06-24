@@ -1,0 +1,13 @@
+<div [id]="'ia-message-' + index" class="main-container-ia-message d-flex justify-content-start align-items-start w-100">
+  <img
+    alt="logo-empresa"
+    [src]="logoEmpresa">
+  <div class="ia-message px-4 py-2">
+    @if(!messageObj?.loading) {
+      <p [innerHtml]="messageObj?.message" class="mb-1"></p>
+    } @else {
+      <p class="mb-1">{{ digitandoTexto }}</p>
+    }
+      <small class="mb-0">{{ messageObj?.time }}</small>
+    </div>
+</div>

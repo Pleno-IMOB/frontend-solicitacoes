@@ -1,0 +1,26 @@
+.main-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #f9fafc;
+  padding: calc(90px + 2vh) 3vw 2vh;
+  height: auto;
+  min-height: calc(100vh - 271px);
+  max-height: calc(100vh - 271px);
+  overflow-y: auto;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.btn-confirmar {
+  margin-top: 20px;
+  height: 54px !important;
+  min-height: 54px !important;
+  width: 330px;
+  align-self: center;
+}
+
