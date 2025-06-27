@@ -1,0 +1,88 @@
+img {
+  width: 200px;
+  height: auto;
+  align-self: center;
+}
+
+mat-card {
+  max-width: 300px;
+}
+
+.btn-container {
+  height: calc(25% + 25px);
+
+  .btn-solicitar {
+    align-self: center;
+    text-align: center;
+    width: 50%;
+    height: 80px;
+
+    mat-icon {
+      color: white;
+      font-size: 24px;
+      height: 28px;
+      width: 24px;
+    }
+  }
+}
+
+.background-container {
+  height: 75vh;
+}
+
+.shadow-container {
+  box-shadow: rgba(0, 0, 0, 0.5) 0 0 20px 5px;
+}
+
+.imobiliaria-card {
+  height: 200px;
+  width: 320px;
+  background-color: white;
+}
+
+.tip-vis-container {
+  padding: 70px 100px;
+  background-color: #01426a;
+
+  h3 {
+    color: white;
+  }
+}
+
+.cid-ope-container {
+  margin: 0 0 80px 0;
+  padding: 70px 100px;
+  background-color: #dbf1ff;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 2rem;
+}
+
+
+@media (max-width: 800px) {
+  .btn-container {
+    .btn-solicitar {
+      align-self: center;
+      text-align: center;
+      width: 80%;
+      height: 80px;
+    }
+  }
+}
+
+@media (max-width: 500px) {
+  .tip-vis-container {
+    padding: 70px 40px;
+  }
+
+  .cid-ope-container {
+    padding: 70px 40px;
+  }
+
+  h3 {
+    font-size: 16px !important;
+  }
+}

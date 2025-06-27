@@ -1,0 +1,39 @@
+footer {
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  min-height: 130px;
+  padding: 0 30px 0 30px;
+
+  div {
+    img {
+      width: 140px;
+    }
+
+    .divider {
+      height: 1px;
+      background-color: rgba(0, 0, 0, 0.12);
+      width: 100%;
+      margin: 0 12px;
+    }
+
+    .social-media-container {
+      display: flex;
+      align-items: center;
+      gap: 2vw;
+
+      i {
+        font-size: 15px;
+        color: #01426a;
+      }
+    }
+  }
+
+  .dados-pleno {
+    color: #b5b5b5;
+    font-size: 13px;
+    line-height: 15px;
+  }
+}

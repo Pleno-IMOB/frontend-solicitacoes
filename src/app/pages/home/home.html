@@ -1,0 +1,58 @@
+<app-header></app-header>
+<div
+  class="d-flex flex-column w-100 h-100">
+  <div class="d-flex justify-content-center align-items-center w-100 position-relative background-container"
+       style="background-image: url('assets/images/banner.jpg'); background-size: cover; background-position: center;">
+    <mat-card
+      class="d-flex align-items-center justify-content-center shadow-container flex-column imobiliaria-card">
+      <img
+        [alt]="'logo-' + currentHost"
+        [src]="'https://api.sistemaspleno.com/api/portalDoCliente/logo-imobiliaria?host=' + currentHost">
+      <h3 class="text-center pt-3 pb-2 m-0">{{ empresa.imob_empresa }}</h3>
+      <p class="text-center m-0">{{ formataEnderecoImobiliaria(empresa) }}</p>
+    </mat-card>
+  </div>
+  <div class="w-100 d-flex justify-content-center btn-container">
+    <button (click)="openSolicitarVistoriaDialog()"
+            class="btn-solicitar"
+            color="primary"
+            matButton="filled">
+      <h3 class="mb-0 color-white">SOLICITAR VISTORIA</h3>
+      <mat-icon>calendar_month</mat-icon>
+    </button>
+  </div>
+</div>
+<div class="w-100 tip-vis-container">
+  <h3 class="text-center font-mulish-black">SOLICITAR POR TIPO DE VISTORIA</h3>
+  <div class="main-grid pt-5">
+    @for (tipoVistoria of tiposDeVistoria; track tipoVistoria) {
+      <div class="w-100 d-flex justify-content-center">
+        <app-main-card
+          [empresa]="empresa"
+          [buttonText]="'SOLICITAR'"
+          [tipoVistoria]="tipoVistoria"
+          (selecionarTipoVistoria)="selecionaTipoVistoria($event)">
+        </app-main-card>
+      </div>
+    }
+  </div>
+</div>
+@if (cidadesOperacao.length > 0) {
+  <div class="w-100 cid-ope-container">
+    <h3 class="text-center font-mulish-black">SOLICITAR POR CIDADE DE OPERAÇÃO</h3>
+    <div class="main-grid pt-5">
+      @for (cidadeOperacao of cidadesOperacao; track cidadeOperacao) {
+        <div class="w-100 d-flex justify-content-center">
+          <app-main-card
+            [empresa]="empresa"
+            [buttonText]="'SOLICITAR'"
+            [cidadeOperacao]="cidadeOperacao"
+            (selecionarTipoVistoria)="selecionaTipoVistoria($event)">
+          </app-main-card>
+        </div>
+      }
+    </div>
+  </div>
+}
+<app-footer></app-footer>
+
