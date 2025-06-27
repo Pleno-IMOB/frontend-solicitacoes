@@ -2,26 +2,29 @@ import { Component, EventEmitter, Inject, Input, OnInit, Output, PLATFORM_ID } f
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { CidadeOperacao, Imobiliaria } from '../../common/types';
+import { CidadeOperacao, Imobiliaria, TipoVistoria } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
-  selector: 'app-cidade-operacao-card',
+  selector: 'app-main-card',
   imports: [
     MatCardModule,
     MatDividerModule,
     MatIconModule,
     MatButtonModule
   ],
-  templateUrl: './cidade-operacao-card.html',
-  styleUrl: './cidade-operacao-card.scss',
+  templateUrl: './main-card.html',
+  styleUrl: './main-card.scss',
   standalone: true
 })
-export class CidadeOperacaoCard implements OnInit {
+export class MainCard implements OnInit {
   @Input() empresa!: Imobiliaria;
   @Input() cidadeOperacao!: CidadeOperacao;
-  @Output() selecionarCidade: EventEmitter<CidadeOperacao> = new EventEmitter<CidadeOperacao>();
+  @Input() tipoVistoria!: TipoVistoria;
+  @Input() buttonText!: string;
+  @Output() selecionarCidadeOperacao: EventEmitter<CidadeOperacao> = new EventEmitter<CidadeOperacao>();
+  @Output() selecionarTipoVistoria: EventEmitter<TipoVistoria> = new EventEmitter<TipoVistoria>();
   protected currentHost: string = '';
 
   constructor (@Inject(PLATFORM_ID) private platformId: object) {
@@ -32,12 +35,18 @@ export class CidadeOperacaoCard implements OnInit {
       this.currentHost = window.location.host;
       this.currentHost = 'novaimoveispf.sistemaspleno.com';
     }
+
+    console.log(this.buttonText);
   }
 
   /**
    * Emite o evento de seleção da cidade de operação.
    */
   protected aoSelecionar (): void {
-    this.selecionarCidade.emit(this.cidadeOperacao);
+    if ( this.cidadeOperacao ) {
+      this.selecionarCidadeOperacao.emit(this.cidadeOperacao);
+    } else {
+      this.selecionarTipoVistoria.emit(this.tipoVistoria);
+    }
   }
 }

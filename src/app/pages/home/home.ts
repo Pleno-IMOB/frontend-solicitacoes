@@ -6,13 +6,14 @@ import { MatCardModule } from '@angular/material/card';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { imobiliaria } from '../../../assets/mocks';
+import { cidadesOperacao, imobiliaria, tiposDeVistoria } from '../../../assets/mocks';
+import { formataEnderecoImobiliaria } from '../../common/utils';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { SolicitarVistoria } from '../solicitar-vistoria/solicitar-vistoria';
-import { formataEnderecoImobiliaria } from '../../common/utils';
-import { Imobiliaria } from '../../common/types';
+import { CidadeOperacao, Imobiliaria, TipoVistoria } from '../../common/types';
+import { MainCard } from '../../components/main-card/main-card';
 
 @Component({
   selector: 'app-home',
@@ -25,7 +26,8 @@ import { Imobiliaria } from '../../common/types';
     Footer,
     MatDividerModule,
     FontAwesomeModule,
-    MatDialogModule
+    MatDialogModule,
+    MainCard
   ],
   templateUrl: './home.html',
   styleUrl: './home.scss'
@@ -33,6 +35,9 @@ import { Imobiliaria } from '../../common/types';
 export class Home implements OnInit {
   protected currentHost: string = '';
   protected empresa!: Imobiliaria;
+  protected tiposDeVistoria!: TipoVistoria[];
+  protected cidadesOperacao!: CidadeOperacao[];
+  protected selectedTipoVistoria!: TipoVistoria;
   protected readonly formataEnderecoImobiliaria = formataEnderecoImobiliaria;
 
   constructor (
@@ -40,6 +45,8 @@ export class Home implements OnInit {
     private dialog: MatDialog
   ) {
     this.empresa = imobiliaria;
+    this.tiposDeVistoria = tiposDeVistoria;
+    this.cidadesOperacao = cidadesOperacao;
   }
 
   ngOnInit (): void {
@@ -67,5 +74,10 @@ export class Home implements OnInit {
 
     const result = await firstValueFrom(dialog.afterClosed());
     console.log(result);
+  }
+
+  protected async selecionaTipoVistoria (tipoVistoria: TipoVistoria): Promise<void> {
+    this.selectedTipoVistoria = tipoVistoria;
+    await this.openSolicitarVistoriaDialog();
   }
 }

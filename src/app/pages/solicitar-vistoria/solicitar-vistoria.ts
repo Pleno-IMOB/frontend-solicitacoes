@@ -5,9 +5,9 @@ import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
-import { CidadeOperacao, Imobiliaria } from '../../common/types';
-import { cidadesOperacao, imobiliaria } from '../../../assets/mocks';
-import { CidadeOperacaoCard } from '../../components/cidade-operacao-card/cidade-operacao-card';
+import { CidadeOperacao, Imobiliaria, TipoVistoria } from '../../common/types';
+import { cidadesOperacao, imobiliaria, tiposDeVistoria } from '../../../assets/mocks';
+import { MainCard } from '../../components/main-card/main-card';
 
 @Component({
   selector: 'app-solicitar-vistoria',
@@ -19,20 +19,23 @@ import { CidadeOperacaoCard } from '../../components/cidade-operacao-card/cidade
     FormsModule,
     MatButtonModule,
     CommonModule,
-    CidadeOperacaoCard
+    MainCard
   ],
   templateUrl: './solicitar-vistoria.html',
   styleUrl: './solicitar-vistoria.scss'
 })
 export class SolicitarVistoria {
   @ViewChild('stepper', { static: false }) stepper!: MatStepper;
-  protected cidadesOperacao!: CidadeOperacao[];
-  protected selectedCidadeOperacao!: CidadeOperacao;
   protected empresa!: Imobiliaria;
+  protected cidadesOperacao!: CidadeOperacao[];
+  protected tiposDeVistoria!: TipoVistoria[];
+  protected selectedCidadeOperacao!: CidadeOperacao;
+  protected selectedTipoVistoria!: TipoVistoria;
 
   constructor () {
     this.cidadesOperacao = cidadesOperacao;
     this.empresa = imobiliaria;
+    this.tiposDeVistoria = tiposDeVistoria;
   }
 
   /**
@@ -42,5 +45,14 @@ export class SolicitarVistoria {
   protected selecionaCidadeOperacao (cidade: CidadeOperacao): void {
     this.stepper.next();
     this.selectedCidadeOperacao = cidade;
+  }
+
+  /**
+   * Avança para o próximo passo no stepper e define o tipo de vistoria selecionado.
+   * @param tipoVistoria - Tipo de vistoria a ser selecionado.
+   */
+  protected selecionaTipoVistoria (tipoVistoria: TipoVistoria): void {
+    this.stepper.next();
+    this.selectedTipoVistoria = tipoVistoria;
   }
 }

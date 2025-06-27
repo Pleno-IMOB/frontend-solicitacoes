@@ -1,4 +1,4 @@
-import { CidadeOperacao, Imobiliaria } from '../app/common/types';
+import { CidadeOperacao, Imobiliaria, TipoVistoria } from '../app/common/types';
 
 export const imobiliaria: Imobiliaria = {
   imob_codigo: 1,
@@ -570,6 +570,57 @@ const barueri: CidadeOperacao = {
     uf_codigo_ibge: 35
   }
 };
+
+export const tiposDeVistoria: TipoVistoria[] = [
+  {
+    tip_vis_codigo: 1023,
+    tip_vis_descricao: 'Constatação',
+    tip_vis_cor: null,
+    tip_vis_icon: null,
+    tip_vis_titulo: null,
+    tip_vis_obs: null
+  },
+  {
+    tip_vis_codigo: 1028,
+    tip_vis_descricao: 'Entrada',
+    tip_vis_cor: '#28a745',
+    tip_vis_icon: null,
+    tip_vis_titulo: 'TERMO DE VISTORIA',
+    tip_vis_obs: `<p><strong>Contestação</strong></p><p>Caso identifique divergências entre este relatório e o estado atual do imóvel, você poderá apresentar contestação, observando os seguintes pré-requisitos:</p><p>As contestações devem ser enviadas exclusivamente por meio do QR CODE localizado no final do termo de vistoria.</p><p>Indique os ambientes conforme descritos no laudo.</p><p>Aponte apenas os defeitos e divergências que não estejam descritos no laudo ou registrados em fotos, evitando a repetição de informações já constantes na vistoria.</p><p>Ao anexar fotos, nomeie-as de acordo com o ambiente ou item correspondente. Sempre que possível, envie as imagens em arquivo compactado (formato ZIP).</p><p>A contestação deve ser enviada em um único chamado. Apenas o primeiro chamado será considerado, sendo os demais desconsiderados.</p><p>O retorno será realizado por e-mail no prazo de até 96 horas. O locatário possui o prazo estabelecido em contrato, contado a partir da data de assinatura deste laudo de vistoria, para se manifestar formalmente sobre a vistoria apresentada pelo Locador. Decorrido esse prazo sem manifestação expressa, entender-se-á como aceita a vistoria em sua totalidade.</p>`
+  },
+  {
+    tip_vis_codigo: 1034,
+    tip_vis_descricao: 'Preventiva',
+    tip_vis_cor: '#fb6340',
+    tip_vis_icon: null,
+    tip_vis_titulo: 'TERMO DE VISTORIA',
+    tip_vis_obs: null
+  },
+  {
+    tip_vis_codigo: 1032,
+    tip_vis_descricao: 'Revistoria (Saída)',
+    tip_vis_cor: '#fb6340',
+    tip_vis_icon: null,
+    tip_vis_titulo: 'TERMO DE VISTORIA',
+    tip_vis_obs: null
+  },
+  {
+    tip_vis_codigo: 1016,
+    tip_vis_descricao: 'Rotina',
+    tip_vis_cor: '#fb6340',
+    tip_vis_icon: null,
+    tip_vis_titulo: 'TERMO DE VISTORIA',
+    tip_vis_obs: null
+  },
+  {
+    tip_vis_codigo: 6,
+    tip_vis_descricao: 'Saída',
+    tip_vis_cor: '#fb6340',
+    tip_vis_icon: null,
+    tip_vis_titulo: 'TERMO DE VISTORIA',
+    tip_vis_obs: null
+  }
+];
 
 export const cidadesOperacao: CidadeOperacao[] = [
   saoPaulo,

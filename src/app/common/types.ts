@@ -230,3 +230,12 @@ export interface Imobiliaria {
   cidade: Cidade;
   bairro: Bairro;
 }
+
+export interface TipoVistoria {
+  tip_vis_codigo: number;
+  tip_vis_descricao: string;
+  tip_vis_cor: string | null;
+  tip_vis_icon: string | null;
+  tip_vis_titulo: string | null;
+  tip_vis_obs: string | null;
+}
