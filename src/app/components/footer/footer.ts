@@ -48,7 +48,12 @@ export class Footer implements OnInit {
     }
   }
 
-  ngOnInit () {
+  /**
+   * Inicializa o componente e configura a assinatura para o serviço de gravação de áudio.
+   * @property {boolean} mostrarInput - Indica se o input deve ser exibido.
+   * @property {string | null} audioURL - URL do áudio gravado.
+   */
+  ngOnInit (): void {
     if(this.mostrarInput) {
       this.audioRecordingService.audioBlob$.subscribe(blob => {
         this.audioURL = window.URL.createObjectURL(blob);
@@ -65,6 +70,37 @@ export class Footer implements OnInit {
     }
   }
 
+  /**
+   * Abre um seletor de arquivos oculto e processa o arquivo selecionado.
+   */
+  protected selecionarArquivo(): void {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.style.display = 'none';
+
+    input.addEventListener('change', (event: Event) => {
+      const target = event.target as HTMLInputElement;
+
+      if (target.files && target.files.length > 0) {
+        const arquivo = target.files[0];
+        console.log('Arquivo selecionado:', arquivo);
+
+        const formData = new FormData();
+        formData.append('arquivo', arquivo);
+      }
+    });
+
+    document.body.appendChild(input);
+    input.click();
+
+    setTimeout((): HTMLInputElement => document.body.removeChild(input), 0);
+  }
+
+  /**
+   * Converte um Blob em uma string Base64.
+   * @param blob - O Blob que será convertido.
+   * @returns Uma Promise que resolve para a string Base64 do Blob.
+   */
   private blobToBase64(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -74,6 +110,10 @@ export class Footer implements OnInit {
     });
   }
 
+  /**
+   * Envia uma mensagem do usuário se não estiver carregando.
+   * @param event - Evento de envio do formulário.
+   */
   protected enviarMensagem(event: Event): void {
     event?.preventDefault();
     if ( this.loading ) {
@@ -84,11 +124,19 @@ export class Footer implements OnInit {
     control?.setValue('');
   }
 
+  /**
+   * Inicia a gravação de áudio.
+   * @property {boolean} isRecording - Indica se a gravação está em andamento.
+   */
   protected startRecording(): void {
     this.isRecording = true;
     this.audioRecordingService.startRecording().then();
   }
 
+  /**
+   * Para a gravação de áudio.
+   * @property {boolean} isRecording - Indica se a gravação está em andamento.
+   */
   protected stopRecording(): void {
     this.isRecording = false;
     this.audioRecordingService.stopRecording().then();

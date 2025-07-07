@@ -1,10 +1,10 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ApiData, ErrorBackend } from './interfaces';
+import { ApiData, ErrorBackend } from './types';
 import { map } from 'rxjs/operators';
 import { IMOBILIARIA } from './common';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { isDevMode } from '@angular/core';
-import { UtilsService } from '../app/services/utils.service';
+import { UtilsService } from '../services/utils.service';
 
 export class BackendDefaults {
   public Ip = null;
@@ -23,56 +23,109 @@ export class BackendDefaults {
     this.getDomain();
   }
 
-  public get isLocalhost () {
+  /**
+   * Verifica se o ambiente atual é localhost.
+   * @returns {boolean} Retorna verdadeiro se o protocolo não incluir 'https', indicando que é localhost.
+   */
+  public get isLocalhost (): boolean {
     return !window.location.protocol.includes('https');
   }
 
-  public get hostIsPleno () {
+  /**
+   * Verifica se o host atual pertence ao domínio Pleno.
+   * @returns {boolean} Retorna verdadeiro se o host incluir 'plenoimob' ou 'sistemaspleno'.
+   */
+  public get hostIsPleno (): boolean {
     return window.location.host.includes('plenoimob') || window.location.host.includes('sistemaspleno');
   }
 
-  getIp () {
-    return new Promise((resolve) => {
-      let ip = null;
+  /**
+   * Obtém o endereço IP público do usuário.
+   * @returns {Promise<any>} Promessa que resolve com o endereço IP.
+   */
+  public getIp (): Promise<any> {
+    return new Promise((resolve: any): void => {
+      let ip: any = null;
       const xmlhttp = new XMLHttpRequest();
       xmlhttp.open('GET', 'https://api.ipify.org/?format=json');
       xmlhttp.send();
-      xmlhttp.onload = function (e) {
+      xmlhttp.onload = function (e: ProgressEvent<EventTarget>): void {
         ip = JSON.parse(xmlhttp.response);
         resolve(ip.ip);
       };
     }) as Promise<any>;
   }
 
-  apiGet<T> (endpoint: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
+  /**
+   * Realiza uma requisição GET para o endpoint especificado.
+   * @param {string} endpoint - O endpoint da API para a requisição.
+   * @param {any} [data] - Dados opcionais a serem enviados com a requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public apiGet<T> (endpoint: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
     return this.get(endpoint, data, callbackErr);
   }
 
-  apiPost<T> (endpoint: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
+  /**
+   * Envia uma requisição POST para o endpoint especificado.
+   * @param {string} endpoint - O endpoint da API para a requisição.
+   * @param {any} [data] - Dados opcionais a serem enviados com a requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public apiPost<T> (endpoint: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
     return this.post(endpoint, data, callbackErr);
   }
 
-  apiUpdate<T> (endpoint: string, data: any): Promise<T> {
+  /**
+   * Atualiza dados no endpoint especificado.
+   * @param {string} endpoint - O endpoint da API para a atualização.
+   * @param {any} data - Dados a serem enviados na atualização.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public apiUpdate<T> (endpoint: string, data: any): Promise<T> {
     return this.update(endpoint, data);
   }
 
-  apiDelete<T> (endpoint: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
+  /**
+   * Envia uma requisição DELETE para o endpoint especificado.
+   * @param {string} endpoint - O endpoint da API para a requisição.
+   * @param {any} [data] - Dados opcionais a serem enviados com a requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public apiDelete<T> (endpoint: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
     return this.delete(endpoint, data, callbackErr);
   }
 
-  apiGetExternal<T> (fullUrl: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
+  /**
+   * Realiza uma requisição GET para um URL completo externo.
+   * @param {string} fullUrl - URL completo para a requisição.
+   * @param {any} [data] - Dados opcionais a serem enviados com a requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public apiGetExternal<T> (fullUrl: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
     if ( data ) {
       this.limparDados(data);
       fullUrl += `?${this.serialize(data, false)}`;
     }
 
     return firstValueFrom(this.http
-      .get<ApiData<T>>(fullUrl)  // <- Aqui está a correção
+      .get<ApiData<T>>(fullUrl)
       .pipe(map((response: ApiData<T>) => this.tratarRetorno<T>(response, null, null, callbackErr))));
 
   }
 
-  async apiPostExternal<T> (fullUrl: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
+  /**
+   * Envia uma requisição POST para um URL completo externo.
+   * @param {string} fullUrl - URL completa para a requisição.
+   * @param {any} [data] - Dados opcionais a serem enviados com a requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public async apiPostExternal<T> (fullUrl: string, data?: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
     const options = {
       headers: new HttpHeaders().set('Content-Type', 'application/json')
     };
@@ -86,7 +139,13 @@ export class BackendDefaults {
     );
   }
 
-  async apiUpdateExternal<T> (fullUrl: string, data: any): Promise<T> {
+  /**
+   * Atualiza dados em um URL completo externo.
+   * @param {string} fullUrl - URL completa para a requisição.
+   * @param {any} data - Dados a serem enviados na atualização.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public async apiUpdateExternal<T> (fullUrl: string, data: any): Promise<T> {
     return firstValueFrom(
       this.http
         .put<ApiData<T>>(fullUrl, data)
@@ -94,7 +153,12 @@ export class BackendDefaults {
     );
   }
 
-  async apiDeleteExternal<T> (fullUrl: string): Promise<T> {
+  /**
+   * Envia uma requisição DELETE para um URL completo externo.
+   * @param {string} fullUrl - URL completa para a requisição.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public async apiDeleteExternal<T> (fullUrl: string): Promise<T> {
     return firstValueFrom(
       this.http
         .delete<ApiData<T>>(fullUrl)
@@ -102,7 +166,14 @@ export class BackendDefaults {
     );
   }
 
-  async apiFormDataPost<T> (
+  /**
+   * Envia uma requisição POST com dados de formulário.
+   * @param {string} url - URL para a requisição.
+   * @param {FormData} form - Dados do formulário a serem enviados.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
+  public async apiFormDataPost<T> (
     url: string,
     form: FormData,
     callbackErr?: (error: ErrorBackend) => void
@@ -114,12 +185,18 @@ export class BackendDefaults {
     );
   }
 
+  /**
+   * Serializa um objeto em uma string de consulta.
+   * @param {any} obj - Objeto a ser serializado.
+   * @param {any} prefix - Prefixo opcional para as chaves do objeto.
+   * @returns {any} String de consulta resultante da serialização.
+   */
   public serialize (obj: any, prefix: any): any {
     const str = [];
     for ( const p in obj ) {
       if ( obj.hasOwnProperty(p) ) {
-        const k = prefix ? `${prefix}[${p}]` : p;
-        const v = obj[p];
+        const k: string = prefix ? `${prefix}[${p}]` : p;
+        const v: any = obj[p];
         str.push((v !== null && typeof v === 'object') ?
           this.serialize(v, k) :
           encodeURIComponent(k) + '=' + encodeURIComponent(v));
@@ -128,7 +205,14 @@ export class BackendDefaults {
     return str.join('&');
   }
 
-  refreshToken<T> (token: string, endpoint: string, parameters = {}) {
+  /**
+   * Atualiza o token de autenticação.
+   * @param {string} token - Token de autenticação.
+   * @param {string} endpoint - Endpoint da API para atualização do token.
+   * @param {Object} [parameters={}] - Parâmetros adicionais para a requisição.
+   * @returns {Observable<any>} Observable com a resposta da API.
+   */
+  public refreshToken<T> (token: string, endpoint: string, parameters = {}): Observable<any> {
     const options = {
       headers: new HttpHeaders()
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -184,6 +268,13 @@ export class BackendDefaults {
     }
   }
 
+  /**
+   * Realiza uma requisição GET para o URL especificado.
+   * @param {string} url - O URL para a requisição.
+   * @param {any} [data] - Dados opcionais a serem enviados com a requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
   protected get<T> (url: string, data?: any, callbackErr?: (error: ErrorBackend) => void) {
     if ( data ) {
       this.limparDados(data);
@@ -199,6 +290,13 @@ export class BackendDefaults {
     );
   }
 
+  /**
+   * Envia uma requisição POST para o URL especificado.
+   * @param {string} url - O URL para a requisição.
+   * @param {any} params - Parâmetros a serem enviados na requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
   protected async post<T> (url: string, params: any, callbackErr?: (error: ErrorBackend) => void): Promise<T> {
     const options = {
       headers: new HttpHeaders().set('Content-Type', 'application/json')
@@ -215,6 +313,12 @@ export class BackendDefaults {
     );
   }
 
+  /**
+   * Atualiza dados no URL especificado.
+   * @param {string} url - URL para a requisição.
+   * @param {any} params - Parâmetros a serem enviados na atualização.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
   protected async update<T> (url: string, params: any): Promise<T> {
     const options = {
       headers: new HttpHeaders().set('Content-Type', 'application/json')
@@ -229,6 +333,13 @@ export class BackendDefaults {
     );
   }
 
+  /**
+   * Envia uma requisição DELETE para o URL especificado.
+   * @param {string} url - O URL para a requisição.
+   * @param {any} [params] - Parâmetros opcionais a serem enviados na requisição.
+   * @param {(error: ErrorBackend) => void} [callbackErr] - Função de callback para tratar erros específicos.
+   * @returns {Promise<T>} Promessa que resolve com os dados da resposta.
+   */
   protected async delete<T> (
     url: string,
     params?: any,
@@ -275,7 +386,6 @@ export class BackendDefaults {
         throw new Error(('Erro session!!!'));
       }
 
-      // Somente mostra o erro caso não tiver callback
       if ( callbackErr ) {
         callbackErr(response.error);
       } else {
@@ -298,7 +408,11 @@ export class BackendDefaults {
     }
   }
 
-  protected limparDados (objeto: any) {
+  /**
+   * Limpa os dados de um objeto, ajustando valores nulos, indefinidos e booleanos.
+   * @param {any} objeto - Objeto a ser limpo.
+   */
+  protected limparDados (objeto: any): void {
     for ( const propriedade in objeto ) {
       if ( objeto[propriedade] === undefined || objeto[propriedade] === null ) {
         objeto[propriedade] = '';

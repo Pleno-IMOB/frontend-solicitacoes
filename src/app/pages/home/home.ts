@@ -14,11 +14,10 @@ import { UserMessage } from '../../components/user-message/user-message';
 import moment from 'moment';
 import { UserAudio } from '../../components/user-audio/user-audio';
 import { BackendService } from '../../services/backend.service';
-import { UsuarioService } from '../../services/usuario.service';
 import { Login } from '../login/login';
 import { firstValueFrom } from 'rxjs';
-import { Router } from '@angular/router';
 import { UtilsService } from '../../services/utils.service';
+import {AuthService} from '../../services/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -47,13 +46,14 @@ export class Home implements OnInit {
   protected finalizado: boolean = false;
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
+  private payload!: any;
+  protected solicitacaoFinalizada: boolean = false;
 
   constructor (
     private cd: ChangeDetectorRef,
     private backend: BackendService,
-    private usuarioService: UsuarioService,
     private dialog: MatDialog,
-    private router: Router,
+    private authService: AuthService,
     private ngZone: NgZone
   ) {
   }
@@ -134,6 +134,9 @@ export class Home implements OnInit {
 
     const response: { resposta: { finalizado: boolean, message: string, payload: any }, thread_id: string } = await this.backend.apiPost('solicitacao/chat/solicitar', params);
     this.finalizado = response.resposta?.finalizado;
+    if(this.finalizado) {
+      this.payload = response.resposta?.payload;
+    }
     this.thread_id = response.thread_id;
     const timeIA: string = moment().format('HH:mm:ss DD/MM/YY');
     this.listaPerguntasRespostas[this.index].iaMessage = { message: response.resposta.message, time: timeIA, index: this.index, loading: false };
@@ -147,31 +150,10 @@ export class Home implements OnInit {
    * @return Promessa que resolve quando a confirmação é concluída.
    */
   protected async confirmarAgendamento (): Promise<void> {
-    if ( !this.usuarioService.usuario || !this.usuarioService.usuarioIsLogged ) {
-      await this.openLoginDialog();
+    if ( !this.authService.usuario?.value ) {
+      await this.login();
     } else {
-      this.finalizarAgendamento();
-    }
-  }
-
-  /**
-   * Abre um diálogo de login e aguarda o resultado.
-   * @return Promessa que resolve quando o diálogo é fechado.
-   */
-  protected async openLoginDialog (): Promise<void> {
-    const dialog: MatDialogRef<Login, any> = this.dialog.open(Login, {
-      data: {},
-      width: '80vw',
-      maxWidth: '500px',
-      maxHeight: '90vh',
-      minWidth: '340px',
-      height: 'auto',
-      panelClass: 'login-dialog'
-    });
-
-    const result = await firstValueFrom(dialog.afterClosed());
-    if ( result ) {
-      console.log(result);
+      await this.finalizarAgendamento();
     }
   }
 
@@ -195,7 +177,7 @@ export class Home implements OnInit {
       const time = 3000;
       UtilsService.notifySuccess('Iremos lhe redirecionar em alguns segundos!', 'Login efetuado com sucesso!', { timeOut: time });
       setTimeout(() => {
-        this.router.navigateByUrl('/');   ///// TODO AQUI NAO DEVE REDIRECIONAR
+        window.history.pushState({}, '', '/');
       }, time);
     }
   }
@@ -219,7 +201,24 @@ export class Home implements OnInit {
    * Finaliza o agendamento (implementação pendente).
    * @return Não retorna valor.
    */
-  private finalizarAgendamento (): void {
+  private async finalizarAgendamento (): Promise<void> {
+    if(this.payload) {
+      UtilsService.carregandoGeral(true);
+      const response: any = await this.backend.apiPost('solicitacao/chat/store', this.payload);
+      if(response) {
+        this.solicitacaoFinalizada = true;
+          const time = 3000;
+          UtilsService.notifySuccess('Sua solicitação de vistoria foi agendada com sucesso.', 'Agendado!', { timeOut: time });
+      }
+      this.thread_id = '';
+      UtilsService.carregandoGeral(false);
+    }
+  }
 
+  /**
+   * Reinicia a aplicação recarregando a página atual.
+   */
+  protected iniciarNovaSolicitacao (): void {
+    setTimeout(() => window.location.reload(), 1000);
   }
 }

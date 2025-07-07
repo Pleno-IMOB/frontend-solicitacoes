@@ -5,8 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
   name: 'safe'
 })
 export class SafePipe implements PipeTransform {
-  constructor (private sanitized: DomSanitizer) {
-  }
+  constructor (private sanitized: DomSanitizer) { }
 
   /**
    * Sanitiza um valor com base no tipo especificado, garantindo segurança contra injeções.

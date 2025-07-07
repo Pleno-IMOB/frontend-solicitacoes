@@ -56,13 +56,13 @@ export class DialogObserverService {
     const observer = new MutationObserver((mutationsList) => {
       for ( let mutation of mutationsList ) {
         if ( mutation.type === 'childList' ) {
-          mutation.addedNodes.forEach((node) => {
+          mutation.addedNodes.forEach((node: Node): void => {
             if ( node instanceof HTMLElement && node.classList.contains('mat-dialog-container') ) {
               this.startInterval(node);
             }
           });
 
-          mutation.removedNodes.forEach((node) => {
+          mutation.removedNodes.forEach((node: Node): void => {
             if ( node instanceof HTMLElement && node.classList.contains('mat-dialog-container') ) {
               this.stopInterval(node);
             }
@@ -80,7 +80,7 @@ export class DialogObserverService {
    * @return {void}
    */
   private startInterval (dialogContainer: HTMLElement): void {
-    const intervalId = setInterval(() => {
+    const intervalId = setInterval((): void => {
       this.calculateDialogContentHeight(dialogContainer);
     }, this.timeInterval);
 
@@ -94,7 +94,7 @@ export class DialogObserverService {
    * @return {void}
    */
   private stopInterval (dialogContainer: HTMLElement): void {
-    const intervalId = this.intervalIdMap.get(dialogContainer);
+    const intervalId: any = this.intervalIdMap.get(dialogContainer);
     if ( intervalId ) {
       clearInterval(intervalId);
       this.intervalIdMap.delete(dialogContainer);

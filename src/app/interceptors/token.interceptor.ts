@@ -4,7 +4,6 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { BackendService } from '../services/backend.service';
-import { Router } from '@angular/router';
 
 let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject<string | null>(null);
@@ -16,10 +15,9 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
  * @return Observable que emite eventos HTTP ou trata erros de autenticação.
  */
 export function interceptToken (request: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
-  const authService = inject(AuthService);
-  const backendService = inject(BackendService);
-  const router = inject(Router);
-  const token = authService.authToken || authService.usuario?.value?.auth_token;
+  const authService: AuthService = inject(AuthService);
+  const backendService: BackendService = inject(BackendService);
+  const token: string | undefined = authService.authToken || authService.usuario?.value?.auth_token;
   if ( token ) {
     request = addTokenHeader(request, token);
   }
@@ -33,7 +31,6 @@ export function interceptToken (request: HttpRequest<any>, next: HttpHandlerFn):
           backendService,
           refreshTokenSubject,
           { value: isRefreshing },
-          router
         );
       }
       return throwError(() => error);
@@ -59,7 +56,6 @@ function addTokenHeader (request: HttpRequest<any>, token: string): HttpRequest<
  * @param backendService Serviço de backend para operações de atualização de token.
  * @param refreshTokenSubject Sujeito que emite o novo token após a atualização.
  * @param isRefreshingRef Referência ao estado de atualização do token.
- * @param router Serviço de navegação do Angular Router.
  * @return Observable que emite a nova requisição ou um erro se a atualização falhar.
  */
 function handle401Error (
@@ -69,7 +65,6 @@ function handle401Error (
   backendService: BackendService,
   refreshTokenSubject: BehaviorSubject<string | null>,
   isRefreshingRef: { value: boolean },
-  router: Router
 ): Observable<any> {
   if ( !isRefreshingRef.value ) {
     isRefreshingRef.value = true;
@@ -88,12 +83,12 @@ function handle401Error (
         catchError((err) => {
           isRefreshingRef.value = false;
           authService.logout().then();
-          router.navigate([ '/login' ]);
+          window.history.pushState({}, '', '/login');
           return throwError(() => err);
         })
       );
     } else {
-      router.navigate([ '/login' ]);
+      window.history.pushState({}, '', '/login');
     }
   }
 

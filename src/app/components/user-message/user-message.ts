@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,14 +17,8 @@ import { MatButtonModule } from '@angular/material/button';
   styleUrl: './user-message.scss',
   standalone: true
 })
-export class UserMessage implements OnInit {
+export class UserMessage {
   @Input() logoUsuario?: string;
   @Input() messageObj?: Resposta;
   @Input() index?: number;
-
-  constructor () {
-  }
-
-  ngOnInit (): void {
-  }
 }

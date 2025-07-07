@@ -21,13 +21,23 @@
     </div>
   }
   @if (finalizado) {
-    <button
-      class="btn-confirmar"
-      color="primary"
-      matButton="filled"
-      type="button" (click)="confirmarAgendamento()">
-      CONFIRMAR AGENDAMENTO
-    </button>
+    @if(!solicitacaoFinalizada) {
+      <button
+        class="btn-confirmar"
+        color="primary"
+        matButton="filled"
+        type="button" (click)="confirmarAgendamento()">
+        CONFIRMAR AGENDAMENTO
+      </button>
+    } @else {
+      <button
+        class="btn-confirmar"
+        color="primary"
+        matButton="filled"
+        type="button" (click)="iniciarNovaSolicitacao()">
+        INICIAR NOVO AGENDAMENTO
+      </button>
+    }
   }
 </div>
 

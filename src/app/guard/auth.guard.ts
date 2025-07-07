@@ -7,12 +7,10 @@ import { AuthService } from '../services/auth.service';
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-
   constructor (
     private authService: AuthService,
     private router: Router
-  ) {
-  }
+  ) { }
 
   /**
    * Verifica se a rota pode ser ativada com base no estado de autenticação do usuário.
@@ -33,7 +31,7 @@ export class AuthGuard implements CanActivate {
   }
 
   /**
-   * Constrói a URL resolvida a partir de um snapshot de rota ativada.
+   * Constroi a URL resolvida a partir de um snapshot de rota ativada.
    * @param route Snapshot da rota ativada.
    * @return URL resolvida como uma string.
    */

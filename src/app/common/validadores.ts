@@ -1,10 +1,10 @@
-import {AbstractControl, AsyncValidatorFn, ValidationErrors, ValidatorFn} from '@angular/forms';
+import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import * as CNPJ from '@fnando/cnpj';
 import * as CPF from '@fnando/cpf';
 import moment from 'moment';
-import {Observable, of} from 'rxjs';
-import {catchError, debounceTime, map, switchMap} from 'rxjs/operators';
-import { formatNum } from '../../lib/common';
+import { of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
+import { formatNum } from './common';
 
 export namespace Validadores {
   /**
@@ -69,7 +69,7 @@ export namespace Validadores {
   export const telefoneDDI: ValidatorFn = (control: AbstractControl) => {
     const value = (control.value || '').replace(/[\D]*/gi, '');
     if ( value.length && [ 12, 13 ].indexOf(value.length) === -1 ) {
-      return { telefoneDDI: { value } }; // Fixed the error key to 'telefoneDDI'
+      return { telefoneDDI: { value } };
     } else {
       return null;
     }
@@ -111,7 +111,6 @@ export namespace Validadores {
    */
   export function telInput (required = false): ValidatorFn {
     return (control: AbstractControl) => {
-      // tslint:disable-next-line:prefer-const
       let { ddi, numero } = control.value;
 
       if ( required && (!ddi?.length || !numero?.length) )
@@ -320,10 +319,6 @@ export namespace Validadores {
       return null;
     }
 
-    // Regular expression to match valid time formats H:MM, HH:MM, HHH:MM
-    // - single digit hours: \d
-    // - double digit hours: [0-9]\d
-    // - triple digit hours without leading zero: [1-9]\d{2}
     const regex = /^(\d|[0-9]\d|[1-9]\d{2}):([0-5]\d)$/;
     const match = regex.exec(value);
 
@@ -527,10 +522,7 @@ export namespace Validadores {
       return null;
     }
 
-    // Divide o nome por espaços, remove strings vazias, e filtra palavras curtas
     const partes = nome.split(' ').filter(p => p.length >= 2);
-
-    // Regras mínimas: pelo menos 2 palavras com 2 ou mais letras
     const nomeEhValido = partes.length >= 2;
 
     return nomeEhValido ? null : { nomeInvalido: true };
