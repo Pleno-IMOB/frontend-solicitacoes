@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import {AsyncPipe, DatePipe} from '@angular/common';
+import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,8 +17,8 @@ import { MostrarErrosDirective } from '../../services/mostrar-erros/mostrar-erro
 import { MostrarPrimeiroErroDirective } from '../../services/mostrar-erros/mostrar-primeiro-erro.directive';
 import { UtilsService } from '../../services/utils.service';
 import { MatDialogRef } from '@angular/material/dialog';
-import {RecaptchaV3Module, ReCaptchaV3Service} from "ng-recaptcha";
-import {firstValueFrom} from "rxjs";
+import { RecaptchaV3Module, ReCaptchaV3Service } from "ng-recaptcha";
+import { firstValueFrom } from "rxjs";
 
 @Component({
   selector: 'app-login',
@@ -46,7 +46,9 @@ import {firstValueFrom} from "rxjs";
   styleUrl: './login.scss',
   standalone: true
 })
-export class Login {
+export class Login implements AfterViewInit {
+  @ViewChild('celularInput') celularInput!: ElementRef<HTMLInputElement>;
+  @ViewChild('tokenInput') private tokenInput!: ElementRef<HTMLInputElement>;
   protected form: FormGroup;
   protected pageIndex: number = 0;
   protected tempoRestante: number = 60;
@@ -71,6 +73,12 @@ export class Login {
       cli_nome: [ null, [ Validators.required, Validators.minLength(4) ] ],
       cli_cpfCnpj: [ null, [ Validators.required, Validadores.cpfCnpj ] ]
     });
+  }
+
+  ngAfterViewInit(): void {
+    if(this.celularInput) {
+      this.celularInput.nativeElement.focus();
+    }
   }
 
   /**
@@ -165,7 +173,6 @@ export class Login {
       recaptchaVersion: 3
     });
 
-    console.log(response);
     if (!response) {
       this.form.get('token')?.setErrors({ tokenInvalido: true });
     } else {
@@ -207,6 +214,9 @@ export class Login {
       this.pageIndex++;
     }
     UtilsService.carregandoGeral(false);
+    if(this.pageIndex === 1) {
+      this.tokenInput?.nativeElement.focus();
+    }
   }
 
   /**

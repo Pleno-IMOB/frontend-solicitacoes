@@ -18,11 +18,11 @@
   <form [formGroup]="form" class="w-100 pt-2" plenoPrimeiroErro>
     @if (pageIndex === 0) {
       <h4 class="text-center mb-1">Entre com seu celular</h4>
-      <p class="text-center py-1">Enviaremos um código de verificação via SMS</p>
+      <p class="text-center py-1">Enviaremos um código de verificação</p>
 
       <mat-form-field class="w-100">
         <mat-label>Digite seu celular</mat-label>
-        <input plenoMask="celularDDD" formControlName="celular" matInput (keydown.enter)="avancar(form.get('celular'))" placeholder="(**) *****-****">
+        <input #celularInput plenoMask="celularDDD" formControlName="celular" matInput (keydown.enter)="avancar(form.get('celular'))" placeholder="(**) *****-****">
       </mat-form-field>
 
       <button
@@ -44,7 +44,7 @@
 
       <mat-form-field class="w-100">
         <mat-label>Código de verificação</mat-label>
-        <input formControlName="token" mask="0-0-0-0-0-0" matInput placeholder="******" (keyup)="form.get('token')?.value?.length === 6 && avancar(form.get('token'))">
+        <input #tokenInput formControlName="token" mask="0-0-0-0-0-0" matInput placeholder="******" (keyup)="form.get('token')?.value?.length === 6 && avancar(form.get('token'))">
       </mat-form-field>
 
       <div class="counter-container d-flex justify-content-center align-items-center gap-1 pb-3">

@@ -8,39 +8,16 @@
         <h5 class="mb-0 online-msg">Online</h5>
       </div>
     </div>
-    @if (user) {
-      <button color="primary" matButton="text" [matMenuTriggerFor]="menu">
-        <mat-menu #menu="matMenu">
-          @if(page === 'agendamento'){
-            <button mat-menu-item (click)="redirecionaParaMinhaConta()">
-              <mat-icon>account_circle</mat-icon>
-              Minha conta
-            </button>
-          } @else {
-            <button mat-menu-item (click)="redirecionaParaAgendamento()">
-              <mat-icon>calendar_today</mat-icon>
-              Agendamento
-            </button>
-          }
-          <button (click)="openLogoutModal()" mat-menu-item>
-            <mat-icon>logout</mat-icon>
-            Sair
-          </button>
-        </mat-menu>
-        <div class="d-flex justify-content-center align-items-center usu-container">
-          @if (user?.usu_foto) {
-            <img
-              [alt]="user?.usu_nome"
-              [src]="user?.usu_foto">
-          } @else {
-            <mat-icon>account_circle</mat-icon>
-          }
-          <small class="mb-0 text-truncate w-100">{{ user?.usu_nome }}</small>
+    @if(user) {
+      <button color="primary" matButton="text" class="button-logout" (click)="openLogoutModal()">
+        <div class="d-flex justify-content-center align-items-center">
+          <mat-icon>logout</mat-icon>
+          <small class="mb-0">SAIR</small>
         </div>
       </button>
     } @else {
-      <button color="primary" matButton="text">
-        <div class="d-flex justify-content-center align-items-center" routerLink="/login">
+      <button color="primary" matButton="text" class="button-account" (click)="login()">
+        <div class="d-flex justify-content-center align-items-center">
           <mat-icon>account_circle</mat-icon>
           <small class="mb-0">LOGIN</small>
         </div>

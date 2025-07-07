@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Header } from '../../components/header/header';
 import { Footer } from '../../components/footer/footer';
 import { MatCardModule } from '@angular/material/card';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +17,7 @@ import { BackendService } from '../../services/backend.service';
 import { UsuarioService } from '../../services/usuario.service';
 import { Login } from '../login/login';
 import { firstValueFrom } from 'rxjs';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { UtilsService } from '../../services/utils.service';
 
 @Component({
@@ -53,8 +53,8 @@ export class Home implements OnInit {
     private backend: BackendService,
     private usuarioService: UsuarioService,
     private dialog: MatDialog,
-    private activeRoute: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) {
   }
 
@@ -62,12 +62,21 @@ export class Home implements OnInit {
    * Inicializa o componente e executa ações com base na rota ativa.
    * @return Promessa que resolve quando a inicialização é concluída.
    */
-  async ngOnInit (): Promise<void> {
-    if ( this.activeRoute.routeConfig?.path === 'login' ) {
-      await this.login();
-    } else {
-      await this.enviaPerguntaResposta();
-    }
+  async ngOnInit(): Promise<void> {
+    const originalPushState = window.history.pushState;
+    const self = this;
+
+    window.history.pushState = function (...args) {
+      originalPushState.apply(this, args);
+      const url = args[2] as string;
+
+      if (url === '/login') {
+        self.ngZone.run(() => {
+          self.login();
+        });
+      }
+    };
+    await this.enviaPerguntaResposta();
   }
 
   /**
@@ -116,7 +125,7 @@ export class Home implements OnInit {
     this.cd.detectChanges();
     this.rolarParaBaixo();
     const params = {
-      host: 'testecomestruturapleno.sistemaspleno.com',
+      host: this.backend.urlSistema,
       thread_id: this.thread_id,
       user_instruction: typeof dado !== 'string' ? dado?.base64 : dado
     };
@@ -173,7 +182,6 @@ export class Home implements OnInit {
   private async login () {
     const dialog: MatDialogRef<Login, any> = this.dialog.open(Login, {
       data: {},
-      disableClose: true,
       width: '80vw',
       maxWidth: '500px',
       maxHeight: '90vh',
@@ -187,7 +195,7 @@ export class Home implements OnInit {
       const time = 3000;
       UtilsService.notifySuccess('Iremos lhe redirecionar em alguns segundos!', 'Login efetuado com sucesso!', { timeOut: time });
       setTimeout(() => {
-        this.router.navigateByUrl('/');
+        this.router.navigateByUrl('/');   ///// TODO AQUI NAO DEVE REDIRECIONAR
       }, time);
     }
   }

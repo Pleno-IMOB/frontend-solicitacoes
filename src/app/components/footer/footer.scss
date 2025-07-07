@@ -77,3 +77,10 @@ footer {
 :host ::ng-deep .mdc-text-field--filled {
   padding-right: 0 !important;
 }
+
+
+@media (max-width: 500px) {
+  .social-media-container {
+    gap: 16px !important;
+  }
+}

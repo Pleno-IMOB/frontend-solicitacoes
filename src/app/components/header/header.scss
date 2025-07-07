@@ -21,7 +21,7 @@ header {
     background-color: #ffffff;
   }
 
-  button {
+  .button-account {
     height: 70px;
 
     div {
@@ -32,6 +32,22 @@ header {
         height: 48px;
         width: 48px;
         font-size: 48px;
+        color: #01426a;
+      }
+    }
+  }
+
+  .button-logout {
+    height: 60px;
+
+    div {
+      flex-direction: column;
+      height: auto;
+
+      mat-icon {
+        height: 30px;
+        width: 30px;
+        font-size: 30px;
         color: #01426a;
       }
     }

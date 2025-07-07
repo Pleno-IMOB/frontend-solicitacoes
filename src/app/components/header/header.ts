@@ -15,9 +15,7 @@ import { BackendService } from '../../services/backend.service';
     MatIconModule,
     MatButtonModule,
     MatDialogModule,
-    MatMenuTrigger,
-    MatMenuModule,
-    RouterLink
+    MatMenuModule
   ],
   templateUrl: './header.html',
   standalone: true,
@@ -67,11 +65,7 @@ export class Header implements OnInit {
     });
   }
 
-  protected redirecionaParaMinhaConta() {
-    this.router.navigateByUrl('/minha-conta').then();
-  }
-
-  protected redirecionaParaAgendamento() {
-    this.router.navigateByUrl('').then();
+  login() {
+    window.history.pushState({}, '', '/login');
   }
 }

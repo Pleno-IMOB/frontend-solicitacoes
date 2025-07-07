@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideEnvironmentNgxMask(maskConfig),
     {
       provide: 'INTERCEPTOR_HOST',
-      useValue: IMOBILIARIA('testecomestruturapleno.sistemaspleno.com')
+      useValue: IMOBILIARIA('eduardotwsteproducao30.sistemaspleno.com')
     },
     {
       provide: RECAPTCHA_V3_SITE_KEY,
