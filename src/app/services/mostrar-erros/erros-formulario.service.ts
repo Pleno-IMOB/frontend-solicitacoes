@@ -32,6 +32,8 @@ export class ErrosFormularioService {
         return 'Campo Obrigatório!';
       case 'obrigatorio':
         return 'Campo Obrigatório, espaços em branco não são considerados!';
+      case 'tokenInvalido':
+        return 'Token inválido!';
       case 'minlength':
         return `Informe no mínimo ${value.requiredLength} caractéres!`;
       case 'maxlength':

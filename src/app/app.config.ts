@@ -8,6 +8,8 @@ import { interceptToken } from './interceptors/token.interceptor';
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { IMOBILIARIA } from '../lib/common';
+import {RECAPTCHA_V3_SITE_KEY} from 'ng-recaptcha';
+import {environment} from '../environments/environment';
 
 const maskConfig: Partial<NgxMaskConfig> = {
   validation: false
@@ -22,6 +24,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: 'INTERCEPTOR_HOST',
       useValue: IMOBILIARIA('testecomestruturapleno.sistemaspleno.com')
+    },
+    {
+      provide: RECAPTCHA_V3_SITE_KEY,
+      useValue: environment.recaptchaV3
     },
     provideHttpClient(
       withInterceptors([ interceptToken ])

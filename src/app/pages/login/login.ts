@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import {AsyncPipe, DatePipe} from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,8 @@ import { MostrarErrosDirective } from '../../services/mostrar-erros/mostrar-erro
 import { MostrarPrimeiroErroDirective } from '../../services/mostrar-erros/mostrar-primeiro-erro.directive';
 import { UtilsService } from '../../services/utils.service';
 import { MatDialogRef } from '@angular/material/dialog';
+import {RecaptchaV3Module, ReCaptchaV3Service} from "ng-recaptcha";
+import {firstValueFrom} from "rxjs";
 
 @Component({
   selector: 'app-login',
@@ -33,7 +35,9 @@ import { MatDialogRef } from '@angular/material/dialog';
     CelularMaskPipe,
     MascaraDirective,
     MostrarErrosDirective,
-    MostrarPrimeiroErroDirective
+    MostrarPrimeiroErroDirective,
+    AsyncPipe,
+    RecaptchaV3Module
   ],
   providers: [
     provideNgxMask()
@@ -48,12 +52,14 @@ export class Login {
   protected tempoRestante: number = 60;
   protected reenviarDisponivel: boolean = false;
   protected intervalId: any;
+  private ultimaExecucao: number = 0;
 
   constructor (
     private formBuilder: FormBuilder,
     private backend: BackendService,
     private authService: AuthService,
-    private matDialogRef: MatDialogRef<any>
+    private matDialogRef: MatDialogRef<any>,
+    private recaptchaV3Service: ReCaptchaV3Service
   ) {
     this.form = this.formBuilder.group({
       celular: [ null, [ Validators.required, Validadores.celular ] ],
@@ -75,7 +81,11 @@ export class Login {
     UtilsService.carregandoGeral(true);
     const prefix = `${this.backend.hostAPI}portalDoCliente/`;
     try {
-      const response: any = await this.backend.apiPostExternal(`${prefix}usuario/loginAgendamento`, { ...this.form.value });
+      const response: any = await this.backend.apiPostExternal(`${prefix}usuario/loginAgendamento`, {
+        ...this.form.value,
+        recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
+        recaptchaVersion: 3
+      });
       await this.authService.atualizarUsuario(response);
       this.matDialogRef.close(this.authService.usuario.value);
     } catch ( error ) {
@@ -91,26 +101,30 @@ export class Login {
    */
   protected async buscarPorCpfCnpj (): Promise<any> {
     const cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
-    if ( cpfCnpj.length === 11 ) {
+    if ( cpfCnpj.length === 14 ) {
       setTimeout(async (): Promise<void> => {
         const cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
-        if ( cpfCnpj.length === 11 ) {
+        if ( cpfCnpj.length === 14 ) {
           const prefix = `${this.backend.hostAPI}areacliente/`;
+          UtilsService.carregandoGeral(true);
           const response: any = await this.backend.apiGetExternal(`${prefix}pessoa/validarCpf?pes_cpf=${cpfCnpj}&sis_codigo=6&host=${this.form.get('host')?.value}`);
           if ( response && response?.length > 0 ) {
             this.form.get('cli_nome')?.setValue(response[0]?.pessoa.pes_nome);
           }
+          UtilsService.carregandoGeral(false);
         }
       }, 1000);
-    } else if ( cpfCnpj.length === 14 ) {
+    } else if ( cpfCnpj.length === 18 ) {
       setTimeout(async (): Promise<void> => {
         const cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
-        if ( cpfCnpj.length === 14 ) {
+        if ( cpfCnpj.length === 18 ) {
           const prefix = `${this.backend.hostAPI}vistoria/`;
+          UtilsService.carregandoGeral(true);
           const response: any = await this.backend.apiGetExternal(`${prefix}pessoa/buscaPorCnpj?pes_cnpj=${cpfCnpj}&sis_codigo=6&host=${this.form.get('host')?.value}`);
           if ( response ) {
             this.form.get('cli_nome')?.setValue(response?.pes_nome);
           }
+          UtilsService.carregandoGeral(false);
         }
       }, 1000);
     }
@@ -130,7 +144,11 @@ export class Login {
    */
   protected async enviarTokenParaCelular (): Promise<void> {
     const prefix = `${this.backend.hostAPI}portalDoCliente/`;
-    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/enviarTokenLoginAgendamento`, { ...this.form.value });
+    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/enviarTokenLoginAgendamento`, {
+      ...this.form.value,
+      recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
+      recaptchaVersion: 3
+    });
 
     this.form.get('tok_codigo')?.setValue(response?.tok_codigo);
   }
@@ -141,11 +159,21 @@ export class Login {
    */
   protected async confirmarTokenDoCelular () {
     const prefix = `${this.backend.hostAPI}portalDoCliente/`;
-    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/validarTokenLoginAgendamento`, { ...this.form.value });
+    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/validarTokenLoginAgendamento`, {
+      ...this.form.value,
+      recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
+      recaptchaVersion: 3
+    });
 
-    this.form.get('nome')?.setValue(response?.usu_nome);
-    this.form.get('email')?.setValue(response?.pessoa?.pes_email);
-    this.authService.authToken = response?.auth_token;
+    console.log(response);
+    if (!response) {
+      this.form.get('token')?.setErrors({ tokenInvalido: true });
+    } else {
+      this.form.get('token')?.setErrors(null);
+      this.form.get('nome')?.setValue(response?.usu_nome);
+      this.form.get('email')?.setValue(response?.pessoa?.pes_email);
+      this.authService.authToken = response?.auth_token;
+    }
   }
 
   /**
@@ -154,20 +182,31 @@ export class Login {
    * @return Promessa que resolve quando a etapa é avançada.
    */
   protected async avancar (control: AbstractControl<any, any> | null): Promise<void> {
+    const agora = Date.now();
+    const intervalo = 5000;
+
+    if (agora - this.ultimaExecucao < intervalo) {
+      console.warn('Aguarde antes de tentar novamente.');
+      return;
+    }
+
+    this.ultimaExecucao = agora;
     if ( control?.invalid ) {
       control?.markAsDirty();
       control?.markAsTouched();
     } else {
+      UtilsService.carregandoGeral(true);
       if ( this.pageIndex === 0 ) {
-        console.log(this.pageIndex);
         await this.enviarTokenParaCelular();
         this.iniciarContagem();
+        this.form.get('token')?.setValue('');
       }
       if ( this.pageIndex === 1 ) {
         await this.confirmarTokenDoCelular();
       }
       this.pageIndex++;
     }
+    UtilsService.carregandoGeral(false);
   }
 
   /**
@@ -187,8 +226,10 @@ export class Login {
    * @return Promessa que resolve quando o token é reenviado.
    */
   protected async reenviarToken (): Promise<void> {
+    UtilsService.carregandoGeral(true);
     await this.enviarTokenParaCelular();
     this.iniciarContagem();
+    UtilsService.carregandoGeral(false);
   }
 
   /**
@@ -212,4 +253,6 @@ export class Login {
       }
     }, 1000);
   }
+
+  protected readonly UtilsService = UtilsService;
 }

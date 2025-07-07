@@ -22,11 +22,11 @@
 
       <mat-form-field class="w-100">
         <mat-label>Digite seu celular</mat-label>
-        <input plenoMask="celularDDD" formControlName="celular" matInput placeholder="(**) *****-****">
+        <input plenoMask="celularDDD" formControlName="celular" matInput (keydown.enter)="avancar(form.get('celular'))" placeholder="(**) *****-****">
       </mat-form-field>
 
       <button
-        [disabled]="!!form.get('celular')?.invalid"
+        [disabled]="!!form.get('celular')?.invalid || (UtilsService.loadingGeral | async)"
         (click)="avancar(form.get('celular'))"
         class="w-100"
         color="primary"
@@ -44,7 +44,7 @@
 
       <mat-form-field class="w-100">
         <mat-label>Código de verificação</mat-label>
-        <input formControlName="token" mask="0-0-0-0-0-0" matInput placeholder="******">
+        <input formControlName="token" mask="0-0-0-0-0-0" matInput placeholder="******" (keyup)="form.get('token')?.value?.length === 6 && avancar(form.get('token'))">
       </mat-form-field>
 
       <div class="counter-container d-flex justify-content-center align-items-center gap-1 pb-3">
@@ -57,7 +57,7 @@
       <div class="w-100 d-flex btn-container">
         <button
           (click)="avancar(form.get('token'))"
-          [disabled]="form.get('token')?.invalid"
+          [disabled]="form.get('token')?.invalid || (UtilsService.loadingGeral | async)"
           class="w-100"
           color="primary"
           matButton="filled"
@@ -68,7 +68,7 @@
 
         <button
           (click)="reenviarToken()"
-          [disabled]="!reenviarDisponivel"
+          [disabled]="!reenviarDisponivel || (UtilsService.loadingGeral | async)"
           class="w-100"
           color="primary"
           matButton="outlined"
@@ -117,6 +117,7 @@
         <button
           (click)="loginAgendamento()"
           [disabled]="form.invalid"
+          (keydown.enter)="form.valid &&avancar(form.get('celular'))"
           class="w-100"
           color="primary"
           matButton="filled"

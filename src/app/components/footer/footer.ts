@@ -31,6 +31,7 @@ export class Footer implements OnInit {
   protected isRecording: boolean = false;
   protected audioURL: string | null = null;
   @Input() loading: boolean = false;
+  @Input() mostrarInput: boolean = true;
   @Output() enviaMensagemUsuario: EventEmitter<string> = new EventEmitter<string>();
   @Output() enviaAudioUsuario: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
@@ -40,24 +41,28 @@ export class Footer implements OnInit {
     private audioRecordingService: AudioService,
     private cd: ChangeDetectorRef
   ) {
-    this.formIa = this.formBuilder.group({
-      prompt: [ null, Validators.required ],
-    });
+    if(this.mostrarInput) {
+      this.formIa = this.formBuilder.group({
+        prompt: [ null, Validators.required ],
+      });
+    }
   }
 
   ngOnInit () {
-    this.audioRecordingService.audioBlob$.subscribe(blob => {
-      this.audioURL = window.URL.createObjectURL(blob);
-      this.cd.detectChanges();
-      this.blobToBase64(blob).then((base64: string) => {
-        this.enviaAudioUsuario.emit({
-          blob,
-          base64,
-          url: this.audioURL,
-          time: moment().format('HH:mm:ss DD/MM/YY')
+    if(this.mostrarInput) {
+      this.audioRecordingService.audioBlob$.subscribe(blob => {
+        this.audioURL = window.URL.createObjectURL(blob);
+        this.cd.detectChanges();
+        this.blobToBase64(blob).then((base64: string) => {
+          this.enviaAudioUsuario.emit({
+            blob,
+            base64,
+            url: this.audioURL,
+            time: moment().format('HH:mm:ss DD/MM/YY')
+          });
         });
       });
-    });
+    }
   }
 
   private blobToBase64(blob: Blob): Promise<string> {

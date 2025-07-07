@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Imobiliaria } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,6 +27,7 @@ export class Header implements OnInit {
   protected empresa?: Imobiliaria;
   protected logoUsuario?: string;
   protected user?: any;
+  @Input() page: 'agendamento' | 'minha-conta' = 'agendamento';
 
   constructor (
     private authService: AuthService,
@@ -64,5 +65,13 @@ export class Header implements OnInit {
         await this.router.navigateByUrl('/login ');
       }
     });
+  }
+
+  protected redirecionaParaMinhaConta() {
+    this.router.navigateByUrl('/minha-conta').then();
+  }
+
+  protected redirecionaParaAgendamento() {
+    this.router.navigateByUrl('').then();
   }
 }

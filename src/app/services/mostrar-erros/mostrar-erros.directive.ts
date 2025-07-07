@@ -68,8 +68,8 @@ export class MostrarErrosDirective implements AfterViewInit, OnDestroy {
 
       const status$ = merge(
         fromEvent(this.input, 'blur'),
-        this.ngControl.statusChanges ?? EMPTY,
-        this.ngControl.valueChanges ?? EMPTY,
+        this.ngControl?.statusChanges ?? EMPTY,
+        this.ngControl?.valueChanges ?? EMPTY,
         this.mostrarPrimeiroErro.submit.pipe(mapTo('submit')),
         this.mostrarTodosErros$
       );
@@ -78,8 +78,8 @@ export class MostrarErrosDirective implements AfterViewInit, OnDestroy {
       /* monitora mudanças de status do campo, caso exista algum erro,
        o erro é mostrado abaixo do campo */
       this.changes = combineLatest(focus$, status$).subscribe(([ focus, status ]) => {
-        if ( this.ngControl.errors && (!focus || status === 'submit') ) {
-          const erro = this.obterDivErro(this.errosFormulario.formatObjToMsg(this.ngControl.errors));
+        if ( this.ngControl?.errors && (!focus || status === 'submit') ) {
+          const erro = this.obterDivErro(this.errosFormulario.formatObjToMsg(this.ngControl?.errors));
 
           if ( !this.parent.find('.pleno-erro').length ) {
             this.parent.append(erro);

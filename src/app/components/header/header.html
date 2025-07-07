@@ -11,10 +11,17 @@
     @if (user) {
       <button color="primary" matButton="text" [matMenuTriggerFor]="menu">
         <mat-menu #menu="matMenu">
-          <button mat-menu-item>
-            <mat-icon>account_circle</mat-icon>
-            Minha conta
-          </button>
+          @if(page === 'agendamento'){
+            <button mat-menu-item (click)="redirecionaParaMinhaConta()">
+              <mat-icon>account_circle</mat-icon>
+              Minha conta
+            </button>
+          } @else {
+            <button mat-menu-item (click)="redirecionaParaAgendamento()">
+              <mat-icon>calendar_today</mat-icon>
+              Agendamento
+            </button>
+          }
           <button (click)="openLogoutModal()" mat-menu-item>
             <mat-icon>logout</mat-icon>
             Sair

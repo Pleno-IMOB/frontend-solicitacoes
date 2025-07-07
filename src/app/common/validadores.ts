@@ -1,9 +1,9 @@
-import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import {AbstractControl, AsyncValidatorFn, ValidationErrors, ValidatorFn} from '@angular/forms';
 import * as CNPJ from '@fnando/cnpj';
 import * as CPF from '@fnando/cpf';
 import moment from 'moment';
-import { of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import {Observable, of} from 'rxjs';
+import {catchError, debounceTime, map, switchMap} from 'rxjs/operators';
 import { formatNum } from '../../lib/common';
 
 export namespace Validadores {
