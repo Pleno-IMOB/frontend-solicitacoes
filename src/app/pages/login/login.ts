@@ -94,8 +94,10 @@ export class Login implements AfterViewInit {
         recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
         recaptchaVersion: 3
       });
-      await this.authService.atualizarUsuario(response);
-      this.matDialogRef.close(this.authService.usuario.value);
+      if( response ) {
+        await this.authService.atualizarUsuario(response);
+        this.matDialogRef.close(this.authService.usuario.value);
+      }
     } catch ( error ) {
       console.error('Erro ao fazer loginAgendamento:', error);
       throw error;

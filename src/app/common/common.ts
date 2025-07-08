@@ -1,16 +1,6 @@
 import { FormGroup } from '@angular/forms';
-import { inject } from '@angular/core';
-import { Platform } from '@angular/cdk/platform';
-
 import format from 'format-number';
-
-export const statusProposta = {
-  1: { text: 'Novo Lead', class: 'bg-yellow', icon: 'fa-concierge-bell' },
-  2: { text: 'Em Andamento', class: 'bg-yellow' },
-  3: { text: 'Confecção do contrato', class: 'bg-info' },
-  4: { text: 'Assinatura', class: 'bg-success' },
-  5: { text: 'Encerrado', class: 'bg-primary' }
-};
+import { DataConfig } from './types';
 
 export function removeAcento (text: any) {
   if ( text ) {
@@ -26,11 +16,6 @@ export function removeAcento (text: any) {
   } else {
     return text;
   }
-}
-
-export interface DataConfig {
-  toUpper?: boolean;
-  toUpperIgnored?: string[];
 }
 
 export function limparDados (objeto: any, cfg: DataConfig = {} as DataConfig, removeEmptyArray = false) {
@@ -85,7 +70,6 @@ export function imprimir (html = null, landscape = false) {
     };
 
     setTimeout(() => {
-      // win.onload = printFunction;
       printFunction();
     }, 1000);
   }
@@ -139,17 +123,11 @@ export function validForm (form: FormGroup) {
   });
 }
 
-// ############################################################################################################################################################################################################
-// ############################################################################################################################################################################################################
-// NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR     // NÃO ALTERAR
 export const IMOBILIARIA = (host = 'apresentacao.plenoimob.com.br') => {
   return (
     window.location.host.includes('localhost') || window.location.host.includes('192.168.0.')
   ) ? host : window.location.host;
-}; // NÃO ALTERAR
-// NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR // NÃO ALTERAR
-// #################################################################################################################################################################
-// #################################################################################################################################################################
+};
 
 export enum Sistemas {
   locacao = 1,
@@ -168,17 +146,6 @@ export function delay (ms: number) {
 export function validateEmail (email: string) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(String(email).toLowerCase());
-}
-
-export function detectmob () {
-  return !!(navigator.userAgent.match(/Android/i)
-    || navigator.userAgent.match(/webOS/i)
-    || navigator.userAgent.match(/iPhone/i)
-    || navigator.userAgent.match(/iPad/i)
-    || navigator.userAgent.match(/iPod/i)
-    || navigator.userAgent.match(/BlackBerry/i)
-    || navigator.userAgent.match(/Windows Phone/i)
-    || window.innerWidth <= 1200);
 }
 
 export function array_unique<T> (obj: Array<T>) {
@@ -251,40 +218,6 @@ export function fileToBase64 (file: any) {
   });
 }
 
-export function resizeImageCanvas (base64: string, width: any, height: any, insertVideoIcon = false) {
-  return new Promise<string>((resolve) => {
-    const sourceImage = new Image();
-    sourceImage.onload = async () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-
-      let minVal;
-      if ( (sourceImage.width === sourceImage.height) && canvas ) {
-        canvas.getContext('2d')?.drawImage(sourceImage, 0, 0, width, height);
-      } else {
-        minVal = Math.min(sourceImage.width, sourceImage.height);
-        if ( sourceImage.width > sourceImage.height ) {
-          canvas.getContext('2d')?.drawImage(sourceImage, (sourceImage.width - minVal) / 2, 0, minVal, minVal, 0, 0, width, height);
-        } else {
-          canvas.getContext('2d')?.drawImage(sourceImage, 0, (sourceImage.height - minVal) / 2, minVal, minVal, 0, 0, width, height);
-        }
-      }
-      if ( insertVideoIcon && canvas && canvas?.getContext('2d') ) {
-        const image = (await getImageFromPath('assets/img/play.png') as any);
-        // canvas.getContext('2d').globalAlpha = 0.8;
-        canvas.getContext('2d')?.drawImage(image,
-          canvas.width / 2 - 50,
-          canvas.height / 2 - 50,
-          100,
-          100);
-      }
-      resolve(canvas.toDataURL(base64MimeType(base64), 100));
-    };
-    sourceImage.src = base64;
-  });
-}
-
 export function watermarkImage (base64: string, thumb = false, texto: string) {
   return new Promise<string>((resolve) => {
     const img = new Image();
@@ -347,49 +280,6 @@ export function urlToFile (url: any, filename: any, mimeType: any) {
   );
 }
 
-// export function replaceTablesPhotos () {
-//   $('table.fotos').replaceWith(function () {
-//     let html = '';
-//     $('td', this).each(function () {
-//       if ( $(this).html() )
-//         html += '<div>' + $(this).html() + '</div>';
-//     });
-//     return '<div class="fotos">' + html + '</div>';
-//   });
-// }
-
-export function clearSyncFusionLicense () {
-  const phrasesToCheck = [
-    'syncfusion',
-    'claim your free',
-    'trial version',
-    'essential studio'
-  ];
-
-  // Create a MutationObserver instance
-  const observer = new MutationObserver((mutationsList, observer) => {
-    for ( const mutation of mutationsList ) {
-      if ( mutation.type === 'childList' ) {
-        const addedNodesArray = Array.from(mutation.addedNodes);
-        for ( const addedNode of addedNodesArray ) {
-          if ( addedNode.nodeType === Node.ELEMENT_NODE && (addedNode as Element).tagName === 'DIV' ) {
-            const textContent = addedNode.textContent?.toLowerCase();
-            if ( phrasesToCheck.some(phrase => textContent?.includes(phrase)) ) {
-              (addedNode as Element).remove();
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // Configuration of the observer
-  const config = { childList: true, subtree: true };
-
-  // Start observing the document
-  observer.observe(document, config);
-}
-
 export function formatCurrency (value: string | number) {
   value = String(value).replace('R$', '').trim();
   if ( String(value).includes('.') && String(value).includes(',') ) {
@@ -432,125 +322,6 @@ export function isValidJSON (jsonString: string): boolean {
   } catch ( error ) {
     return false;
   }
-}
-
-/**
- * Abre uma nova aba no navegador e configura um listener
- * para receber dados e efetuar uma requisição POST.
- */
-export function baixarMidiasOpenTab () {
-  const tab = window.open();
-
-  const content = `
-    <h2 style="margin-bottom: 0;">Iniciando geração do ZIP... 🚀</h2>
-    <p style="margin: 5px 0;" id="progress-message">Aguarde, estamos preparando tudo. Isso pode levar alguns minutos.</p>
-    <script>
-      window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'EXECUTE_FUNCTION') {
-          const jsonData = event.data.payload;
-          fetchLink(jsonData);
-        }
-      });
-
-      async function fetchLink(data) {
-        const progressMessage = document.getElementById('progress-message');
-        try {
-          progressMessage.innerHTML += '<p>Enviando requisição ao servidor...</p>';
-
-          const response = await fetch('https://vistoriabaixarfotos-g54tp5thua-rj.a.run.app/export', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-          });
-
-          if (!response.body) {
-            progressMessage.innerHTML = '<p>Erro ao iniciar resposta.</p>';
-            return;
-          }
-
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder('utf-8');
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done){
-              break;
-            }
-
-            // Atualiza o conteúdo com quebra de linha
-            progressMessage.innerHTML = decoder.decode(value, { stream: true });
-          }
-        } catch (error) {
-          console.error('Erro ao realizar o POST:', error);
-          progressMessage.innerHTML = '<p>Erro de comunicação com o servidor. Tente novamente.</p>';
-        }
-      }
-    </script>
-  `;
-
-  tab?.document.write(content);
-  return tab;
-}
-
-/**
- * Verifica se o navegador atual é suportado com base em uma lista de navegadores populares e padrões de webview.
- * @returns {boolean} Retorna true se o navegador for suportado, caso contrário false.
- */
-export function isSupportedBrowser (): boolean {
-  const platform = inject(Platform);
-  const TOP_BROWSER_SET = new Set<string>([
-    'Chrome', 'Safari', 'Edge', 'Firefox', 'Samsung Internet', 'Opera',
-    'Vivaldi', 'Brave', 'DuckDuckGo', 'Yandex', 'UC Browser', 'QQBrowser',
-    'Coc Coc'
-  ]);
-
-  const WEBVIEW_PATTERNS = [
-    'wv', 'webview', 'fbav', 'fban', 'fbsv',
-    'instagram', 'linkedin', 'twitter', 'pinterest'
-  ];
-
-  const getBrowserName = (agent: string) => {
-    if ( /firefox/i.test(agent) ) return 'Firefox';
-    if ( /edg/i.test(agent) ) return 'Edge';
-    if ( /samsungbrowser/i.test(agent) ) return 'Samsung Internet';
-    if ( /opera|opr/i.test(agent) ) return 'Opera';
-    if ( /vivaldi/i.test(agent) ) return 'Vivaldi';
-    if ( /brave/i.test(agent) ) return 'Brave';
-    if ( /duckduckgo/i.test(agent) ) return 'DuckDuckGo';
-    if ( /yabrowser/i.test(agent) ) return 'Yandex';
-    if ( /ucbrowser/i.test(agent) ) return 'UC Browser';
-    if ( /qqbrowser/i.test(agent) ) return 'QQBrowser';
-    if ( /coc_coc_browser/i.test(agent) ) return 'Coc Coc';
-    if ( /chrome|crios|crmo/i.test(agent) ) return 'Chrome';
-    if ( /safari/i.test(agent) && !/chrome|crios|crmo/i.test(agent) ) return 'Safari';
-
-    return '';
-  };
-
-  if ( typeof navigator === 'undefined' || !navigator.userAgent ) {
-    return false;
-  }
-
-  const userAgent = navigator.userAgent;
-  const browserName = getBrowserName(userAgent);
-  if ( !TOP_BROWSER_SET.has(browserName) ) {
-    return false;
-  }
-
-  const lowerCaseUserAgent = userAgent.toLowerCase();
-  const isAWebView = WEBVIEW_PATTERNS.some(pattern => lowerCaseUserAgent.includes(pattern));
-  if ( isAWebView ) {
-    return false;
-  }
-
-  return (
-    platform.EDGE ||
-    platform.SAFARI ||
-    platform.FIREFOX ||
-    platform.BLINK
-  );
 }
 
 export function formatNum (valor: any, precisao?: number, to?: string, prefixo?: string, sufixo?: string) {

@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { UtilsService } from './utils.service';
 import { HttpClient } from '@angular/common/http';
 import { BackendService } from './backend.service';
-import { AuthServiceUsuario } from '../../lib/interfaces';
+import { AuthServiceUsuario } from '../common/types';
 
 @Injectable({
   providedIn: 'root'
@@ -23,7 +23,6 @@ export class AuthService {
   private authToken$ = new BehaviorSubject<string | null>(localStorage.getItem(this.keyToken) || null);
 
   constructor (
-    private utils: UtilsService,
     private route: Router,
     public http: HttpClient,
     private backend: BackendService
@@ -76,7 +75,7 @@ export class AuthService {
    * @param {Usuario} v - The updated user data.
    * @return {Usuario} - The updated user data.
    */
-  async atualizarUsuario (v: AuthServiceUsuario): Promise<AuthServiceUsuario> {
+  public async atualizarUsuario (v: AuthServiceUsuario): Promise<AuthServiceUsuario> {
     if ( v.auth_token ) {
       this.authToken = v.auth_token;
       delete v?.auth_token;
@@ -98,7 +97,7 @@ export class AuthService {
    * Logs out the user, clears local storage and removes chat.
    * @return {Promise<boolean>} A promise that resolves with true when the logout is successful.
    */
-  async logout (): Promise<boolean> {
+  public async logout (): Promise<boolean> {
     this.permissoes$.next(null);
     this.authToken$.next(null);
     this.usuario$.next(null);
@@ -111,7 +110,7 @@ export class AuthService {
    * @param {ActivatedRouteSnapshot} activatedRoute - The activated route snapshot object.
    * @return {Promise<boolean>} - A promise that resolves to a boolean indicating if the user has permission.
    */
-  async canActivate (activatedRoute: ActivatedRouteSnapshot): Promise<boolean> {
+  public async canActivate (activatedRoute: ActivatedRouteSnapshot): Promise<boolean> {
     UtilsService.carregandoGeral(true);
 
     if ( !this.permissoesCarregadas ) {
@@ -135,7 +134,7 @@ export class AuthService {
    * @param {any} permissao - The permission to check for the given module.
    * @return {boolean} - Returns `true` if the user has the specified permission for the module, otherwise returns `false`.
    */
-  havePermission (modulo: String, permissao: any): boolean {
+  private havePermission (modulo: String, permissao: any): boolean {
     if ( this.usuario$.value ) {
       if ( this.permissoes.value ) {
         for ( const mod of this.permissoes.value ) {
@@ -158,7 +157,7 @@ export class AuthService {
    *
    * @returns {void}
    */
-  clearStorage (): void {
+  public clearStorage (): void {
     this.allStorage().forEach((item) => localStorage.removeItem(item));
   }
 
@@ -166,7 +165,7 @@ export class AuthService {
    * Retrieves all keys from the localStorage that contain the specified string.
    * @returns {string[]} An array of strings representing the keys containing the specified string.
    */
-  allStorage (): string[] {
+  private allStorage (): string[] {
     const storage = Object.entries(localStorage);
     const values = [];
     for ( const item of storage ) {

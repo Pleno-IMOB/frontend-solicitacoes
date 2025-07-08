@@ -7,28 +7,26 @@ import { debounceTime } from 'rxjs/operators';
   selector: '[plenoPrimeiroErro]'
 })
 export class MostrarPrimeiroErroDirective implements AfterViewInit, OnDestroy {
-  public submit = new EventEmitter();
+  public submit: EventEmitter<any> = new EventEmitter();
   private campos: { input: any; control: NgControl; y?: number }[] = [];
   private onSubmit?: Subscription;
 
-  private ordenarCampos$ = new BehaviorSubject([]);
+  private ordenarCampos$: BehaviorSubject<never[]> = new BehaviorSubject([]);
   private ordenarCampos?: Subscription;
 
   /**
    * Inicializa assinaturas e ordena campos após a visualização ser carregada.
    * @return Não retorna valor.
    */
-  ngAfterViewInit () {
-    this.onSubmit = this.submit.subscribe(() => {
+  ngAfterViewInit (): void {
+    this.onSubmit = this.submit.subscribe((): void => {
       const invalid = this.campos.filter(c => c.control.invalid);
       this.focarInput(invalid[0] && invalid[0].input);
     });
 
-    /* obtem a posição do input na tela */
-    const posicao = (i: any) =>
+    const posicao= (i: any): any =>
       i && typeof i.getLocationInWindow === 'function' && i.getLocationInWindow();
 
-    /* ordena os campos pela posição y em que eles estão na tela */
     this.ordenarCampos = this.ordenarCampos$.pipe(debounceTime(500)).subscribe(() => {
       this.campos = this.campos
         .map(c => ({ ...c, y: (posicao(c.input) || { y: 0 }).y }))
@@ -40,7 +38,7 @@ export class MostrarPrimeiroErroDirective implements AfterViewInit, OnDestroy {
    * Limpa assinaturas de eventos ao destruir a diretiva para evitar vazamentos de memória.
    * @return Não retorna valor.
    */
-  ngOnDestroy () {
+  ngOnDestroy (): void {
     if ( this.onSubmit instanceof Subscription ) {
       this.onSubmit.unsubscribe();
     }
@@ -56,7 +54,7 @@ export class MostrarPrimeiroErroDirective implements AfterViewInit, OnDestroy {
    * @param control Controle Angular associado ao elemento de entrada.
    * @return Não retorna valor.
    */
-  registrarInput (input: any, control: NgControl) {
+  public registrarInput (input: any, control: NgControl): void {
     this.campos = [ ...this.campos, { input, control } ];
     this.ordenarCampos$.next(this.campos as any);
   }
@@ -66,7 +64,7 @@ export class MostrarPrimeiroErroDirective implements AfterViewInit, OnDestroy {
    * @param input Elemento de entrada atual.
    * @return Não retorna valor.
    */
-  irParaProximoCampo (input: any) {
+  public irParaProximoCampo (input: any): void {
     const index = this.campos.findIndex(v => v.input === input);
     const proximoCampo = this.campos[index + 1];
 
@@ -80,12 +78,11 @@ export class MostrarPrimeiroErroDirective implements AfterViewInit, OnDestroy {
    * @param input Elemento de entrada a ser focado.
    * @return Não retorna valor.
    */
-  focarInput (input: any) {
+  private focarInput (input: any): void {
     if ( input && typeof input.focus === 'function' ) {
       input.focus();
 
       if ( input.android ) {
-        // emite evento para garantir que o KeyboardToolbar apareça corretamente
         input.notify({ eventName: 'focus', object: input });
       }
     }

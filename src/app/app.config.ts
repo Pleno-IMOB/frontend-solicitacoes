@@ -7,9 +7,9 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { interceptToken } from './interceptors/token.interceptor';
 import { provideToastr } from 'ngx-toastr';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { IMOBILIARIA } from '../lib/common';
-import {RECAPTCHA_V3_SITE_KEY} from 'ng-recaptcha';
-import {environment} from '../environments/environment';
+import { IMOBILIARIA } from './common/common';
+import { RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
+import { environment } from '../environments/environment';
 
 const maskConfig: Partial<NgxMaskConfig> = {
   validation: false
@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideEnvironmentNgxMask(maskConfig),
     {
       provide: 'INTERCEPTOR_HOST',
-      useValue: IMOBILIARIA('eduardotwsteproducao30.sistemaspleno.com')
+      useValue: IMOBILIARIA('realcheck.sistemaspleno.com')
     },
     {
       provide: RECAPTCHA_V3_SITE_KEY,

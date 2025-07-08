@@ -36,13 +36,14 @@ footer {
 
   .button-container {
     gap: 10px;
-    right: 18px;
-    top: 16px;
+    right: 16px;
+    top: 12px;
 
     button {
       background-color: #01426a;
       width: 54px !important;
       min-width: 54px !important;
+      height: 30px;
 
       mat-icon {
         margin: 0;
@@ -78,9 +79,17 @@ footer {
   padding-right: 0 !important;
 }
 
+.social-media-container a mat-icon {
+  height: 19px;
+  width: 19px;
+  font-size: 19px;
+  color: #01426a;
+}
+
 
 @media (max-width: 500px) {
   .social-media-container {
     gap: 16px !important;
   }
 }
+

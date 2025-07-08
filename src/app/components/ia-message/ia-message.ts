@@ -1,11 +1,11 @@
-import {Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, PLATFORM_ID} from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import {CidadeOperacao, Imobiliaria, Pergunta, PerguntaResposta, TipoVistoria, Usuario} from '../../common/types';
+import { Pergunta } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
-import { isPlatformBrowser } from '@angular/common';
-import {MatProgressSpinner, MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
 
 @Component({
   selector: 'app-ia-message',
@@ -14,7 +14,8 @@ import {MatProgressSpinner, MatProgressSpinnerModule} from '@angular/material/pr
     MatDividerModule,
     MatIconModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    Nl2BrPipe
   ],
   templateUrl: './ia-message.html',
   styleUrl: './ia-message.scss',
@@ -30,18 +31,26 @@ export class IaMessage implements OnInit, OnChanges, OnDestroy {
   protected digitandoTexto: string = 'Digitando..';
   private indexMsg = 0;
 
-  constructor () {
-  }
-
+  /**
+   * Inicializa o componente e inicia o controle do texto "Digitando".
+   */
   ngOnInit (): void {
     this.controlarDigitando();
   }
 
+  /**
+   * Atualiza o estado do componente quando as propriedades de entrada mudam.
+   */
   ngOnChanges (): void {
     this.controlarDigitando();
   }
 
-  controlarDigitando() {
+  /**
+   * Controla a animação do texto "Digitando" enquanto a mensagem está carregando.
+   *
+   * @private
+   */
+  private controlarDigitando(): void {
     if (this.messageObj?.loading) {
       if (!this.intervalId) {
         this.intervalId = setInterval(() => {
@@ -54,7 +63,10 @@ export class IaMessage implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  limparIntervalo() {
+  /**
+   * Limpa o intervalo de animação do texto "Digitando" e redefine o índice.
+   */
+  private limparIntervalo(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -62,7 +74,10 @@ export class IaMessage implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  ngOnDestroy() {
+  /**
+   * Limpa o intervalo de animação quando o componente é destruído.
+   */
+  ngOnDestroy(): void {
     this.limparIntervalo();
   }
 }

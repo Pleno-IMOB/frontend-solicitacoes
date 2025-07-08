@@ -131,11 +131,24 @@ export interface Pessoa {
 }
 
 export interface ApiData<T> {
-  code?: number;
-  error: ErrorBackend;
-  validation?: any[];
-  success?: boolean;
-  data: T;
+  code?: number,
+  error: ErrorBackend,
+  validation?: any[],
+  success?: boolean,
+  data: T
+}
+
+export interface AuthServiceUsuario extends Usuario {
+  usu_codigo: number;
+  foto: string;
+  cli_codigo: number;
+  auth_token?: string;
+  permissoes?: any[];
+}
+
+export interface DataConfig {
+  toUpper?: boolean;
+  toUpperIgnored?: string[];
 }
 
 export interface ErrorBackend {
@@ -149,35 +162,6 @@ export interface ErrorBackend {
       title: string;
     }
   ];
-}
-
-export interface Foto {
-  file?: any;
-  cloudSlug: string;
-  vis_con_codigo: number;
-  loading: boolean;
-  rowid?: number;
-  search?: string;
-  fot_codigo: number;
-  amb_rowid: number;
-  amb_codigo: number;
-  amb_ite_codigo: number;
-  amb_ite_rowid: number;
-  cha_codigo: number;
-  cha_rowid: number;
-  med_codigo: number;
-  med_rowid: number;
-  fot_nome: string;
-  fot_extensao: string;
-  fot_ordem: number;
-  fot_descricao: string;
-  fot_data?: string;
-  path: string;
-  path_thumb: string;
-  status: number;
-  selected?: boolean;
-  loaded?: boolean;
-  src?: string | void;
 }
 
 export interface Imobiliaria {

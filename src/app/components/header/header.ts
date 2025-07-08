@@ -1,12 +1,12 @@
-import {Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Imobiliaria } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { MatMenuModule } from '@angular/material/menu';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
@@ -22,7 +22,6 @@ import { BackendService } from '../../services/backend.service';
   styleUrl: './header.scss'
 })
 export class Header implements OnInit {
-  protected empresa?: Imobiliaria;
   protected logoUsuario?: string;
   protected user?: any;
   @Input() page: 'agendamento' | 'minha-conta' = 'agendamento';
@@ -65,6 +64,9 @@ export class Header implements OnInit {
     });
   }
 
+  /**
+   * Redireciona o usuário para a página de login.
+   */
   login() {
     window.history.pushState({}, '', '/login');
   }

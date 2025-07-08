@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
-import { BackendDefaults } from '../../lib/backend';
+import { BackendDefaults } from '../common/backend';
 
 @Injectable({
   providedIn: 'root'
@@ -20,11 +20,11 @@ export class BackendService extends BackendDefaults {
     super(http);
     this.urlSistema = interceptorHost;
     this.urlUploads = `${this.urlRaiz}/uploads/${this.urlSistema}/`;
-    (async () => {
+    (async (): Promise<void> => {
       this.Ip = await this.getIp();
     })();
 
-    (async () => {
+    (async (): Promise<void> => {
       this.Ip = await this.getIp();
     })();
   }

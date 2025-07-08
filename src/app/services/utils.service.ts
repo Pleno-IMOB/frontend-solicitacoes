@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import { SweetAlertOptions } from 'sweetalert2';
 import { IndividualConfig, ToastrService } from 'ngx-toastr';
 
@@ -29,7 +29,7 @@ export class UtilsService {
    * Obtém a mensagem de carregamento geral.
    * @return Observable que emite a mensagem de carregamento geral.
    */
-  static get loadingGeralMsg () {
+  static get loadingGeralMsg (): BehaviorSubject<string> {
     return UtilsService.loadingGeralMsg$;
   }
 
@@ -37,7 +37,7 @@ export class UtilsService {
    * Obtém o estado de carregamento específico.
    * @return Observable que emite o estado de carregamento.
    */
-  static get loading () {
+  static get loading (): BehaviorSubject<boolean> {
     return UtilsService.loading$;
   }
 
@@ -45,7 +45,7 @@ export class UtilsService {
    * Obtém o observable de erros.
    * @return Observable que emite informações de erro.
    */
-  static get erro () {
+  static get erro (): Observable<SweetAlertOptions | null> {
     return UtilsService.erro$.asObservable();
   }
 

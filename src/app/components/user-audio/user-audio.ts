@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,14 +19,8 @@ import { AudioRecorder } from '../audio-recorder/audio-recorder';
   styleUrl: './user-audio.scss',
   standalone: true
 })
-export class UserAudio implements OnInit {
+export class UserAudio   {
   @Input() logoUsuario?: string;
   @Input() messageObj!: Resposta;
   @Input() index?: number;
-
-  constructor () {
-  }
-
-  ngOnInit (): void {
-  }
 }

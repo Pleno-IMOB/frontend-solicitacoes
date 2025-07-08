@@ -52,7 +52,7 @@ export class MascaraDirective implements AfterViewInit, OnDestroy {
     }
 
     const formatarFn = this.mascara[this.formato] || this.mascara.padrao(this.formato);
-    const valorFormatado = formatarFn(this.ngControl.value) + '';
+    const valorFormatado: string = formatarFn(this.ngControl.value) + '';
 
     if ( this.ngControl.value !== valorFormatado ) {
       this.ngControl.control.setValue(valorFormatado);

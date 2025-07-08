@@ -4,8 +4,10 @@ import { Directive, HostListener } from '@angular/core';
   selector: '[onlyNumbers]'
 })
 export class OnlyNumbers {
-  constructor() {}
-
+  /**
+   * Lida com eventos de pressionamento de tecla para permitir apenas números.
+   * @param event Evento de teclado que contém informações sobre a tecla pressionada.
+   */
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     const allowedKeys = [
