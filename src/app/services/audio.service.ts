@@ -12,6 +12,7 @@ export class AudioService {
   private audioBlobSubject: Subject<Blob> = new Subject<Blob>();
   private readonly isBrowser: boolean = false;
   public audioBlob$: Observable<Blob> = this.audioBlobSubject.asObservable();
+  private stream: MediaStream | null = null;
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -32,8 +33,8 @@ export class AudioService {
       await this.audioContext.resume();
     }
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    this.mediaRecorder = new MediaRecorder(stream);
+    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    this.mediaRecorder = new MediaRecorder(this.stream);
     this.chunks = [];
 
     this.mediaRecorder.ondataavailable = (event: BlobEvent) => this.chunks.push(event.data);
@@ -44,15 +45,19 @@ export class AudioService {
    * Para a gravação de áudio e processa os dados gravados.
    * @returns {Promise<void>} - Promessa que resolve quando a gravação é parada.
    */
-  async stopRecording(): Promise<void> {
+  public async stopRecording(): Promise<void> {
     if (!this.isBrowser || !this.mediaRecorder || !this.audioContext) return;
 
-    this.mediaRecorder.onstop = async () => {
-      const audioData = await new Blob(this.chunks).arrayBuffer();
+    this.mediaRecorder.onstop = async (): Promise<void> => {
+      const audioData: ArrayBuffer = await new Blob(this.chunks).arrayBuffer();
       const audioBuffer = await this.audioContext!.decodeAudioData(audioData);
-      const wavBlob = this.bufferToWave(audioBuffer, audioBuffer.length);
+      const wavBlob: Blob = this.bufferToWave(audioBuffer, audioBuffer.length);
       this.audioBlobSubject.next(wavBlob);
       this.chunks = [];
+
+      this.stream?.getTracks().forEach((track: MediaStreamTrack): any => track.stop());
+      this.stream = null;
+      this.mediaRecorder = null;
     };
 
     this.mediaRecorder.stop();

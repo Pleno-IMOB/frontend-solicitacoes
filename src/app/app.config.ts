@@ -32,7 +32,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([ interceptToken ])
     ),
-    provideToastr(),
-    provideAnimations()
+    provideAnimations(),
+    provideToastr()
   ]
 };

@@ -1,14 +1,14 @@
-import {ChangeDetectorRef, Component, ElementRef, NgZone, OnInit, ViewChild} from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Header } from '../../components/header/header';
 import { Footer } from '../../components/footer/footer';
 import { MatCardModule } from '@angular/material/card';
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { PerguntaResposta, Resposta } from '../../common/types';
+import { Anexo, PerguntaResposta } from '../../common/types';
 import { IaMessage } from '../../components/ia-message/ia-message';
 import { UserMessage } from '../../components/user-message/user-message';
 import moment from 'moment';
@@ -17,7 +17,9 @@ import { BackendService } from '../../services/backend.service';
 import { Login } from '../login/login';
 import { firstValueFrom } from 'rxjs';
 import { UtilsService } from '../../services/utils.service';
-import {AuthService} from '../../services/auth.service';
+import { AuthService } from '../../services/auth.service';
+import { UserArquivo } from '../../components/user-arquivo/user-arquivo';
+import { IndividualConfig, ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-home',
@@ -33,7 +35,8 @@ import {AuthService} from '../../services/auth.service';
     MatDialogModule,
     IaMessage,
     UserMessage,
-    UserAudio
+    UserAudio,
+    UserArquivo
   ],
   templateUrl: './home.html',
   standalone: true,
@@ -46,15 +49,22 @@ export class Home implements OnInit {
   protected finalizado: boolean = false;
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
-  private payload!: any;
+  protected payload!: any;
   protected solicitacaoFinalizada: boolean = false;
+  private options: Partial<IndividualConfig> = {
+    positionClass: 'toast-bottom-center',
+    progressBar: true,
+    timeOut: 3000,
+    closeButton: true,
+  };
 
   constructor (
     private cd: ChangeDetectorRef,
     private backend: BackendService,
     private dialog: MatDialog,
-    private authService: AuthService,
-    private ngZone: NgZone
+    protected authService: AuthService,
+    private ngZone: NgZone,
+    private toastr: ToastrService,
   ) {
   }
 
@@ -70,13 +80,13 @@ export class Home implements OnInit {
       originalPushState.apply(this, args);
       const url = args[2] as string;
 
-      if (url === '/login') {
+      if (url === '/login' || url === '/agendamento/login') {
         self.ngZone.run(() => {
           self.login();
         });
       }
     };
-    await this.enviaPerguntaResposta();
+    await this.enviaPerguntaResposta('', 'mensagem');
   }
 
   /**
@@ -88,80 +98,118 @@ export class Home implements OnInit {
   }
 
   /**
-   * Processa e envia dados recebidos, rolando a visualização para baixo antes e depois.
-   * @param dado Dado a ser processado e enviado.
-   * @return Promessa que resolve quando o processamento é concluído.
+   * Recebe uma mensagem e a envia ao backend.
+   * @param dado - Mensagem recebida como string.
+   * @return Promessa que resolve quando a operação é concluída.
    */
-  protected async recebeDado (dado: string | Resposta): Promise<void> {
-    this.rolarParaBaixo();
-    await this.enviaPerguntaResposta(dado);
-    this.rolarParaBaixo();
+  protected async recebeMensagem (dado: string): Promise<void> {
+    await this.enviaPerguntaResposta(dado, 'mensagem');
   }
 
   /**
-   * Envia uma pergunta e recebe uma resposta, atualizando a lista de interações.
-   * @param dado Dado a ser enviado na pergunta.
-   * @return Promessa que resolve quando a interação é concluída.
+   * Recebe um áudio e o envia ao backend.
+   * @param dado - Dados do áudio a serem enviados.
+   * @return Promessa que resolve quando a operação é concluída.
    */
-  protected async enviaPerguntaResposta (dado: string | Resposta = ''): Promise<void> {
-    let perguntaResposta: PerguntaResposta;
+  protected async recebeAudio (dado: any): Promise<void> {
+    await this.enviaPerguntaResposta(dado, 'audio');
+  }
+
+  /**
+   * Recebe um arquivo e o envia ao backend.
+   * @param dado - Dados do arquivo a serem enviados.
+   * @return Promessa que resolve quando a operação é concluída.
+   */
+  protected async recebeArquivo (dado: any): Promise<void> {
+    await this.enviaPerguntaResposta(dado, 'arquivo');
+  }
+
+  /**
+   * Envia uma pergunta ou resposta ao backend e atualiza a interface do usuário.
+   * @param dado - Dados a serem enviados, podendo ser uma string ou um objeto com informações adicionais.
+   * @param tipoDado - Tipo de dado enviado, que pode ser 'audio', 'mensagem' ou 'arquivo'.
+   * @return Promessa que resolve quando a operação é concluída.
+   */
+  protected async enviaPerguntaResposta (dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo'): Promise<void> {
+    let perguntaResposta!: PerguntaResposta;
+    let user_instruction: string | string[] = '';
     this.loading = true;
     this.finalizado = false;
     const time: string = moment().format('HH:mm:ss DD/MM/YY');
-    if ( typeof dado === 'string' ) {
+    if(tipoDado === 'mensagem') {
       perguntaResposta = {
         index: this.index,
         iaMessage: { message: '', time: '', index: this.index, loading: true },
         userMessage: { message: dado, time, index: this.index, isAudio: false }
       };
-    } else {
+
+      user_instruction = dado;
+    }
+    if(tipoDado === 'audio') {
       perguntaResposta = {
         index: this.index,
         iaMessage: { message: '', time, index: this.index, loading: true },
         userMessage: { ...dado, time, index: this.index, isAudio: true }
       };
+
+      user_instruction = dado.base64;
     }
+    if(tipoDado === 'arquivo') {
+      perguntaResposta = {
+        index: this.index,
+        iaMessage: { message: '', time, index: this.index, loading: true },
+        userMessage: { ...dado, time, index: this.index, isAudio: false }
+      };
+    }
+
+    let anexos = (dado.anexos || []).map((anexo: Anexo): string => {
+      return anexo.base64
+    });
+
     this.listaPerguntasRespostas.push(perguntaResposta);
     this.cd.detectChanges();
-    this.rolarParaBaixo();
     const params = {
       host: this.backend.urlSistema,
       thread_id: this.thread_id,
-      user_instruction: typeof dado !== 'string' ? dado?.base64 : dado
+      user_instruction,
+      anexos,
+      cli_codigo: this.authService.usuario.value?.cli_codigo,
+      usu_codigo: this.authService.usuario.value?.usu_codigo
     };
 
     this.rolarParaBaixo();
 
-    const response: { resposta: { finalizado: boolean, message: string, payload: any }, thread_id: string } = await this.backend.apiPost('solicitacao/chat/solicitar', params);
-    this.finalizado = response.resposta?.finalizado;
-    if(this.finalizado) {
-      this.payload = response.resposta?.payload;
-    }
-    this.thread_id = response.thread_id;
-    const timeIA: string = moment().format('HH:mm:ss DD/MM/YY');
-    this.listaPerguntasRespostas[this.index].iaMessage = { message: response.resposta.message, time: timeIA, index: this.index, loading: false };
-    this.index++;
-    this.loading = false;
-    this.rolarParaBaixo();
-  }
+    const response: {
+      resposta: {
+        finalizado: boolean,
+        message: string,
+        payload: any
+      },
+      thread_id: string
+    } = await this.backend.apiPost('solicitacao/chat/solicitar', params);
 
-  /**
-   * Confirma o agendamento, solicitando login se necessário.
-   * @return Promessa que resolve quando a confirmação é concluída.
-   */
-  protected async confirmarAgendamento (): Promise<void> {
-    if ( !this.authService.usuario?.value ) {
-      await this.login();
+    if(response) {
+      this.finalizado = response.resposta?.finalizado;
+      if(this.finalizado) {
+        this.payload = response.resposta?.payload;
+      }
+      this.thread_id = response.thread_id;
+      const timeIA: string = moment().format('HH:mm:ss DD/MM/YY');
+      this.listaPerguntasRespostas[this.index].iaMessage = { message: response.resposta.message, time: timeIA, index: this.index, loading: false };
+      this.index++;
+      this.loading = false;
     } else {
-      await this.finalizarAgendamento();
+      this.loading = false;
     }
+
+    this.rolarParaBaixo();
   }
 
   /**
    * Realiza o processo de login exibindo um diálogo e redirecionando após sucesso.
    * @return Promessa que resolve quando o login é concluído.
    */
-  private async login () {
+  protected async login () {
     const dialog: MatDialogRef<Login, any> = this.dialog.open(Login, {
       data: {},
       width: '80vw',
@@ -174,11 +222,14 @@ export class Home implements OnInit {
 
     const result = await firstValueFrom(dialog.afterClosed());
     if ( result ) {
-      const time = 3000;
-      UtilsService.notifySuccess('Iremos lhe redirecionar em alguns segundos!', 'Login efetuado com sucesso!', { timeOut: time });
-      setTimeout(() => {
-        window.history.pushState({}, '', '/');
-      }, time);
+      setTimeout((): void => {
+        this.toastr.success('', 'Login efetuado com sucesso!', this.options);
+        window.history.pushState({}, '', ('/agendamento'));
+      }, 1000);
+
+      if(!UtilsService.loadingGeral.value && this.authService.usuario.value?.usu_codigo && this.authService.usuario.value?.cli_codigo) {
+        await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
+      }
     }
   }
 
@@ -201,18 +252,16 @@ export class Home implements OnInit {
    * Finaliza o agendamento (implementação pendente).
    * @return Não retorna valor.
    */
-  private async finalizarAgendamento (): Promise<void> {
-    if(this.payload) {
-      UtilsService.carregandoGeral(true);
-      const response: any = await this.backend.apiPost('solicitacao/chat/store', this.payload);
-      if(response) {
-        this.solicitacaoFinalizada = true;
-          const time = 3000;
-          UtilsService.notifySuccess('Sua solicitação de vistoria foi agendada com sucesso.', 'Agendado!', { timeOut: time });
-      }
-      this.thread_id = '';
-      UtilsService.carregandoGeral(false);
+  protected async finalizarAgendamento (): Promise<void> {
+    UtilsService.carregandoGeral(true);
+    this.payload = {...this.payload}
+    const response: any = await this.backend.apiPost('solicitacao/chat/store', this.payload);
+    if(response) {
+      this.solicitacaoFinalizada = true;
     }
+    this.thread_id = '';
+    UtilsService.carregandoGeral(false);
+    this.toastr.success('Sua solicitação de vistoria foi agendada com sucesso.', 'Agendado!', this.options);
   }
 
   /**

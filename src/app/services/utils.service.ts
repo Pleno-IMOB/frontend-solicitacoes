@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { SweetAlertOptions } from 'sweetalert2';
 import { IndividualConfig, ToastrService } from 'ngx-toastr';
 
@@ -7,10 +7,10 @@ import { IndividualConfig, ToastrService } from 'ngx-toastr';
   providedIn: 'root'
 })
 export class UtilsService {
-  private static loadingGeral$ = new BehaviorSubject<boolean>(false);
-  private static loadingGeralMsg$ = new BehaviorSubject<string>('Carregando');
-  private static loading$ = new BehaviorSubject<boolean>(false);
-  private static erro$ = new BehaviorSubject<SweetAlertOptions | null>(null);
+  private static loadingGeral$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private static loadingGeralMsg$: BehaviorSubject<string> = new BehaviorSubject<string>('Carregando');
+  private static loading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private static erro$: BehaviorSubject<SweetAlertOptions | null> = new BehaviorSubject<SweetAlertOptions | null>(null);
   private static toastr: ToastrService;
 
   constructor (toastr: ToastrService) {
@@ -21,7 +21,7 @@ export class UtilsService {
    * Obtém o estado de carregamento geral.
    * @return Observable que emite o estado de carregamento geral.
    */
-  static get loadingGeral () {
+  static get loadingGeral (): BehaviorSubject<boolean> {
     return UtilsService.loadingGeral$;
   }
 
@@ -55,7 +55,7 @@ export class UtilsService {
    * @param msg Mensagem a ser exibida durante o carregamento.
    * @return Não retorna valor.
    */
-  static carregandoGeral (carregando: boolean, msg = 'Carregando ...') {
+  static carregandoGeral (carregando: boolean, msg = 'Carregando ...'): void {
     if ( carregando )
       document.body.style.cursor = 'progress';
     else
@@ -79,7 +79,7 @@ export class UtilsService {
    * @param erro Opções de configuração do SweetAlert para exibir o erro.
    * @return Não retorna valor.
    */
-  static mostrarErro (erro: SweetAlertOptions) {
+  static mostrarErro (erro: SweetAlertOptions): void {
     UtilsService.erro$.next(erro);
   }
 
@@ -87,7 +87,7 @@ export class UtilsService {
    * Limpa o erro atualmente exibido.
    * @return Não retorna valor.
    */
-  static limparErro () {
+  static limparErro (): void {
     UtilsService.erro$.next(null);
   }
 
@@ -107,6 +107,6 @@ export class UtilsService {
       closeButton: true,
       ...config
     };
-    UtilsService.toastr.success(message, title, options);
+    UtilsService.toastr?.success(message, title, options);
   }
 }

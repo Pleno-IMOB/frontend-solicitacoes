@@ -2,24 +2,28 @@ import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { Resposta } from '../../common/types';
+import { Anexo } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
-import { AudioRecorder } from '../audio-recorder/audio-recorder';
 
 @Component({
-  selector: 'app-user-audio',
+  selector: 'app-user-arquivo',
   imports: [
     MatCardModule,
     MatDividerModule,
     MatIconModule,
-    MatButtonModule,
-    AudioRecorder
+    MatButtonModule
   ],
-  templateUrl: './user-audio.html',
-  styleUrl: './user-audio.scss',
+  templateUrl: './user-arquivo.html',
+  styleUrl: './user-arquivo.scss',
   standalone: true
 })
-export class UserAudio   {
-  @Input() messageObj!: Resposta;
+export class UserArquivo {
+  @Input() anexo!: Anexo;
   @Input() index?: number;
+
+  protected openArquivo (): void {
+    if(this.anexo) {
+      window.open(this.anexo.url, '_blank');
+    }
+  }
 }

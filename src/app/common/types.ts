@@ -265,15 +265,6 @@ export interface Imobiliaria {
   bairro: Bairro;
 }
 
-export interface TipoVistoria {
-  tip_vis_codigo: number;
-  tip_vis_descricao: string;
-  tip_vis_cor: string | null;
-  tip_vis_icon: string | null;
-  tip_vis_titulo: string | null;
-  tip_vis_obs: string | null;
-}
-
 export interface Usuario {
   search?: string;
   usu_codigo: number;
@@ -304,12 +295,22 @@ export interface Resposta {
   message?: string;
   blob?: Blob;
   base64?: string;
-  isAudio?: boolean;
   url?: string;
+  isAudio?: boolean;
+  anexos?: Anexo[];
 }
 
 export interface PerguntaResposta {
   index: number;
   iaMessage: Pergunta;
   userMessage: Resposta;
+}
+
+export interface Anexo {
+  base64: string;
+  blob: Blob;
+  url: string;
+  name: string;
+  time: string;
+  index: number;
 }

@@ -9,6 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AudioService } from '../../services/audio.service';
 import moment from 'moment';
+import { base64ToBlob, fileToBase64 } from '../../common/common';
+import Swal from 'sweetalert2';
+import { Anexo } from '../../common/types';
 
 @Component({
   selector: 'app-footer',
@@ -31,83 +34,101 @@ export class Footer implements OnInit {
   protected isRecording: boolean = false;
   protected audioURL: string | null = null;
   @Input() loading: boolean = false;
-  @Input() mostrarInput: boolean = true;
   @Output() enviaMensagemUsuario: EventEmitter<string> = new EventEmitter<string>();
   @Output() enviaAudioUsuario: EventEmitter<any> = new EventEmitter<any>();
-  @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
+  @Output() enviaArquivoUsuario: EventEmitter<any> = new EventEmitter<any>();
 
   constructor (
     private formBuilder: FormBuilder,
     private audioRecordingService: AudioService,
     private cd: ChangeDetectorRef
   ) {
-    if(this.mostrarInput) {
-      this.formIa = this.formBuilder.group({
-        prompt: [ null, Validators.required ],
-      });
-    }
+    this.formIa = this.formBuilder.group({
+      prompt: [ null, Validators.required ],
+    });
   }
 
   /**
    * Inicializa o componente e configura a assinatura para o serviço de gravação de áudio.
-   * @property {boolean} mostrarInput - Indica se o input deve ser exibido.
    * @property {string | null} audioURL - URL do áudio gravado.
    */
   ngOnInit (): void {
-    if(this.mostrarInput) {
-      this.audioRecordingService.audioBlob$.subscribe(blob => {
-        this.audioURL = window.URL.createObjectURL(blob);
-        this.cd.detectChanges();
-        this.blobToBase64(blob).then((base64: string) => {
-          this.enviaAudioUsuario.emit({
-            blob,
-            base64,
-            url: this.audioURL,
-            time: moment().format('HH:mm:ss DD/MM/YY')
-          });
+    this.audioRecordingService.audioBlob$.subscribe((blob: Blob) => {
+      this.audioURL = window.URL.createObjectURL(blob);
+      this.cd.detectChanges();
+      fileToBase64(blob).then((base64: string): void => {
+        this.enviaAudioUsuario.emit({
+          blob,
+          base64,
+          url: this.audioURL,
+          time: moment().format('HH:mm:ss DD/MM/YY'),
+          isAudio: true
         });
       });
-    }
+    });
   }
 
   /**
    * Abre um seletor de arquivos oculto e processa o arquivo selecionado.
    */
   protected selecionarArquivo(): void {
-    const input = document.createElement('input');
+    const listaAnexos: Anexo[] = [];
+    const input: HTMLInputElement = document.createElement('input');
     input.type = 'file';
+    input.accept = '.pdf,.doc,.docx,.xls,.xlsx,application/msword,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf';
+    input.multiple = true;
     input.style.display = 'none';
 
-    input.addEventListener('change', (event: Event) => {
+    input.addEventListener('change', async (event: Event): Promise<void> => {
       const target = event.target as HTMLInputElement;
-
       if (target.files && target.files.length > 0) {
-        const arquivo = target.files[0];
-        console.log('Arquivo selecionado:', arquivo);
+        const tiposPermitidos: string[] = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
 
-        const formData = new FormData();
-        formData.append('arquivo', arquivo);
+        for (const arquivo of Array.from(target.files)) {
+          let index = 0;
+          const extensao: string | undefined = arquivo.name.split('.').pop()?.toLowerCase();
+
+          if (!extensao || !tiposPermitidos.includes(extensao)) {
+            await Swal.fire({
+              html: `<h3>Tipo de arquivo inválido</h3><br><h4>Permitidos (PDF, DOC e XLS).</h4>`,
+              icon: 'error',
+              focusCancel: true,
+              customClass: { confirmButton: 'btn btn-warning' },
+              allowOutsideClick: false,
+              allowEscapeKey: false
+            });
+            continue;
+          }
+
+          const base64: string = await fileToBase64(arquivo);
+          const blob: Blob = base64ToBlob(base64, `application/${extensao}`);
+          const url: string = URL.createObjectURL(blob);
+          const name: string = arquivo?.name;
+          const time: string = moment().format('HH:mm:ss DD/MM/YY');
+
+          listaAnexos.push({
+            base64,
+            blob,
+            url,
+            name,
+            time,
+            index
+          });
+
+          index++;
+        }
+
+        this.enviaArquivoUsuario.emit({
+          time: moment().format('HH:mm:ss DD/MM/YY'),
+          isAudio: false,
+          anexos: listaAnexos
+        });
       }
     });
 
     document.body.appendChild(input);
     input.click();
-
-    setTimeout((): HTMLInputElement => document.body.removeChild(input), 0);
-  }
-
-  /**
-   * Converte um Blob em uma string Base64.
-   * @param blob - O Blob que será convertido.
-   * @returns Uma Promise que resolve para a string Base64 do Blob.
-   */
-  private blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-    });
+    setTimeout(() => document.body.removeChild(input), 0);
   }
 
   /**

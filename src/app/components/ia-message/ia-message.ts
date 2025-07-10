@@ -23,7 +23,6 @@ import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
 })
 export class IaMessage implements OnInit, OnChanges, OnDestroy {
   @Input() logoEmpresa?: string;
-  @Input() logoUsuario?: string;
   @Input() messageObj?: Pergunta;
   @Input() index?: number;
   private intervalId: any;

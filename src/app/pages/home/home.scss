@@ -5,8 +5,8 @@
   background-color: #f2f2f5;
   padding: calc(90px + 2vh) 3vw 2vh;
   height: auto;
-  min-height: calc(100vh - 271px);
-  max-height: calc(100vh - 271px);
+  min-height: calc(100vh - 287px);
+  max-height: calc(100vh - 287px);
   overflow-y: auto;
 
   div {
@@ -20,7 +20,29 @@
   margin-top: 20px;
   height: 54px !important;
   min-height: 54px !important;
-  width: 330px;
+  width: 340px;
+  min-width: 340px;
+  max-width: 340px;
   align-self: center;
+
+  b {
+    letter-spacing: .6px !important;
+  }
 }
 
+.btn-novo-agendamento {
+  background-color: #ffffff;
+  color: #01426a !important;
+  border: 2px solid #01426a !important;
+}
+
+.btn-agendamento {
+  background-color: #2dce89 !important;
+  color: #fff;
+}
+
+.home-btn-icon {
+  font-size: 22px;
+  height: 22px;
+  width: 22px;
+}

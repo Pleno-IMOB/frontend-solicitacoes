@@ -1,17 +1,15 @@
 <footer id="footer">
-    @if(mostrarInput) {
-        <div class="w-100 d-flex position-relative" [formGroup]="formIa">
-            <mat-form-field class="w-100">
-                <mat-label>Digite aqui</mat-label>
-                <textarea matInput rows="4" class="text-area-pleno pb-2" formControlName="prompt" (keydown.enter)="enviarMensagem($event)"></textarea>
-            </mat-form-field>
-            <div class="d-flex flex-column align-items-center justify-content-center button-container position-absolute">
-                <button (click)="enviarMensagem($event)" matButton="filled" [disabled]="!formIa.get('prompt')?.value || loading"><mat-icon class="send-icon">send</mat-icon></button>
-                <button (click)="!isRecording ? startRecording() : stopRecording()" [disabled]="loading" matButton="filled"><mat-icon>{{ !isRecording ? 'mic' : 'mic_off' }}</mat-icon></button>
-                <button matButton="filled" (click)="selecionarArquivo()"><mat-icon>attach_file</mat-icon></button>
-            </div>
+    <div class="w-100 d-flex position-relative" [formGroup]="formIa">
+        <mat-form-field class="w-100">
+            <mat-label>Digite aqui</mat-label>
+            <textarea matInput rows="4" class="text-area-pleno pb-2" formControlName="prompt" (keydown.enter)="enviarMensagem($event)"></textarea>
+        </mat-form-field>
+        <div class="d-flex flex-column align-items-center justify-content-center button-container position-absolute">
+            <button (click)="enviarMensagem($event)" matButton="filled" [disabled]="!formIa.get('prompt')?.value || loading"><mat-icon class="send-icon">send</mat-icon></button>
+            <button (click)="!isRecording ? startRecording() : stopRecording()" [disabled]="loading" matButton="filled"><mat-icon>{{ !isRecording ? 'mic' : 'stop' }}</mat-icon></button>
+            <button matButton="filled" (click)="selecionarArquivo()" [disabled]="loading"><mat-icon>attach_file</mat-icon></button>
         </div>
-    }
+    </div>
     <div class="d-flex justify-content-between align-items-center">
         <img alt="Pleno sistemas para imobiliárias"
              src="https://www.sistemaspleno.com/wp-content/themes/plenoimob/assets/img/logo.svg">

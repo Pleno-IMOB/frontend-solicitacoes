@@ -370,8 +370,8 @@ export class BackendDefaults {
    */
   protected tratarRetorno<T> (response: ApiData<T>, title?: string | null, text?: string | null, callbackErr?: (error: ErrorBackend) => void): any {
     const defaults = {
-      title: 'Algo deu errado 😅😬',
-      text: 'Ocorreu um erro na comunicação com o servidor, tente novamente em alguns instantes.'
+      title: 'Ocorreu um erro inesperado',
+      text: 'Erro na comunicação com o servidor, tente novamente em alguns instantes.'
     };
 
     if ( response.success ) {
@@ -401,7 +401,6 @@ export class BackendDefaults {
             defaults.text += `<br><small><strong>${validation[0]}</strong></small>`;
           }
         }
-
         UtilsService.mostrarErro({ title: title || defaults.title, text: response.error.message || text || defaults.text });
         throw (response.error);
       }

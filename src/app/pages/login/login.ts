@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, ViewChild} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -19,6 +19,7 @@ import { UtilsService } from '../../services/utils.service';
 import { MatDialogRef } from '@angular/material/dialog';
 import { RecaptchaV3Module, ReCaptchaV3Service } from "ng-recaptcha";
 import { firstValueFrom } from "rxjs";
+import { MatCheckbox } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-login',
@@ -37,7 +38,8 @@ import { firstValueFrom } from "rxjs";
     MostrarErrosDirective,
     MostrarPrimeiroErroDirective,
     AsyncPipe,
-    RecaptchaV3Module
+    RecaptchaV3Module,
+    MatCheckbox
   ],
   providers: [
     provideNgxMask()
@@ -55,6 +57,9 @@ export class Login implements AfterViewInit {
   protected reenviarDisponivel: boolean = false;
   protected intervalId: any;
   private ultimaExecucao: number = 0;
+  protected souCliente: boolean = false;
+  protected nomeReadOnly: boolean = false;
+  protected emailReadOnly: boolean = false;
 
   constructor (
     private formBuilder: FormBuilder,
@@ -70,15 +75,35 @@ export class Login implements AfterViewInit {
       host: [ this.backend.urlSistema, [ Validators.required ] ],
       nome: [ null, [ Validators.required, Validators.minLength(4) ] ],
       email: [ null, [ Validators.required, Validators.email ] ],
+      sou_cliente: [ false ],
       cli_nome: [ null, [ Validators.required, Validators.minLength(4) ] ],
       cli_cpfCnpj: [ null, [ Validators.required, Validadores.cpfCnpj ] ]
     });
+
+
+    this.form.get('sou_cliente')?.valueChanges.subscribe((valor: boolean): void => {
+      this.souCliente = valor;
+
+      if (valor) {
+        const nome = this.form.get('nome')?.value;
+        if(nome) {
+          this.form.get('cli_nome')?.setValue(nome);
+        }
+      }
+    });
   }
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
     if(this.celularInput) {
       this.celularInput.nativeElement.focus();
     }
+    this.form.get('cli_cpfCnpj')?.valueChanges.subscribe(async (valor: string): Promise<void> => {
+      if(UtilsService.loadingGeral.value || valor?.length < 14) {
+        return;
+      } else {
+        await this.buscarPorCpfCnpj(this.form.get('cli_cpfCnpj'));
+      }
+    });
   }
 
   /**
@@ -109,15 +134,18 @@ export class Login implements AfterViewInit {
    * Busca informações por CPF ou CNPJ e atualiza o formulário com os dados recebidos.
    * @return Promessa que resolve quando a busca é concluída.
    */
-  protected async buscarPorCpfCnpj (): Promise<any> {
-    const cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
+  protected async buscarPorCpfCnpj (control: AbstractControl<any, any> | null): Promise<any> {
+    if(UtilsService.loadingGeral.value) {
+      return;
+    }
+    let cpfCnpj = control?.value;
     if ( cpfCnpj.length === 14 ) {
       setTimeout(async (): Promise<void> => {
-        const cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
+        cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
         if ( cpfCnpj.length === 14 ) {
-          const prefix = `${this.backend.hostAPI}areacliente/`;
           UtilsService.carregandoGeral(true);
-          const response: any = await this.backend.apiGetExternal(`${prefix}pessoa/validarCpf?pes_cpf=${cpfCnpj}&sis_codigo=6&host=${this.form.get('host')?.value}`);
+          const prefix = `${this.backend.hostAPI}areacliente/`;
+          const response: any = await this.backend.apiGetExternal(`${prefix}pessoa/validarCpf?pes_cpf=${cpfCnpj}&sis_codigo=6&host=${this.form.get('host')?.value}`, null, (): void => {});
           if ( response && response?.length > 0 ) {
             this.form.get('cli_nome')?.setValue(response[0]?.pessoa.pes_nome);
           }
@@ -126,11 +154,11 @@ export class Login implements AfterViewInit {
       }, 1000);
     } else if ( cpfCnpj.length === 18 ) {
       setTimeout(async (): Promise<void> => {
-        const cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
+        cpfCnpj = this.form.get('cli_cpfCnpj')?.value;
         if ( cpfCnpj.length === 18 ) {
-          const prefix = `${this.backend.hostAPI}vistoria/`;
           UtilsService.carregandoGeral(true);
-          const response: any = await this.backend.apiGetExternal(`${prefix}pessoa/buscaPorCnpj?pes_cnpj=${cpfCnpj}&sis_codigo=6&host=${this.form.get('host')?.value}`);
+          const prefix = `${this.backend.hostAPI}vistoria/`;
+          const response: any = await this.backend.apiGetExternal(`${prefix}pessoa/buscaPorCnpj?pes_cnpj=${cpfCnpj}&sis_codigo=6&host=${this.form.get('host')?.value}`, null, (): void => {});
           if ( response ) {
             this.form.get('cli_nome')?.setValue(response?.pes_nome);
           }
@@ -154,12 +182,15 @@ export class Login implements AfterViewInit {
    */
   protected async enviarTokenParaCelular (): Promise<void> {
     const prefix = `${this.backend.hostAPI}portalDoCliente/`;
+    UtilsService.carregandoGeral(true);
+
     const response: any = await this.backend.apiPostExternal(`${prefix}usuario/enviarTokenLoginAgendamento`, {
       ...this.form.value,
       recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
       recaptchaVersion: 3
     });
 
+    UtilsService.carregandoGeral(false);
     this.form.get('tok_codigo')?.setValue(response?.tok_codigo);
   }
 
@@ -167,7 +198,10 @@ export class Login implements AfterViewInit {
    * Confirma o token recebido no celular e atualiza o formulário com os dados do usuário.
    * @return Promessa que resolve com a confirmação do token.
    */
-  protected async confirmarTokenDoCelular () {
+  protected async confirmarTokenDoCelular (): Promise<void> {
+    const tokenControl = this.form.get('token');
+    const nomeControl = this.form.get('nome');
+    const emailControl = this.form.get('email');
     const prefix = `${this.backend.hostAPI}portalDoCliente/`;
     const response: any = await this.backend.apiPostExternal(`${prefix}usuario/validarTokenLoginAgendamento`, {
       ...this.form.value,
@@ -176,11 +210,13 @@ export class Login implements AfterViewInit {
     });
 
     if (!response) {
-      this.form.get('token')?.setErrors({ tokenInvalido: true });
+      tokenControl?.setErrors({ tokenInvalido: true });
     } else {
-      this.form.get('token')?.setErrors(null);
-      this.form.get('nome')?.setValue(response?.usu_nome);
-      this.form.get('email')?.setValue(response?.pessoa?.pes_email);
+      tokenControl?.setErrors(null);
+      nomeControl?.setValue(response?.usu_nome);
+      emailControl?.setValue(response?.usu_email);
+      this.nomeReadOnly = !!nomeControl?.value;
+      this.emailReadOnly = !!emailControl?.value;
       this.authService.authToken = response?.auth_token;
     }
   }
@@ -217,7 +253,9 @@ export class Login implements AfterViewInit {
     }
     UtilsService.carregandoGeral(false);
     if(this.pageIndex === 1) {
-      this.tokenInput?.nativeElement.focus();
+      setTimeout((): void => {
+        this.tokenInput?.nativeElement.focus();
+      }, 500);
     }
   }
 

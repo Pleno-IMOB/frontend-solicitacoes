@@ -1,13 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { Imobiliaria } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
 import { BackendService } from '../../services/backend.service';
+import { AuthServiceUsuario } from '../../common/types';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -24,12 +24,10 @@ import { BackendService } from '../../services/backend.service';
 export class Header implements OnInit {
   protected logoUsuario?: string;
   protected user?: any;
-  @Input() page: 'agendamento' | 'minha-conta' = 'agendamento';
 
   constructor (
     private authService: AuthService,
-    private backend: BackendService,
-    private router: Router
+    private backend: BackendService
   ) {
     this.logoUsuario = `${this.backend.baseURL}/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
@@ -38,8 +36,8 @@ export class Header implements OnInit {
    * Inicializa o componente e subscreve ao serviço de autenticação para obter o usuário atual.
    * @return Promessa que resolve quando a inicialização é concluída.
    */
-  async ngOnInit () {
-    this.authService.usuario.subscribe((next) => this.user = next);
+  async ngOnInit (): Promise<void> {
+    this.authService.usuario.subscribe((next: AuthServiceUsuario | null): AuthServiceUsuario | null => this.user = next);
   }
 
   /**
@@ -59,7 +57,7 @@ export class Header implements OnInit {
     }).then(async (result: SweetAlertResult): Promise<void> => {
       if ( result.isConfirmed ) {
         await this.authService.logout();
-        await this.router.navigateByUrl('/login ');
+        window.location.reload();
       }
     });
   }
@@ -68,6 +66,6 @@ export class Header implements OnInit {
    * Redireciona o usuário para a página de login.
    */
   login() {
-    window.history.pushState({}, '', '/login');
+    window.history.pushState({}, '', ('/agendamento/login'));
   }
 }

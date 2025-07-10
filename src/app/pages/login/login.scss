@@ -56,3 +56,11 @@ button[mat-button][disabled] mat-icon {
 :host ::ng-deep .mdc-floating-label--float-above mat-label {
   white-space: nowrap !important;
 }
+
+h5 {
+  margin-bottom: 0;
+}
+
+:host ::ng-deep label {
+  margin-bottom: 0 !important;
+}
