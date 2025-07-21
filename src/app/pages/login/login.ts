@@ -75,6 +75,7 @@ export class Login implements AfterViewInit {
     this.form = this.formBuilder.group({
       celular: [ null, [ Validators.required, Validadores.celular ] ],
       tok_codigo: [ null ],
+      pes_codigo: [ null ],
       token: [ null, [ Validators.required, Validators.minLength(6) ] ],
       host: [ this.backend.urlSistema, [ Validators.required ] ],
       pes_logo: [ null ],
@@ -120,15 +121,15 @@ export class Login implements AfterViewInit {
    */
   protected async loginAgendamento (): Promise<any> {
     UtilsService.carregandoGeral(true);
-    const prefix = `${this.backend.hostAPI}portalDoCliente/`;
-    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/loginAgendamento`, {
+    const response: any = await this.backend.apiPost(`login/loginAgendamento`, {
       ...this.form.value,
       recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
       recaptchaVersion: 3
     });
     if ( response ) {
-      await this.authService.atualizarUsuario(response);
-      this.matDialogRef.close(this.authService.usuario.value);
+      await this.authService.atualizarPessoa(response);
+      this.matDialogRef.close(this.authService.pessoa.value);
+      UtilsService.carregandoGeral(false);
     }
     UtilsService.carregandoGeral(false);
   }
@@ -183,7 +184,7 @@ export class Login implements AfterViewInit {
    * @return URL do logo como string.
    */
   protected getLogo (): string {
-    return `${this.backend.baseURL}/logo-imobiliaria?host=${this.backend.urlSistema}`;
+    return `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**
@@ -191,10 +192,9 @@ export class Login implements AfterViewInit {
    * @return Promessa que resolve quando o token é enviado.
    */
   protected async enviarTokenParaCelular (): Promise<void> {
-    const prefix = `${this.backend.hostAPI}portalDoCliente/`;
     UtilsService.carregandoGeral(true);
 
-    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/enviarTokenLoginAgendamento`, {
+    const response: any = await this.backend.apiPost(`login/enviarTokenLoginAgendamento`, {
       ...this.form.value,
       recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
       recaptchaVersion: 3
@@ -202,6 +202,7 @@ export class Login implements AfterViewInit {
 
     UtilsService.carregandoGeral(false);
     this.form.get('tok_codigo')?.setValue(response?.tok_codigo);
+    this.form.get('pes_codigo')?.setValue(response?.pes_codigo);
   }
 
   /**
@@ -212,8 +213,7 @@ export class Login implements AfterViewInit {
     const tokenControl = this.form.get('token');
     const nomeControl = this.form.get('nome');
     const emailControl = this.form.get('email');
-    const prefix = `${this.backend.hostAPI}portalDoCliente/`;
-    const response: any = await this.backend.apiPostExternal(`${prefix}usuario/validarTokenLoginAgendamento`, {
+    const response: any = await this.backend.apiPost(`login/validarTokenLoginAgendamento`, {
       ...this.form.value,
       recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
       recaptchaVersion: 3
@@ -223,9 +223,9 @@ export class Login implements AfterViewInit {
       tokenControl?.setErrors({ tokenInvalido: true });
     } else {
       tokenControl?.setErrors(null);
-      nomeControl?.setValue(response?.usu_nome);
-      emailControl?.setValue(response?.usu_email);
-      this.form.get('pes_logo')?.setValue(response?.pessoa?.pes_logo);
+      nomeControl?.setValue(response?.pes_nome);
+      emailControl?.setValue(response?.pes_email);
+      this.form.get('pes_logo')?.setValue(response?.pes_logo);
       this.nomeReadOnly = !!nomeControl?.value;
       this.emailReadOnly = !!emailControl?.value;
       this.authService.authToken = response?.auth_token;

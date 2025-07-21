@@ -8,7 +8,7 @@
         <h5 class="mb-0 online-msg">Online</h5>
       </div>
     </div>
-    @if (authService.usuario.value?.pessoa?.pes_logo) {
+    @if (authService.pessoa?.value?.pes_logo) {
       <button color="primary" matButton="text" [matMenuTriggerFor]="menu" class="px-0">
         <mat-menu #menu="matMenu">
           <button mat-menu-item (click)="redirecionaParaMinhaConta()">
@@ -21,12 +21,12 @@
           </button>
         </mat-menu>
         <div class="d-flex justify-content-center align-items-center usu-container">
-          @if (authService.usuario.value?.pessoa?.pes_logo) {
-            <img class="user-image" [src]="authService.usuario.value?.pessoa?.pes_logo" alt="foto-usuario">
+          @if (authService.pessoa?.value?.pes_logo) {
+            <img class="user-image" [src]="authService.pessoa?.value?.pes_logo" alt="foto-usuario">
           } @else {
             <mat-icon>account_circle</mat-icon>
           }
-          <small class="mb-0 text-truncate w-100">{{ authService.usuario.value?.usu_nome }}</small>
+          <small class="mb-0 text-truncate w-100">{{ authService.pessoa?.value?.pes_nome }}</small>
         </div>
       </button>
     } @else {

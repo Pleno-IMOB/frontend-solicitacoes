@@ -139,7 +139,7 @@ export interface ApiData<T> {
   data: T
 }
 
-export interface AuthServiceUsuario extends Usuario {
+export interface AuthServicePessoa extends Pessoa {
   usu_codigo: number;
   foto: string;
   pes_logo: string;

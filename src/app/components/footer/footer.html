@@ -3,7 +3,9 @@
     <mat-form-field class="w-100">
       <mat-label>Digite aqui</mat-label>
       <textarea
-        (keydown.enter)="enviarMensagem($event)"
+        (keydown.enter)="(formIa.get('prompt')?.valid &&
+          formIa.get('prompt')?.value?.trim()?.length !== 0) &&
+          enviarMensagem($event)"
         class="text-area-pleno pb-2"
         formControlName="prompt"
         matInput
@@ -12,7 +14,9 @@
     <div class="d-flex flex-column align-items-center justify-content-center button-container position-absolute">
       <button
         (click)="enviarMensagem($event)"
-        [disabled]="!formIa.get('prompt')?.value || (UtilsService.loading | async)"
+        [disabled]="!formIa.get('prompt')?.value ||
+          formIa.get('prompt')?.value?.trim()?.length === 0 ||
+          (UtilsService.loading | async)"
         matButton="filled">
         <mat-icon class="send-icon">send</mat-icon>
       </button>

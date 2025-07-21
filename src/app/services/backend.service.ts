@@ -7,8 +7,8 @@ import { BackendDefaults } from '../common/backend';
 })
 export class BackendService extends BackendDefaults {
   public override Ip = null;
-  public override endpoint = 'vistoria';
-  public override url: string = (!this.isLocalhost) ? 'https://' + window.location.host + '/vistorias' : `http://${window.location.host}`;
+  public override endpoint = 'agendamento';
+  public override url: string = (!this.isLocalhost) ? 'https://' + window.location.host + '/agendamento' : `http://${window.location.host}`;
   public override urlRaiz: string = (!this.isLocalhost) ? 'https://' + window.location.host : 'https://apresentacao.plenoimob.com.br';
   public override urlSistema: string;
   public override urlUploads: string;
