@@ -79,13 +79,13 @@ export class MeusDados implements AfterViewInit, OnInit {
       }
     });
 
-    if ( this.authService.usuario?.value ) {
+    if ( this.authService.pessoa?.value ) {
       this.form.patchValue({
-        ...this.authService.usuario?.value,
-        nome: this.authService.usuario?.value?.usu_nome,
-        telefone: this.authService.usuario?.value?.usu_telefone,
-        email: this.authService.usuario?.value?.usu_email,
-        pes_logo: this.authService.usuario?.value?.pessoa?.pes_logo
+        ...this.authService.pessoa?.value,
+        nome: this.authService.pessoa?.value?.pes_nome,
+        telefone: this.authService.pessoa?.value?.pes_telefone,
+        email: this.authService.pessoa?.value?.pes_email,
+        pes_logo: this.authService.pessoa?.value?.pes_logo
       });
     }
   }
@@ -105,16 +105,15 @@ export class MeusDados implements AfterViewInit, OnInit {
    */
   protected async loginAgendamento (): Promise<any> {
     UtilsService.carregandoGeral(true);
-    const prefix = `${this.backend.hostAPI}portalDoCliente/`;
     try {
-      const response: any = await this.backend.apiPostExternal(`${prefix}usuario/loginAgendamento`, {
+      const response: any = await this.backend.apiPost(`login/loginAgendamento`, {
         ...this.form.value,
         recaptcha: await firstValueFrom(this.recaptchaV3Service.execute('signup')),
         recaptchaVersion: 3
       });
       if ( response ) {
-        await this.authService.atualizarUsuario(response);
-        this.matDialogRef.close(this.authService.usuario.value);
+        await this.authService.atualizarPessoa(response);
+        this.matDialogRef.close(this.authService.pessoa.value);
       }
     } catch ( error ) {
       console.error('Erro ao fazer loginAgendamento:', error);
@@ -198,7 +197,7 @@ export class MeusDados implements AfterViewInit, OnInit {
    */
   private async getAndSetDadosCliente (): Promise<void> {
     UtilsService.carregandoGeral(true);
-    const cliente: Cliente = await this.backend.apiGet(`cliente/${this.authService.usuario?.value?.cli_codigo}/show`);
+    const cliente: Cliente = await this.backend.apiGet(`cliente/${this.authService.pessoa?.value?.cli_codigo}/show`);
     this.form.patchValue({ cli_nome: cliente.pessoa?.pes_nome, cli_cpfCnpj: cliente.pessoa?.cpf_ou_cnpj });
     UtilsService.carregandoGeral(false);
   }

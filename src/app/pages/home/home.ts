@@ -74,7 +74,7 @@ export class Home implements OnInit {
    * @return URL do logo como string.
    */
   protected getLogo (): string {
-    return `${this.backend.baseURL}/logo-imobiliaria?host=${this.backend.urlSistema}`;
+    return `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**
@@ -167,8 +167,8 @@ export class Home implements OnInit {
       thread_id: this.thread_id,
       user_instruction,
       anexos,
-      cli_codigo: this.authService.usuario.value?.cli_codigo,
-      usu_codigo: this.authService.usuario.value?.usu_codigo
+      cli_codigo: this.authService.pessoa.value?.cli_codigo,
+      pes_codigo: this.authService.pessoa.value?.pes_codigo
     };
 
     const response = await this.backend.apiPost<{
@@ -218,7 +218,7 @@ export class Home implements OnInit {
 
     const result = await firstValueFrom(dialog.afterClosed());
     if ( result ) {
-      if ( this.authService.usuario.value?.usu_codigo && this.authService.usuario.value?.cli_codigo ) {
+      if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
         await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
         UtilsService.notifySuccess('', 'Dados salvos com sucesso!');
       }
@@ -244,7 +244,7 @@ export class Home implements OnInit {
 
     const result = await firstValueFrom(dialog.afterClosed());
     if ( result ) {
-      if ( this.authService.usuario.value?.usu_codigo && this.authService.usuario.value?.cli_codigo ) {
+      if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
         await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
         UtilsService.notifySuccess('', 'Login efetuado com sucesso!');
       }
@@ -273,7 +273,9 @@ export class Home implements OnInit {
    * Reinicia a aplicação recarregando a página atual.
    */
   protected iniciarNovaSolicitacao (): void {
-    setTimeout(() => window.location.reload(), 1000);
+    setTimeout((): void => {
+      window.location.reload();
+    }, 1000);
   }
 
   /**

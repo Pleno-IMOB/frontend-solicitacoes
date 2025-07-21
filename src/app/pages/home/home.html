@@ -34,7 +34,7 @@
       }
     </div>
   }
-  @let logado = authService.usuario.value?.cli_codigo && authService.usuario.value?.usu_codigo;
+  @let logado = authService.pessoa?.value?.cli_codigo && authService.pessoa?.value?.pes_codigo;
   @let podeConfirmar = finalizado && !solicitacaoFinalizada;
   @switch (true) {
     @case (podeConfirmar && !!logado) {

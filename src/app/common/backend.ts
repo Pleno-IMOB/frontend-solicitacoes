@@ -11,7 +11,7 @@ export class BackendDefaults {
   public baseURL = '';
   public hostAPI = '';
   public serviceAPI = '';
-  public endpoint = 'vistoria';
+  public endpoint = 'agendamento';
   public url: string = (!this.isLocalhost) ? 'https://' + window.location.host + '/v2' : `http://${window.location.host}`;
   public urlRaiz: string = (!this.isLocalhost) ? 'https://' + window.location.host : `https://${IMOBILIARIA()}`;
   public urlSistema: string = (!this.isLocalhost) ? window.location.host : IMOBILIARIA();

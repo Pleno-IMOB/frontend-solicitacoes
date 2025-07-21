@@ -17,7 +17,7 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
 export function interceptToken (request: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> {
   const authService: AuthService = inject(AuthService);
   const backendService: BackendService = inject(BackendService);
-  const token: string | undefined = authService.authToken || authService.usuario?.value?.auth_token;
+  const token: string | undefined = authService.authToken || authService.pessoa?.value?.auth_token;
   if ( token ) {
     request = addTokenHeader(request, token);
   }

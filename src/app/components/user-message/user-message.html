@@ -6,6 +6,6 @@
     <small class="mb-0">{{ messageObj?.time }}</small>
   </div>
   <img
-    [src]="authService.usuario.value?.pessoa?.pes_logo ? authService.usuario.value?.pessoa?.pes_logo : 'assets/images/logo-usuario.png'"
+    [src]="authService.pessoa.value?.pes_logo || 'assets/images/logo-usuario.png'"
     alt="logo-empresa">
 </div>
