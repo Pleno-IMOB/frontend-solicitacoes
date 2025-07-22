@@ -138,12 +138,20 @@ export class Footer implements OnInit {
    */
   protected enviarMensagem (event: Event): void {
     event?.preventDefault();
-    if ( UtilsService.loadingGeral.value ) {
+    if ( this.isLoading() ) {
       return;
     }
     const control: AbstractControl<any, any> | null = this.formIa.get('prompt');
     this.enviaMensagemUsuario.emit(control?.value);
     control?.setValue('');
+  }
+
+  /**
+   * Verifica se há carregamento em andamento.
+   * @returns {boolean} Indica se o sistema está carregando.
+   */
+  protected isLoading (): boolean {
+    return (UtilsService.loading.value || UtilsService.loadingGeral.value);
   }
 
   /**
