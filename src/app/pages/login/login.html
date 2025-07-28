@@ -1,0 +1,191 @@
+<div class="h-100 w-100 main-container">
+  <form
+    [formGroup]="form"
+    class="w-100 pt-2 d-flex flex-column align-items-center"
+    plenoPrimeiroErro>
+    @switch (true) {
+      @case (pageStep === 'celular') {
+        <div
+          class="d-flex align-items-center justify-content-center shadow-container flex-column imobiliaria-card pb-3">
+          <img [src]="getLogo()" alt="Logo da empresa">
+        </div>
+        <mat-divider class="pt-2 mx-3"></mat-divider>
+        <h4 class="text-center mb-1">Entre com seu celular</h4>
+        <p class="text-center py-1">Enviaremos um código de verificação</p>
+
+        <mat-form-field class="w-100">
+          <mat-label>Digite seu celular</mat-label>
+          <input
+            #celularInput
+            plenoMask="celularDDD"
+            formControlName="celular"
+            matInput
+            (keydown.enter)="avancarParaToken(form.get('celular'))"
+            placeholder="(**) *****-****">
+        </mat-form-field>
+
+        <button
+          [disabled]="form.get('celular')?.invalid || (UtilsService.loadingGeral | async)"
+          (click)="avancarParaToken(form.get('celular'))"
+          class="w-100"
+          color="primary"
+          matButton="filled"
+          plenoMostrarErros
+          type="button">
+          <p class="mb-0 color-white">Continuar</p>
+        </button>
+      }
+      @case (pageStep === 'token') {
+        <button
+          (click)="voltar()"
+          class="w-100 btn-back align-self-start"
+          matButton="filled"
+          type="button">
+          <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+        <div
+          class="d-flex align-items-center justify-content-center shadow-container flex-column imobiliaria-card pb-3">
+          <img [src]="getLogo()" alt="Logo da empresa">
+        </div>
+        <mat-divider class="pt-2 mx-3"></mat-divider>
+        <h4 class="text-center mb-1">Verificação de código</h4>
+
+        <p class="text-center py-1">Enviamos um código para
+          <b class="font-mulish-bold">{{ form.get('celular')?.value | celularMask }}</b>
+        </p>
+
+        <mat-form-field class="w-100">
+          <mat-label>Código de verificação</mat-label>
+          <input
+            #tokenInput
+            formControlName="token"
+            mask="0-0-0-0-0-0"
+            matInput
+            placeholder="******"
+            (keyup)="avancarParaCadastro(form.get('token'))">
+        </mat-form-field>
+
+        <div class="counter-container d-flex justify-content-center align-items-center gap-1 pb-3">
+          <mat-icon>schedule</mat-icon>
+          <span class="text-center font-weight-bold">
+          {{ tempoRestante * 1000 | date: 'mm:ss':'UTC' }}
+        </span>
+        </div>
+
+        <div class="w-100 d-flex btn-container">
+          <button
+            (click)="avancarParaCadastro(form.get('token'))"
+            [disabled]="form.get('token')?.invalid || (UtilsService.loadingGeral | async)"
+            class="w-100"
+            color="primary"
+            matButton="filled"
+            type="button">
+            <mat-icon class="color-white">task_alt</mat-icon>
+            <p class="mb-0 color-white">Verificar código</p>
+          </button>
+
+          <button
+            (click)="reenviarToken()"
+            [disabled]="!reenviarDisponivel || (UtilsService.loadingGeral | async)"
+            class="w-100"
+            color="primary"
+            matButton="outlined"
+            type="button">
+            <p class="mb-0">Reenviar código</p>
+          </button>
+        </div>
+      }
+      @case (pageStep === 'cadastro') {
+        <button
+          (click)="voltar()"
+          class="w-100 btn-back align-self-start"
+          matButton="filled"
+          type="button">
+          <mat-icon color="primary">arrow_back</mat-icon>
+        </button>
+        <h4 class="text-center mb-1">Complete seus dados</h4>
+        <p class="text-center py-1">Precisamos de algumas informações para finalizar seu cadastro</p>
+
+        <div (click)="inputFoto?.click()" class="usu-container pt-1 mb-3">
+          @if (form.get('pes_logo')?.value) {
+            <img
+              class="user-image"
+              [src]="form.get('pes_logo')?.value"
+              alt="foto-usuario">
+          } @else {
+            <mat-icon>account_circle</mat-icon>
+          }
+          <div
+            [class]="form.get('pes_logo')?.value ?
+            'position-absolute container-add' :
+            'mat-icon-add position-absolute container-add'">
+            <mat-icon>add_a_photo</mat-icon>
+          </div>
+          <input
+            #inputFoto
+            (change)="setaFotoUsuario($event)"
+            accept="image/*"
+            hidden
+            type="file">
+        </div>
+
+        <mat-form-field class="w-100" [class]="nomeReadOnly ? 'input-readonly' : ''">
+          <mat-label>Nome do solicitante (você)</mat-label>
+          <input
+            formControlName="nome"
+            matInput
+            placeholder="Digite seu nome completo"
+            [readonly]="nomeReadOnly">
+        </mat-form-field>
+
+        <mat-form-field class="w-100" [class]="emailReadOnly ? 'input-readonly' : ''">
+          <mat-label>E-mail do solicitante</mat-label>
+          <input
+            formControlName="email"
+            matInput
+            placeholder="Digite seu e-mail"
+            [readonly]="emailReadOnly">
+        </mat-form-field>
+
+        <h5 class="text-center mb-3">
+          Agora, informe o cliente (imobiliária ou proprietário) que você está representando:
+        </h5>
+
+        <mat-checkbox class="mb-2" formControlName="sou_cliente"><h5 class="py-2">Eu sou o cliente</h5>
+        </mat-checkbox>
+
+        <mat-form-field class="w-100">
+          <mat-label>CPF ou CNPJ do cliente</mat-label>
+          <input
+            formControlName="cli_cpfCnpj"
+            plenoMask="cpfCnpj"
+            matInput
+            placeholder="Digite o CPF ou CNPJ do cliente">
+        </mat-form-field>
+
+        <mat-form-field class="w-100" [class]="souCliente ? 'input-readonly' : ''">
+          <mat-label class="text-wrap">Nome do cliente (imobiliária ou proprietário)</mat-label>
+          <input
+            formControlName="cli_nome"
+            [readonly]="souCliente"
+            matInput
+            placeholder="Digite o nome do cliente">
+        </mat-form-field>
+
+        <div class="w-100 d-flex btn-container">
+          <button
+            (click)="loginAgendamento()"
+            [disabled]="form.invalid || (UtilsService.loadingGeral | async)"
+            (keydown.enter)="loginAgendamento()"
+            class="w-100"
+            color="primary"
+            matButton="filled"
+            type="button">
+            <mat-icon class="color-white">task_alt</mat-icon>
+            <p class="mb-0 color-white">Salvar</p>
+          </button>
+        </div>
+      }
+    }
+  </form>
+</div>
