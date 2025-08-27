@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -25,6 +25,7 @@ export class IaMessage implements OnInit, OnChanges, OnDestroy {
   @Input() logoEmpresa?: string;
   @Input() messageObj?: Pergunta;
   @Input() index?: number;
+  @Output() disparaReenviarMensagem = new EventEmitter<{ dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo' }>();
   protected digitandoTexto: string = 'Digitando..';
   private intervalId: any;
   private estados: string[] = [ 'Digitando.', 'Digitando..', 'Digitando...' ];
