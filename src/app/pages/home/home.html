@@ -27,6 +27,7 @@
       }
       @if (perguntaResposta?.iaMessage) {
         <app-ia-message
+          (disparaReenviarMensagem)="reenviarMensagem($event)"
           [messageObj]="perguntaResposta?.iaMessage"
           [logoEmpresa]="getLogo()"
           [index]="perguntaResposta?.index">

@@ -8,7 +8,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Anexo, PerguntaResposta } from '../../common/types';
+import { Anexo, ErrorBackend, PerguntaResposta } from '../../common/types';
 import { IaMessage } from '../../components/ia-message/ia-message';
 import { UserMessage } from '../../components/user-message/user-message';
 import moment from 'moment';
@@ -70,6 +70,120 @@ export class Home implements OnInit {
   }
 
   /**
+   * Reenvia uma mensagem ao backend.
+   * @param event - Objeto contendo o dado a ser reenviado e o tipo de dado ('audio', 'mensagem' ou 'arquivo').
+   */
+  async reenviarMensagem (event: { dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo' }): Promise<void> {
+    await this.enviaPerguntaResposta(event?.dado, event?.tipoDado, true);
+  }
+
+  /**
+   * Envia uma pergunta ou resposta ao backend e atualiza a interface do usuário.
+   * @param dado - Dados a serem enviados, podendo ser uma string ou um objeto com informações adicionais.
+   * @param tipoDado - Tipo de dado enviado, que pode ser 'audio', 'mensagem' ou 'arquivo'.
+   * @param isReenviar - Define se é um reenvio ou primeiro envio.
+   * @return Promessa que resolve quando a operação é concluída.
+   */
+  protected async enviaPerguntaResposta (dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo', isReenviar = false): Promise<void> {
+    let user_instruction: string | string[] = '';
+    const index = this.index;
+
+    if ( !isReenviar ) {
+      this.finalizado = false;
+      const time = moment().format('HH:mm:ss DD/MM/YY');
+
+      let userMessage: PerguntaResposta['userMessage'];
+
+      switch ( tipoDado ) {
+        case 'mensagem':
+          user_instruction = dado;
+          userMessage = {
+            message: dado,
+            time,
+            index,
+            isAudio: false
+          };
+          break;
+
+        case 'audio':
+          user_instruction = dado.base64;
+          userMessage = {
+            ...dado,
+            time,
+            index,
+            isAudio: true
+          };
+          break;
+
+        case 'arquivo':
+          userMessage = {
+            ...dado,
+            time,
+            index,
+            isAudio: false
+          };
+          break;
+      }
+
+      const perguntaResposta: PerguntaResposta = {
+        index,
+        iaMessage: { message: '', time, index, loading: true },
+        userMessage
+      };
+
+      this.listaPerguntasRespostas.push(perguntaResposta);
+      this.cd.detectChanges();
+      this.rolarParaBaixo();
+    } else {
+      const now = moment().format('HH:mm:ss DD/MM/YY');
+      this.listaPerguntasRespostas[index].iaMessage.regen = false;
+      this.listaPerguntasRespostas[index].iaMessage.loading = true;
+      this.listaPerguntasRespostas[index].iaMessage.time = now;
+      user_instruction = dado;
+    }
+    const anexos: string[] = (dado.anexos || []).map((anexo: Anexo) => anexo.base64);
+    UtilsService.carregando(true);
+
+    const params = {
+      host: this.backend.urlSistema,
+      thread_id: this.thread_id,
+      user_instruction,
+      anexos,
+      cli_codigo: this.authService.pessoa.value?.cli_codigo,
+      pes_codigo: this.authService.pessoa.value?.pes_codigo
+    };
+
+    let response = await this.backend.apiPost<{
+      resposta: {
+        finalizado: boolean;
+        message: string;
+        payload: any;
+      },
+      thread_id: string;
+    }>('solicitacao/chat/solicitar', params, (error: ErrorBackend): void => this.tratarErroRespostaConversaIA(index, dado, tipoDado, error));
+
+    if ( response ) {
+      this.finalizado = response?.resposta?.finalizado;
+      if ( this.finalizado ) {
+        this.payload = response.resposta?.payload;
+      }
+
+      this.thread_id = response.thread_id;
+      const timeIA = moment().format('HH:mm:ss DD/MM/YY');
+      this.listaPerguntasRespostas[index].iaMessage = {
+        message: response?.resposta?.message,
+        time: timeIA,
+        index,
+        loading: false,
+        regen: false
+      };
+      this.index++;
+      UtilsService.carregando(false);
+    }
+    this.rolarParaBaixo();
+  }
+
+  /**
    * Obtém a URL do logo da imobiliária.
    * @return URL do logo como string.
    */
@@ -102,103 +216,6 @@ export class Home implements OnInit {
    */
   protected async recebeArquivo (dado: any): Promise<void> {
     await this.enviaPerguntaResposta(dado, 'arquivo');
-  }
-
-  /**
-   * Envia uma pergunta ou resposta ao backend e atualiza a interface do usuário.
-   * @param dado - Dados a serem enviados, podendo ser uma string ou um objeto com informações adicionais.
-   * @param tipoDado - Tipo de dado enviado, que pode ser 'audio', 'mensagem' ou 'arquivo'.
-   * @return Promessa que resolve quando a operação é concluída.
-   */
-  protected async enviaPerguntaResposta (dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo'): Promise<void> {
-    this.finalizado = false;
-    const time = moment().format('HH:mm:ss DD/MM/YY');
-    const index = this.index;
-
-    let user_instruction: string | string[] = '';
-    let userMessage: PerguntaResposta['userMessage'];
-
-    switch ( tipoDado ) {
-      case 'mensagem':
-        user_instruction = dado;
-        userMessage = {
-          message: dado,
-          time,
-          index,
-          isAudio: false
-        };
-        break;
-
-      case 'audio':
-        user_instruction = dado.base64;
-        userMessage = {
-          ...dado,
-          time,
-          index,
-          isAudio: true
-        };
-        break;
-
-      case 'arquivo':
-        userMessage = {
-          ...dado,
-          time,
-          index,
-          isAudio: false
-        };
-        break;
-    }
-
-    const perguntaResposta: PerguntaResposta = {
-      index,
-      iaMessage: { message: '', time, index, loading: true },
-      userMessage
-    };
-
-    const anexos: string[] = (dado.anexos || []).map((anexo: Anexo) => anexo.base64);
-
-    this.listaPerguntasRespostas.push(perguntaResposta);
-    this.cd.detectChanges();
-    this.rolarParaBaixo();
-    UtilsService.carregando(true);
-
-    const params = {
-      host: this.backend.urlSistema,
-      thread_id: this.thread_id,
-      user_instruction,
-      anexos,
-      cli_codigo: this.authService.pessoa.value?.cli_codigo,
-      pes_codigo: this.authService.pessoa.value?.pes_codigo
-    };
-
-    const response = await this.backend.apiPost<{
-      resposta: {
-        finalizado: boolean;
-        message: string;
-        payload: any;
-      },
-      thread_id: string;
-    }>('solicitacao/chat/solicitar', params);
-
-    if ( response ) {
-      this.finalizado = response?.resposta?.finalizado;
-      if ( this.finalizado ) {
-        this.payload = response.resposta?.payload;
-      }
-
-      this.thread_id = response.thread_id;
-      const timeIA = moment().format('HH:mm:ss DD/MM/YY');
-      this.listaPerguntasRespostas[index].iaMessage = {
-        message: response?.resposta?.message,
-        time: timeIA,
-        index,
-        loading: false
-      };
-      this.index++;
-    }
-
-    UtilsService.carregando(false);
-    this.rolarParaBaixo();
   }
 
   /**
@@ -276,6 +293,26 @@ export class Home implements OnInit {
     setTimeout((): void => {
       window.location.reload();
     }, 1000);
+  }
+
+  /**
+   * Lida com erros ao gerar resposta da IA e atualiza a interface do usuário.
+   * @param index Índice da pergunta/resposta na lista.
+   * @param dado Dados enviados que causaram o erro.
+   * @param tipoDado Tipo de dado enviado ('audio', 'mensagem' ou 'arquivo').
+   * @param error Objeto de erro capturado.
+   */
+  private tratarErroRespostaConversaIA (index: number, dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo', error: any): void {
+    console.error(error);
+    const timeIA = moment().format('HH:mm:ss DD/MM/YY');
+    this.listaPerguntasRespostas[index].iaMessage = {
+      message: `Ocorreu um erro ao gerar a resposta.`,
+      time: timeIA,
+      index,
+      regen: true,
+      dado,
+      tipoDado
+    };
   }
 
   /**

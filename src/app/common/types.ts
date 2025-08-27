@@ -289,6 +289,9 @@ export interface Pergunta {
   message: string;
   time: string;
   loading?: boolean;
+  regen?: boolean;
+  dado?: any;
+  tipoDado?: any;
 }
 
 export interface Resposta {
