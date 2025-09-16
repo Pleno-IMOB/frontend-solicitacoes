@@ -1,35 +1,35 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { Pergunta } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
+import { BackendService } from '../../services/backend.service';
+import { UtilsService } from '../../services/utils.service';
 
 @Component({
-  selector: 'app-ia-message',
+  selector: 'app-ia-message-loading',
   imports: [
     MatCardModule,
     MatDividerModule,
     MatIconModule,
     MatButtonModule,
-    MatProgressSpinnerModule,
-    Nl2BrPipe
+    MatProgressSpinnerModule
   ],
-  templateUrl: './ia-message.html',
-  styleUrl: './ia-message.scss',
+  templateUrl: './ia-message-loading.html',
+  styleUrl: './ia-message-loading.scss',
   standalone: true
 })
-export class IaMessage implements OnInit, OnChanges, OnDestroy {
-  @Input() logoEmpresa?: string;
-  @Input() messageObj?: Pergunta;
-  @Input() index?: number;
-  @Output() disparaReenviarMensagem = new EventEmitter<{ dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo' }>();
+export class IaMessageLoading implements OnInit, OnChanges, OnDestroy {
   protected digitandoTexto: string = 'Digitando..';
   private intervalId: any;
   private estados: string[] = [ 'Digitando.', 'Digitando..', 'Digitando...' ];
   private indexMsg = 0;
+
+  constructor (
+    protected backend: BackendService
+  ) {
+  }
 
   /**
    * Inicializa o componente e inicia o controle do texto "Digitando".
@@ -58,7 +58,7 @@ export class IaMessage implements OnInit, OnChanges, OnDestroy {
    * @private
    */
   private controlarDigitando (): void {
-    if ( this.messageObj?.loading ) {
+    if ( UtilsService.loading.value ) {
       if ( !this.intervalId ) {
         this.intervalId = setInterval(() => {
           this.digitandoTexto = this.estados[this.indexMsg];
@@ -77,7 +77,6 @@ export class IaMessage implements OnInit, OnChanges, OnDestroy {
     if ( this.intervalId ) {
       clearInterval(this.intervalId);
       this.intervalId = null;
-      this.index = 0;
     }
   }
 }

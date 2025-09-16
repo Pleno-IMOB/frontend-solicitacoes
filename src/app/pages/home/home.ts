@@ -8,18 +8,18 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { Anexo, ErrorBackend, PerguntaResposta } from '../../common/types';
-import { IaMessage } from '../../components/ia-message/ia-message';
-import { UserMessage } from '../../components/user-message/user-message';
+import { ConversaInterface, PerguntaRespostaInterface, PerguntaSolicitacaoInterface } from '../../common/types';
 import moment from 'moment';
-import { UserAudio } from '../../components/user-audio/user-audio';
 import { BackendService } from '../../services/backend.service';
 import { Login } from '../login/login';
 import { firstValueFrom } from 'rxjs';
 import { UtilsService } from '../../services/utils.service';
 import { AuthService } from '../../services/auth.service';
-import { UserArquivo } from '../../components/user-arquivo/user-arquivo';
 import { MeusDados } from '../meus-dados/meus-dados';
+import { PerguntaSolicitacao } from '../../components/pergunta-solicitacao/pergunta-solicitacao';
+import { IaMessage2 } from '../../components/ia-message-2/ia-message-2';
+import { UserMessage2 } from '../../components/user-message-2/user-message-2';
+import { IaMessageLoading } from '../../components/ia-message-loading/ia-message-loading';
 
 @Component({
   selector: 'app-home',
@@ -33,21 +33,27 @@ import { MeusDados } from '../meus-dados/meus-dados';
     MatDividerModule,
     FontAwesomeModule,
     MatDialogModule,
-    IaMessage,
-    UserMessage,
-    UserAudio,
-    UserArquivo
+    PerguntaSolicitacao,
+    IaMessage2,
+    UserMessage2,
+    IaMessageLoading
   ],
   templateUrl: './home.html',
   standalone: true,
   styleUrl: './home.scss'
 })
 export class Home implements OnInit {
-  protected listaPerguntasRespostas: PerguntaResposta[] = [];
+  protected listaPerguntasRespostas: PerguntaRespostaInterface[] = [];
+  protected conversaIa: ConversaInterface[] = [];
   protected index: number = 0;
   protected finalizado: boolean = false;
   protected payload!: any;
   protected solicitacaoFinalizada: boolean = false;
+  protected perguntaSelecionada: PerguntaSolicitacaoInterface | null = null;
+  protected digitando = false;
+  protected mockListaPerguntas: PerguntaSolicitacaoInterface[] = [];
+  protected roteiroFinalizado = false;
+
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
 
@@ -60,135 +66,52 @@ export class Home implements OnInit {
   ) {
   }
 
-  /**
-   * Inicializa o componente e executa ações com base na rota ativa.
-   * @return Promessa que resolve quando a inicialização é concluída.
-   */
   async ngOnInit (): Promise<void> {
     this.interceptarMudancaDeRota();
-    await this.enviaPerguntaResposta('', 'mensagem');
+    await this.enviaPerguntaResposta();
   }
 
-  /**
-   * Reenvia uma mensagem ao backend.
-   * @param event - Objeto contendo o dado a ser reenviado e o tipo de dado ('audio', 'mensagem' ou 'arquivo').
-   */
-  async reenviarMensagem (event: { dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo' }): Promise<void> {
-    await this.enviaPerguntaResposta(event?.dado, event?.tipoDado, true);
-  }
-
-  /**
-   * Envia uma pergunta ou resposta ao backend e atualiza a interface do usuário.
-   * @param dado - Dados a serem enviados, podendo ser uma string ou um objeto com informações adicionais.
-   * @param tipoDado - Tipo de dado enviado, que pode ser 'audio', 'mensagem' ou 'arquivo'.
-   * @param isReenviar - Define se é um reenvio ou primeiro envio.
-   * @return Promessa que resolve quando a operação é concluída.
-   */
-  protected async enviaPerguntaResposta (dado: any, tipoDado: 'audio' | 'mensagem' | 'arquivo', isReenviar = false): Promise<void> {
-    let user_instruction: string | string[] = '';
-    const index = this.index;
-
-    if ( !isReenviar ) {
-      this.finalizado = false;
-      const time = moment().format('HH:mm:ss DD/MM/YY');
-
-      let userMessage: PerguntaResposta['userMessage'];
-
-      switch ( tipoDado ) {
-        case 'mensagem':
-          user_instruction = dado;
-          userMessage = {
-            message: dado,
-            time,
-            index,
-            isAudio: false
-          };
-          break;
-
-        case 'audio':
-          user_instruction = dado.base64;
-          userMessage = {
-            ...dado,
-            time,
-            index,
-            isAudio: true
-          };
-          break;
-
-        case 'arquivo':
-          userMessage = {
-            ...dado,
-            time,
-            index,
-            isAudio: false
-          };
-          break;
-      }
-
-      const perguntaResposta: PerguntaResposta = {
-        index,
-        iaMessage: { message: '', time, index, loading: true },
-        userMessage
-      };
-
-      this.listaPerguntasRespostas.push(perguntaResposta);
-      this.cd.detectChanges();
-      this.rolarParaBaixo();
-    } else {
-      const now = moment().format('HH:mm:ss DD/MM/YY');
-      this.listaPerguntasRespostas[index].iaMessage.regen = false;
-      this.listaPerguntasRespostas[index].iaMessage.loading = true;
-      this.listaPerguntasRespostas[index].iaMessage.time = now;
-      user_instruction = dado;
-    }
-    const anexos: string[] = (dado.anexos || []).map((anexo: Anexo) => anexo.base64);
+  protected async enviaPerguntaResposta (roteiroFinalizado: boolean = false): Promise<void> {
     UtilsService.carregando(true);
+    this.digitando = true;
 
-    const params = {
+    const params: any = {
       host: this.backend.urlSistema,
       thread_id: this.thread_id,
-      user_instruction,
-      anexos,
       cli_codigo: this.authService.pessoa.value?.cli_codigo,
-      pes_codigo: this.authService.pessoa.value?.pes_codigo
+      pes_codigo: this.authService.pessoa.value?.pes_codigo,
+      roteiro: this.mockListaPerguntas
     };
 
-    let response = await this.backend.apiPost<{
-      resposta: {
-        finalizado: boolean;
-        message: string;
-        payload: any;
-      },
-      thread_id: string;
-    }>('solicitacao/chat/solicitar', params, (error: ErrorBackend): void => this.tratarErroRespostaConversaIA(index, dado, tipoDado, error));
-
-    if ( response ) {
-      this.finalizado = response?.resposta?.finalizado;
-      if ( this.finalizado ) {
-        this.payload = response.resposta?.payload;
+    if ( roteiroFinalizado ) {
+      let response = await this.backend.apiPost<{
+        roteiro: PerguntaSolicitacaoInterface[],
+        thread_id: string;
+      }>('solicitacao/chat/v2/store', params);
+      if ( response ) {
+        console.log(response);
+        // this.mockListaPerguntas = response.roteiro;
+        // this.perguntaSelecionada = this.mockListaPerguntas[0];
+        // this.thread_id = response.thread_id;
+        UtilsService.carregando(false);
       }
 
-      this.thread_id = response.thread_id;
-      const timeIA = moment().format('HH:mm:ss DD/MM/YY');
-      this.listaPerguntasRespostas[index].iaMessage = {
-        message: response?.resposta?.message,
-        time: timeIA,
-        index,
-        loading: false,
-        regen: false
-      };
-      this.index++;
-      UtilsService.carregando(false);
-    }
-    this.rolarParaBaixo();
-  }
+      this.rolarParaBaixo();
+    } else {
+      let response = await this.backend.apiPost<{
+        roteiro: PerguntaSolicitacaoInterface[],
+        thread_id: string;
+      }>('solicitacao/chat/v2/solicitar', params);
+      if ( response ) {
+        this.mockListaPerguntas = response.roteiro;
+        this.perguntaSelecionada = this.getPrimeiraPerguntaValida();
+        this.thread_id = response.thread_id;
+        UtilsService.carregando(false);
+      }
 
-  /**
-   * Obtém a URL do logo da imobiliária.
-   * @return URL do logo como string.
-   */
-  protected getLogo (): string {
-    return `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
+      this.rolarParaBaixo();
+    }
+    this.digitando = false;
   }
 
   /**
@@ -196,26 +119,46 @@ export class Home implements OnInit {
    * @param dado - Mensagem recebida como string.
    * @return Promessa que resolve quando a operação é concluída.
    */
-  protected async recebeMensagem (dado: string): Promise<void> {
-    await this.enviaPerguntaResposta(dado, 'mensagem');
-  }
+  protected async recebeResposta (dado: string | { label_desc: string; label_value: any }): Promise<void> {
+    let message = '';
+    let valor;
+    if ( dado ) {
+      if ( typeof dado === 'string' ) {
+        valor = dado;
+        message = dado;
+      } else {
+        valor = dado.label_value;
+        message = dado.label_desc;
+      }
+    }
 
-  /**
-   * Recebe um áudio e o envia ao backend.
-   * @param dado - Dados do áudio a serem enviados.
-   * @return Promessa que resolve quando a operação é concluída.
-   */
-  protected async recebeAudio (dado: any): Promise<void> {
-    await this.enviaPerguntaResposta(dado, 'audio');
-  }
+    const conversa: ConversaInterface = {
+      index: this.index,
+      userMessage: { time: moment().format('HH:mm:ss DD/MM/YY'), message },
+      iaMessage: { time: moment().format('HH:mm:ss DD/MM/YY'), message: this.perguntaSelecionada?.pergunta || '' }
+    };
 
-  /**
-   * Recebe um arquivo e o envia ao backend.
-   * @param dado - Dados do arquivo a serem enviados.
-   * @return Promessa que resolve quando a operação é concluída.
-   */
-  protected async recebeArquivo (dado: any): Promise<void> {
-    await this.enviaPerguntaResposta(dado, 'arquivo');
+    if ( message ) {
+      this.conversaIa.push(conversa);
+    }
+
+    setTimeout(() => {
+      this.rolarParaBaixo();
+    }, 300);
+
+    if ( this.perguntaSelecionada ) {
+      this.perguntaSelecionada.valor = valor;
+      this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
+    }
+
+    if ( !this.perguntaSelecionada ) {
+      console.log('🚀 Fluxo finalizado!');
+      await this.enviaPerguntaResposta(this.roteiroFinalizado);
+      this.roteiroFinalizado = true;
+    }
+
+    this.cd.detectChanges();
+    this.rolarParaBaixo();
   }
 
   /**
@@ -237,7 +180,7 @@ export class Home implements OnInit {
     if ( result ) {
       if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
         UtilsService.notifySuccess('', 'Dados salvos com sucesso!');
-        await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
+        // await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
       }
     }
 
@@ -263,7 +206,7 @@ export class Home implements OnInit {
     if ( result ) {
       if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
         UtilsService.notifySuccess('', 'Login efetuado com sucesso!');
-        await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
+        // await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
       }
     }
 
@@ -293,6 +236,77 @@ export class Home implements OnInit {
     setTimeout((): void => {
       window.location.reload();
     }, 1000);
+  }
+
+  private getPrimeiraPerguntaValida (): PerguntaSolicitacaoInterface | null {
+    // percorre a lista inicial como se fosse a "raiz"
+    for ( const pergunta of this.mockListaPerguntas ) {
+      if ( this.verificaCondicao(pergunta, null) ) {
+        return pergunta;
+      }
+    }
+    return null;
+  }
+
+  private getProximoIrmao (alvo: PerguntaSolicitacaoInterface): PerguntaSolicitacaoInterface | null {
+    const pai = this.getPai(alvo, this.mockListaPerguntas);
+    const lista = pai ? pai.sub_perguntas : this.mockListaPerguntas;
+    const idx = lista.indexOf(alvo);
+    return idx >= 0 && idx < lista.length - 1 ? lista[idx + 1] : null;
+  }
+
+  private getPai (alvo: PerguntaSolicitacaoInterface, lista: PerguntaSolicitacaoInterface[]): PerguntaSolicitacaoInterface | null {
+    for ( const item of lista ) {
+      if ( item.sub_perguntas.includes(alvo) ) {
+        return item;
+      }
+      const pai = this.getPai(alvo, item.sub_perguntas);
+      if ( pai ) return pai;
+    }
+    return null;
+  }
+
+  private getProximaPergunta (atual: PerguntaSolicitacaoInterface): PerguntaSolicitacaoInterface | null {
+    if ( atual.sub_perguntas && atual.sub_perguntas.length > 0 ) {
+      const filhoValido = atual.sub_perguntas.find(sub => this.verificaCondicao(sub, atual.valor));
+      if ( filhoValido ) return filhoValido;
+    }
+
+    let proximoIrmao = this.getProximoIrmao(atual);
+    while ( proximoIrmao ) {
+      const pai = this.getPai(proximoIrmao, this.mockListaPerguntas);
+      if ( this.verificaCondicao(proximoIrmao, pai?.valor) ) {
+        return proximoIrmao;
+      }
+      proximoIrmao = this.getProximoIrmao(proximoIrmao);
+    }
+
+    let pai = this.getPai(atual, this.mockListaPerguntas);
+    while ( pai ) {
+      let irmaoDoPai = this.getProximoIrmao(pai);
+      while ( irmaoDoPai ) {
+        const paiIrmao = this.getPai(irmaoDoPai, this.mockListaPerguntas);
+        if ( this.verificaCondicao(irmaoDoPai, paiIrmao?.valor) ) {
+          return irmaoDoPai;
+        }
+        irmaoDoPai = this.getProximoIrmao(irmaoDoPai);
+      }
+      pai = this.getPai(pai, this.mockListaPerguntas);
+    }
+
+    return null;
+  }
+
+  private verificaCondicao (pergunta: PerguntaSolicitacaoInterface, valorPai: any): boolean {
+    if ( pergunta.valor !== null && pergunta.valor !== undefined && pergunta.valor !== '' ) {
+      return false;
+    }
+
+    if ( !pergunta.condicao_exibicao || pergunta.condicao_exibicao.length === 0 ) {
+      return true;
+    }
+
+    return pergunta.condicao_exibicao.includes(valorPai);
   }
 
   /**

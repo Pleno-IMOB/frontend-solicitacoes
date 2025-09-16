@@ -325,7 +325,7 @@ export class Login implements AfterViewInit {
    * Atualiza a foto do usuário no formulário com base em um evento de seleção de arquivo.
    * @param event Evento de seleção de arquivo que contém o arquivo de imagem.
    */
-  protected async setaFotoUsuario (event: Event): Promise<void> {
+  protected async setaFotoUsuarioInterface (event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if ( input.files && input.files.length > 0 ) {
       const file = input.files[0];

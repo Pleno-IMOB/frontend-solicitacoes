@@ -4,14 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatButton } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { AudioService } from '../../services/audio.service';
 import moment from 'moment';
 import { base64ToBlob, fileToBase64 } from '../../common/common';
 import Swal from 'sweetalert2';
-import { Anexo } from '../../common/types';
+import { AnexoInterface } from '../../common/types';
 import { UtilsService } from '../../services/utils.service';
 import { Validadores } from '../../common/validadores';
 
@@ -23,7 +22,6 @@ import { Validadores } from '../../common/validadores';
     FontAwesomeModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButton,
     MatIconModule,
     ReactiveFormsModule
   ],
@@ -73,7 +71,7 @@ export class Footer implements OnInit {
    * Abre um seletor de arquivos oculto e processa o arquivo selecionado.
    */
   protected selecionarArquivo (): void {
-    const listaAnexos: Anexo[] = [];
+    const listaAnexos: AnexoInterface[] = [];
     const input: HTMLInputElement = document.createElement('input');
     input.type = 'file';
     input.accept = '.pdf,.doc,.docx,.xls,.xlsx,application/msword,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/pdf';

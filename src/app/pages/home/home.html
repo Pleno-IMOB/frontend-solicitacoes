@@ -1,39 +1,22 @@
 <app-header></app-header>
 
 <div #scrollContainer class="main-container">
-  @for (perguntaResposta of listaPerguntasRespostas; track perguntaResposta.index) {
-    <div>
-      @switch (true) {
-        @case (!!perguntaResposta?.userMessage?.message) {
-          <app-user-message
-            [messageObj]="perguntaResposta.userMessage"
-            [index]="perguntaResposta.index">
-          </app-user-message>
-        }
-        @case (perguntaResposta?.userMessage?.isAudio) {
-          <app-user-audio
-            [messageObj]="perguntaResposta.userMessage"
-            [index]="perguntaResposta.index">
-          </app-user-audio>
-        }
-        @case (!!perguntaResposta?.userMessage?.anexos) {
-          @for (anexo of perguntaResposta.userMessage.anexos; track anexo.index) {
-            <app-user-arquivo
-              [anexo]="anexo"
-              [index]="perguntaResposta.index">
-            </app-user-arquivo>
-          }
-        }
-      }
-      @if (perguntaResposta?.iaMessage) {
-        <app-ia-message
-          (disparaReenviarMensagem)="reenviarMensagem($event)"
-          [messageObj]="perguntaResposta?.iaMessage"
-          [logoEmpresa]="getLogo()"
-          [index]="perguntaResposta?.index">
-        </app-ia-message>
-      }
-    </div>
+  @if (conversaIa.length > 0) {
+    @for (perguntaResposta of conversaIa; track perguntaResposta.index) {
+      <app-ia-message-2
+        [mensagemIa]="perguntaResposta?.iaMessage">
+      </app-ia-message-2>
+      <app-user-message-2
+        [mensagemUser]="perguntaResposta?.userMessage">
+      </app-user-message-2>
+    }
+  }
+  @if (perguntaSelecionada && !digitando) {
+    <app-pergunta-solicitacao
+      (enviaRespostaUsuario)="recebeResposta($event)"
+      [perguntaSolicitacao]="perguntaSelecionada"></app-pergunta-solicitacao>
+  } @else {
+    <app-ia-message-loading></app-ia-message-loading>
   }
   @let logado = !!authService.pessoaValue?.cli_codigo && !!authService.pessoaValue?.pes_codigo;
   @let podeConfirmar = finalizado && !solicitacaoFinalizada;
@@ -79,8 +62,5 @@
   }
 </div>
 
-<app-footer
-  (enviaArquivoUsuario)="recebeArquivo($event)"
-  (enviaAudioUsuario)="recebeAudio($event)"
-  (enviaMensagemUsuario)="recebeMensagem($event)">
+<app-footer>
 </app-footer>
