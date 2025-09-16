@@ -2,7 +2,6 @@ import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { RespostaInterface } from '../../common/types';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth.service';
 
@@ -19,8 +18,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true
 })
 export class UserMessage {
-  @Input() messageObj?: RespostaInterface;
-  @Input() index?: number;
+  @Input() public mensagemUser?: { message: string, time: string };
 
   constructor (
     protected authService: AuthService

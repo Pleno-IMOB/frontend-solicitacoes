@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,7 @@ import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
 import { BackendService } from '../../services/backend.service';
 
 @Component({
-  selector: 'app-ia-message-2',
+  selector: 'app-ia-message',
   imports: [
     MatCardModule,
     MatDividerModule,
@@ -17,18 +17,15 @@ import { BackendService } from '../../services/backend.service';
     MatProgressSpinnerModule,
     Nl2BrPipe
   ],
-  templateUrl: './ia-message-2.html',
-  styleUrl: './ia-message-2.scss',
+  templateUrl: './ia-message.html',
+  styleUrl: './ia-message.scss',
   standalone: true
 })
-export class IaMessage2 implements OnInit {
+export class IaMessage {
   @Input() public mensagemIa?: { message: string, time: string };
 
   constructor (
     protected backend: BackendService
   ) {
-  }
-
-  ngOnInit (): void {
   }
 }

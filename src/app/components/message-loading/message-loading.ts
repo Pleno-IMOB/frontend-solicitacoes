@@ -8,7 +8,7 @@ import { BackendService } from '../../services/backend.service';
 import { UtilsService } from '../../services/utils.service';
 
 @Component({
-  selector: 'app-ia-message-loading',
+  selector: 'app-message-loading',
   imports: [
     MatCardModule,
     MatDividerModule,
@@ -16,11 +16,11 @@ import { UtilsService } from '../../services/utils.service';
     MatButtonModule,
     MatProgressSpinnerModule
   ],
-  templateUrl: './ia-message-loading.html',
-  styleUrl: './ia-message-loading.scss',
+  templateUrl: './message-loading.html',
+  styleUrl: './message-loading.scss',
   standalone: true
 })
-export class IaMessageLoading implements OnInit, OnChanges, OnDestroy {
+export class MessageLoading implements OnInit, OnChanges, OnDestroy {
   protected digitandoTexto: string = 'Digitando..';
   private intervalId: any;
   private estados: string[] = [ 'Digitando.', 'Digitando..', 'Digitando...' ];

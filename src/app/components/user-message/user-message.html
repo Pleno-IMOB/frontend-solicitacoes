@@ -1,11 +1,13 @@
-<div
-  [id]="'user-message-' + index"
-  class="main-container-user-message d-flex justify-content-end align-items-start w-100">
-  <div class="user-message px-4 py-2">
-    <p class="mb-1">{{ messageObj?.message }}</p>
-    <small class="mb-0">{{ messageObj?.time }}</small>
+@if (mensagemUser?.message) {
+  <div
+    class="main-container-user-message d-flex justify-content-end align-items-start w-100"
+    id="user-message">
+    <div class="user-message px-4 py-2">
+      <p class="mb-1">{{ mensagemUser?.message }}</p>
+      <small class="mb-0">{{ mensagemUser?.time }}</small>
+    </div>
+    <img
+      [src]="authService.pessoa.value?.pes_logo || 'assets/images/logo-usuario.png'"
+      alt="logo-empresa">
   </div>
-  <img
-    [src]="authService.pessoa.value?.pes_logo || 'assets/images/logo-usuario.png'"
-    alt="logo-empresa">
-</div>
+}

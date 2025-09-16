@@ -1,145 +1,161 @@
-<div [formGroup]="form" [id]="'ia-message-loading'" class="main-container-ia-message">
+<div [formGroup]="form" class="main-container-ia-message">
   <img
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
     alt="logo-empresa">
   <div class="ia-message px-4 py-2">
-    <p class="pt-3">{{ perguntaSolicitacao.pergunta }}</p>
-    @switch (true) {
-      @case (perguntaSolicitacao.tipo_input === 'TEXT') {
-        <mat-form-field class="w-100">
-          <input
-            (keydown.enter)="!(perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value) && enviarMensagem()"
-            formControlName="resposta"
-            matInput
-            class="position-relative input-pergunta"
-            placeholder="Responda aqui.."
-            type="text">
-          <div class="button-container position-absolute">
-            <button
-              (click)="enviarMensagem()"
-              [disabled]="perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value"
-              matButton="filled">
-              <mat-icon class="send-icon">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
-      }
-      @case (perguntaSolicitacao.tipo_input === 'SELECT') {
-        <mat-form-field class="w-100">
-          <mat-select formControlName="resposta" (selectionChange)="enviarMensagem()">
-            <div class="w-100 p-2">
-              <mat-form-field class="w-100">
-                <input
-                  formControlName="search"
-                  matInput
-                  class="position-relative input-search"
-                  placeholder="Responda aqui.."
-                  type="text">
-                <div class="icon-container position-absolute">
-                  <mat-icon class="search-icon">search</mat-icon>
-                </div>
-              </mat-form-field>
-              @for (pergunta of filteredOptions; track pergunta) {
-                <mat-option [value]="pergunta">{{ pergunta?.label_desc }}</mat-option>
-              }
+    <p class="pt-2 mb-1">{{ perguntaSolicitacao.pergunta }}</p>
+    @if (showForm) {
+      @switch (true) {
+        @case (perguntaSolicitacao.tipo_input === 'TEXT') {
+          <mat-form-field class="w-100">
+            <input
+              (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+              (keydown.space)="$event.stopPropagation()"
+              formControlName="resposta"
+              matInput
+              class="position-relative input-pergunta"
+              placeholder="Responda aqui.."
+              type="text">
+            <div class="button-container position-absolute">
+              <button
+                (click)="enviarMensagem()"
+                [disabled]="!form.get('resposta')?.value"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
             </div>
-          </mat-select>
-        </mat-form-field>
-      }
-      @case (perguntaSolicitacao.tipo_input === 'INTEGER') {
-        <mat-form-field class="w-100">
-          <input
-            (keydown.enter)="enviarMensagem()"
-            formControlName="resposta"
-            matInput
-            class="position-relative"
-            placeholder="Responda aqui.."
-            type="number">
-          <div class="button-container position-absolute">
-            <button
-              (click)="enviarMensagem()"
-              [disabled]="perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value"
-              matButton="filled">
-              <mat-icon class="send-icon">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
-      }
-      @case (perguntaSolicitacao.tipo_input === 'FLOAT') {
-        <mat-form-field class="w-100">
-          <input
-            (keydown.enter)="enviarMensagem()"
-            formControlName="resposta"
-            matInput
-            class="position-relative"
-            placeholder="Responda aqui.."
-            type="text">
-          <div class="button-container position-absolute">
-            <button
-              (click)="enviarMensagem()"
-              [disabled]="perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value"
-              matButton="filled">
-              <mat-icon class="send-icon">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
-      }
-      @case (perguntaSolicitacao.tipo_input === 'CURRENCY') {
-        <mat-form-field class="w-100">
-          <input
-            (keydown.enter)="enviarMensagem()"
-            formControlName="resposta"
-            matInput
-            class="position-relative"
-            placeholder="Responda aqui.."
-            type="text">
-          <div class="button-container position-absolute">
-            <button
-              (click)="enviarMensagem()"
-              [disabled]="perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value"
-              matButton="filled">
-              <mat-icon class="send-icon">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
-      }
-      @case (perguntaSolicitacao.tipo_input === 'DATE') {
-        <mat-form-field class="w-100">
-          <input
-            (keydown.enter)="enviarMensagem()"
-            formControlName="resposta"
-            matInput
-            class="position-relative"
-            placeholder="Responda aqui.."
-            type="text">
-          <div class="button-container position-absolute">
-            <button
-              (click)="enviarMensagem()"
-              [disabled]="perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value"
-              matButton="filled">
-              <mat-icon class="send-icon">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
-      }
-      @case (perguntaSolicitacao.tipo_input === 'DATETIME') {
-        <mat-form-field class="w-100">
-          <input
-            (keydown.enter)="enviarMensagem()"
-            formControlName="resposta"
-            matInput
-            class="position-relative"
-            placeholder="Responda aqui.."
-            type="text">
-          <div class="button-container position-absolute">
-            <button
-              (click)="enviarMensagem()"
-              [disabled]="perguntaSolicitacao.obrigatorio && !form.get('resposta')?.value"
-              matButton="filled">
-              <mat-icon class="send-icon">send</mat-icon>
-            </button>
-          </div>
-        </mat-form-field>
+          </mat-form-field>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'SELECT') {
+          @if (perguntaSolicitacao.options.length > 5) {
+            <mat-form-field class="w-100">
+              <mat-select formControlName="resposta" (selectionChange)="enviarMensagem()">
+                <div class="w-100 p-2">
+                  <mat-form-field class="w-100">
+                    <input
+                      (keydown.space)="$event.stopPropagation()"
+                      formControlName="search"
+                      matInput
+                      class="position-relative input-search"
+                      placeholder="Responda aqui.."
+                      type="text">
+                    <div class="icon-container position-absolute">
+                      <mat-icon class="search-icon">search</mat-icon>
+                    </div>
+                  </mat-form-field>
+                  @for (pergunta of filteredOptions; track pergunta) {
+                    <mat-option [value]="pergunta">{{ pergunta?.label_desc }}</mat-option>
+                  }
+                </div>
+              </mat-select>
+            </mat-form-field>
+          } @else {
+            <mat-chip-listbox formControlName="resposta">
+              @for (pergunta of filteredOptions; track pergunta) {
+                <mat-chip-option
+                  (click)="enviarMensagem()"
+                  [value]="pergunta">
+                  {{ pergunta?.label_desc }}
+                </mat-chip-option>
+              }
+            </mat-chip-listbox>
+          }
+        }
+        @case (perguntaSolicitacao.tipo_input === 'INTEGER') {
+          <mat-form-field class="w-100">
+            <input
+              (keydown.enter)="enviarMensagem()"
+              formControlName="resposta"
+              matInput
+              class="position-relative"
+              placeholder="Responda aqui.."
+              type="number">
+            <div class="button-container position-absolute">
+              <button
+                (click)="enviarMensagem()"
+                [disabled]="!form.get('resposta')?.value"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
+            </div>
+          </mat-form-field>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'FLOAT') {
+          <mat-form-field class="w-100">
+            <input
+              (keydown.enter)="enviarMensagem()"
+              formControlName="resposta"
+              matInput
+              class="position-relative"
+              placeholder="Responda aqui.."
+              type="text">
+            <div class="button-container position-absolute">
+              <button
+                (click)="enviarMensagem()"
+                [disabled]="!form.get('resposta')?.value"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
+            </div>
+          </mat-form-field>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'CURRENCY') {
+          <mat-form-field class="w-100">
+            <input
+              (keydown.enter)="enviarMensagem()"
+              formControlName="resposta"
+              matInput
+              class="position-relative"
+              placeholder="Responda aqui.."
+              type="text">
+            <div class="button-container position-absolute">
+              <button
+                (click)="enviarMensagem()"
+                [disabled]="!form.get('resposta')?.value"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
+            </div>
+          </mat-form-field>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'DATE') {
+          <mat-form-field class="w-100">
+            <input
+              (keydown.enter)="enviarMensagem()"
+              formControlName="resposta"
+              matInput
+              class="position-relative"
+              placeholder="Responda aqui.."
+              type="text">
+            <div class="button-container position-absolute">
+              <button
+                (click)="enviarMensagem()"
+                [disabled]="!form.get('resposta')?.value"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
+            </div>
+          </mat-form-field>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'DATETIME') {
+          <mat-form-field class="w-100">
+            <input
+              (keydown.enter)="enviarMensagem()"
+              formControlName="resposta"
+              matInput
+              class="position-relative"
+              placeholder="Responda aqui.."
+              type="text">
+            <div class="button-container position-absolute">
+              <button
+                (click)="enviarMensagem()"
+                [disabled]="!form.get('resposta')?.value"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
+            </div>
+          </mat-form-field>
+        }
       }
     }
     <small class="mb-0">{{ time }}</small>

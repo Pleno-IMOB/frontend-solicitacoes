@@ -2,21 +2,21 @@
 
 <div #scrollContainer class="main-container">
   @if (conversaIa.length > 0) {
-    @for (perguntaResposta of conversaIa; track perguntaResposta.index) {
-      <app-ia-message-2
+    @for (perguntaResposta of conversaIa; track perguntaResposta) {
+      <app-ia-message
         [mensagemIa]="perguntaResposta?.iaMessage">
-      </app-ia-message-2>
-      <app-user-message-2
+      </app-ia-message>
+      <app-user-message
         [mensagemUser]="perguntaResposta?.userMessage">
-      </app-user-message-2>
+      </app-user-message>
     }
   }
   @if (perguntaSelecionada && !digitando) {
     <app-pergunta-solicitacao
       (enviaRespostaUsuario)="recebeResposta($event)"
       [perguntaSolicitacao]="perguntaSelecionada"></app-pergunta-solicitacao>
-  } @else {
-    <app-ia-message-loading></app-ia-message-loading>
+  } @else if (digitando && !perguntaSelecionada) {
+    <app-message-loading></app-message-loading>
   }
   @let logado = !!authService.pessoaValue?.cli_codigo && !!authService.pessoaValue?.pes_codigo;
   @let podeConfirmar = finalizado && !solicitacaoFinalizada;
@@ -27,31 +27,48 @@
         color="primary"
         matButton="filled"
         type="button"
+        [disabled]="UtilsService.loading.value"
         (click)="finalizarAgendamento()">
         <div class="d-flex flex-row align-items-center">
           <b>CONFIRMAR AGENDAMENTO</b>
-          <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
+          @if (UtilsService.loading.value) {
+            <mat-spinner class="ml-3"></mat-spinner>
+          } @else {
+            <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
+          }
         </div>
       </button>
-    }
-    @case (podeConfirmar && !logado) {
       <button
-        class="btn-confirmar"
-        color="primary"
+        class="btn-reiniciar-agendamento mt-0"
         matButton="filled"
         type="button"
-        (click)="login()">
+        [disabled]="UtilsService.loading.value"
+        (click)="iniciarNovaSolicitacao()">
         <div class="d-flex flex-row align-items-center">
-          <b>ACESSAR MINHA CONTA</b>
-          <mat-icon class="home-btn-icon">login</mat-icon>
+          <b>NÃO, REINICIAR AGENDAMENTO</b>
+          <mat-icon class="home-btn-icon">close</mat-icon>
         </div>
       </button>
     }
+    <!--    @case (podeConfirmar && !logado) {-->
+      <!--      <button-->
+      <!--        class="btn-confirmar"-->
+      <!--        color="primary"-->
+      <!--        matButton="filled"-->
+      <!--        type="button"-->
+      <!--        (click)="login()">-->
+      <!--        <div class="d-flex flex-row align-items-center">-->
+      <!--          <b>ACESSAR MINHA CONTA</b>-->
+      <!--          <mat-icon class="home-btn-icon">login</mat-icon>-->
+      <!--        </div>-->
+      <!--      </button>-->
+      <!--    }-->
     @case (finalizado && solicitacaoFinalizada) {
       <button
         class="btn-confirmar btn-novo-agendamento"
         matButton="outlined"
         type="button"
+        [disabled]="UtilsService.loading.value"
         (click)="iniciarNovaSolicitacao()">
         <div class="d-flex flex-row align-items-center">
           <b>INICIAR NOVO AGENDAMENTO</b>
@@ -61,6 +78,5 @@
     }
   }
 </div>
-
 <app-footer>
 </app-footer>

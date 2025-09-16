@@ -8,6 +8,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
+import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 
 @Component({
   selector: 'app-pergunta-solicitacao',
@@ -19,7 +20,9 @@ import moment from 'moment';
     MatButton,
     MatIcon,
     MatSelect,
-    MatOption
+    MatOption,
+    MatChipOption,
+    MatChipListbox
   ],
   templateUrl: './pergunta-solicitacao.html',
   styleUrl: './pergunta-solicitacao.scss',
@@ -32,6 +35,7 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   protected form: FormGroup;
   protected filteredOptions: any[] = [];
   protected time!: string;
+  protected showForm = true;
   private searchSub?: Subscription;
 
   constructor (
@@ -70,6 +74,7 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     }
 
     this.filteredOptions = this.perguntaSolicitacao?.options ?? [];
+    this.showForm = true;
   }
 
   ngOnDestroy (): void {
@@ -77,6 +82,7 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   }
 
   protected enviarMensagem (): void {
+    this.showForm = false;
     this.enviaRespostaUsuario.emit(this.form.get('resposta')?.value);
     setTimeout(() => this.matSelect?.close());
   }

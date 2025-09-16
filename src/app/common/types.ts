@@ -312,7 +312,6 @@ export interface PerguntaRespostaInterface {
 }
 
 export interface ConversaInterface {
-  index: number;
   iaMessage: { message: string, time: string };
   userMessage: { message: string, time: string };
 }
@@ -340,7 +339,8 @@ export interface PerguntaSolicitacaoInterface {
   options: OptionRespostaSolicitacaoInterface[],
   campo: string;
   valor: any;
-  condicao_exibicao?: number[];
+  desc_valor?: any;
+  condicao_exibicao?: any[];
   sub_perguntas: PerguntaSolicitacaoInterface[];
 }
 

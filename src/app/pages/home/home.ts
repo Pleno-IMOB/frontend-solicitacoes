@@ -17,9 +17,10 @@ import { UtilsService } from '../../services/utils.service';
 import { AuthService } from '../../services/auth.service';
 import { MeusDados } from '../meus-dados/meus-dados';
 import { PerguntaSolicitacao } from '../../components/pergunta-solicitacao/pergunta-solicitacao';
-import { IaMessage2 } from '../../components/ia-message-2/ia-message-2';
-import { UserMessage2 } from '../../components/user-message-2/user-message-2';
-import { IaMessageLoading } from '../../components/ia-message-loading/ia-message-loading';
+import { UserMessage } from '../../components/user-message/user-message';
+import { IaMessage } from '../../components/ia-message/ia-message';
+import { MessageLoading } from '../../components/message-loading/message-loading';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-home',
@@ -34,9 +35,10 @@ import { IaMessageLoading } from '../../components/ia-message-loading/ia-message
     FontAwesomeModule,
     MatDialogModule,
     PerguntaSolicitacao,
-    IaMessage2,
-    UserMessage2,
-    IaMessageLoading
+    UserMessage,
+    IaMessage,
+    MessageLoading,
+    MatProgressSpinner
   ],
   templateUrl: './home.html',
   standalone: true,
@@ -45,15 +47,13 @@ import { IaMessageLoading } from '../../components/ia-message-loading/ia-message
 export class Home implements OnInit {
   protected listaPerguntasRespostas: PerguntaRespostaInterface[] = [];
   protected conversaIa: ConversaInterface[] = [];
-  protected index: number = 0;
   protected finalizado: boolean = false;
-  protected payload!: any;
   protected solicitacaoFinalizada: boolean = false;
   protected perguntaSelecionada: PerguntaSolicitacaoInterface | null = null;
   protected digitando = false;
-  protected mockListaPerguntas: PerguntaSolicitacaoInterface[] = [];
-  protected roteiroFinalizado = false;
-
+  protected readonly UtilsService = UtilsService;
+  private listaPerguntas: PerguntaSolicitacaoInterface[] = [];
+  private jaIniciou = false;
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
 
@@ -66,99 +66,105 @@ export class Home implements OnInit {
   ) {
   }
 
+  /**
+   * Inicializa o componente, interceptando mudanças de rota e iniciando a conversa com a IA.
+   * @return Promise que resolve quando a operação é concluída.
+   */
   async ngOnInit (): Promise<void> {
     this.interceptarMudancaDeRota();
-    await this.enviaPerguntaResposta();
+    await this.iniciaConversaIA();
   }
 
-  protected async enviaPerguntaResposta (roteiroFinalizado: boolean = false): Promise<void> {
+  /**
+   * Finaliza o agendamento de uma vistoria, enviando os dados necessários para o backend e atualizando o estado da aplicação.
+   * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
+   */
+  protected async finalizarAgendamento (): Promise<void> {
     UtilsService.carregando(true);
-    this.digitando = true;
 
     const params: any = {
       host: this.backend.urlSistema,
       thread_id: this.thread_id,
       cli_codigo: this.authService.pessoa.value?.cli_codigo,
       pes_codigo: this.authService.pessoa.value?.pes_codigo,
-      roteiro: this.mockListaPerguntas
+      roteiro: this.listaPerguntas
     };
 
-    if ( roteiroFinalizado ) {
-      let response = await this.backend.apiPost<{
-        roteiro: PerguntaSolicitacaoInterface[],
-        thread_id: string;
-      }>('solicitacao/chat/v2/store', params);
-      if ( response ) {
-        console.log(response);
-        // this.mockListaPerguntas = response.roteiro;
-        // this.perguntaSelecionada = this.mockListaPerguntas[0];
-        // this.thread_id = response.thread_id;
-        UtilsService.carregando(false);
-      }
-
-      this.rolarParaBaixo();
-    } else {
-      let response = await this.backend.apiPost<{
-        roteiro: PerguntaSolicitacaoInterface[],
-        thread_id: string;
-      }>('solicitacao/chat/v2/solicitar', params);
-      if ( response ) {
-        this.mockListaPerguntas = response.roteiro;
-        this.perguntaSelecionada = this.getPrimeiraPerguntaValida();
-        this.thread_id = response.thread_id;
-        UtilsService.carregando(false);
-      }
-
-      this.rolarParaBaixo();
+    let response = await this.backend.apiPost<{
+      roteiro: PerguntaSolicitacaoInterface[],
+      thread_id: string;
+    }>('solicitacao/chat/v2/store', params);
+    if ( response ) {
+      this.solicitacaoFinalizada = true;
+      UtilsService.notifySuccess('Sua solicitação de vistoria foi agendada com sucesso.', 'Agendado!');
+      this.thread_id = '';
     }
-    this.digitando = false;
+
+    UtilsService.carregando(false);
+
+    setTimeout(() => this.rolarParaBaixo());
   }
 
   /**
-   * Recebe uma mensagem e a envia ao backend.
-   * @param dado - Mensagem recebida como string.
-   * @return Promessa que resolve quando a operação é concluída.
+   * Inicia uma nova conversa com a IA, enviando uma solicitação ao backend e atualizando a interface do usuário.
+   * @return Promise que resolve quando a operação é concluída.
    */
-  protected async recebeResposta (dado: string | { label_desc: string; label_value: any }): Promise<void> {
-    let message = '';
-    let valor;
-    if ( dado ) {
-      if ( typeof dado === 'string' ) {
-        valor = dado;
-        message = dado;
-      } else {
-        valor = dado.label_value;
-        message = dado.label_desc;
-      }
-    }
+  protected async iniciaConversaIA (): Promise<void> {
+    UtilsService.carregando(true);
+    this.digitando = true;
 
-    const conversa: ConversaInterface = {
-      index: this.index,
-      userMessage: { time: moment().format('HH:mm:ss DD/MM/YY'), message },
-      iaMessage: { time: moment().format('HH:mm:ss DD/MM/YY'), message: this.perguntaSelecionada?.pergunta || '' }
+    const params: any = {
+      host: this.backend.urlSistema
     };
 
-    if ( message ) {
-      this.conversaIa.push(conversa);
+    let response = await this.backend.apiPost<{
+      roteiro: PerguntaSolicitacaoInterface[],
+      thread_id: string;
+    }>('solicitacao/chat/v2/solicitar', params);
+    if ( response ) {
+      this.listaPerguntas = response.roteiro;
+      this.perguntaSelecionada = this.getPrimeiraPerguntaValida();
+      this.thread_id = response.thread_id;
     }
 
-    setTimeout(() => {
-      this.rolarParaBaixo();
-    }, 300);
+    UtilsService.carregando(false);
+    this.digitando = false;
+    setTimeout(() => this.rolarParaBaixo());
+  }
+
+  /**
+   * Processa a resposta recebida e atualiza a interface do usuário.
+   * @param {string | { label_desc: string; label_value: any }} dado - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
+   * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
+   */
+  protected async recebeResposta (
+    dado: string | { label_desc: string; label_value: any }
+  ): Promise<void> {
+    const { valor, message } = this.extrairResposta(dado);
+
+    if ( message ) {
+      const conversa = this.criarConversa(message, this.perguntaSelecionada?.pergunta || '');
+      this.conversaIa.push(conversa);
+      this.rolarDepois();
+    }
 
     if ( this.perguntaSelecionada ) {
       this.perguntaSelecionada.valor = valor;
+      this.perguntaSelecionada.desc_valor = message;
       this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
     }
 
     if ( !this.perguntaSelecionada ) {
-      console.log('🚀 Fluxo finalizado!');
-      await this.enviaPerguntaResposta(this.roteiroFinalizado);
-      this.roteiroFinalizado = true;
+      if ( this.jaIniciou ) {
+        this.mostrarConfirmacaoFinal();
+      } else {
+        this.jaIniciou = true;
+        await this.enviaRoteiro();
+        this.rolarDepois();
+      }
     }
 
     this.cd.detectChanges();
-    this.rolarParaBaixo();
   }
 
   /**
@@ -180,7 +186,6 @@ export class Home implements OnInit {
     if ( result ) {
       if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
         UtilsService.notifySuccess('', 'Dados salvos com sucesso!');
-        // await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
       }
     }
 
@@ -206,7 +211,6 @@ export class Home implements OnInit {
     if ( result ) {
       if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
         UtilsService.notifySuccess('', 'Login efetuado com sucesso!');
-        // await this.enviaPerguntaResposta('O cliente e o usuário foram setados com sucesso.', 'mensagem');
       }
     }
 
@@ -214,33 +218,126 @@ export class Home implements OnInit {
   }
 
   /**
-   * Finaliza o agendamento (implementação pendente).
-   * @return Não retorna valor.
-   */
-  protected async finalizarAgendamento (): Promise<void> {
-    UtilsService.carregandoGeral(true);
-    this.payload = { ...this.payload };
-    const response: any = await this.backend.apiPost('solicitacao/chat/store', this.payload);
-    if ( response ) {
-      this.solicitacaoFinalizada = true;
-    }
-    this.thread_id = '';
-    UtilsService.carregandoGeral(false);
-    UtilsService.notifySuccess('Sua solicitação de vistoria foi agendada com sucesso.', 'Agendado!');
-  }
-
-  /**
    * Reinicia a aplicação recarregando a página atual.
    */
   protected iniciarNovaSolicitacao (): void {
-    setTimeout((): void => {
-      window.location.reload();
-    }, 1000);
+    setTimeout((): void => window.location.reload(), 800);
   }
 
+  /**
+   * Exibe a confirmação final das respostas coletadas e atualiza a interface do usuário.
+   * @returns {void}
+   */
+  private mostrarConfirmacaoFinal (): void {
+    const resumo = this.coletarRespostas(this.listaPerguntas);
+    const confirmacao = this.criarConversa(
+      '',
+      this.montarMensagemConfirmacao(resumo)
+    );
+
+    this.conversaIa.push(confirmacao);
+
+    setTimeout(() => {
+      this.finalizado = true;
+      this.rolarParaBaixo();
+      this.cd.detectChanges();
+    }, 200);
+  }
+
+  /**
+   * Rola a visualização para baixo após um atraso especificado.
+   * @param delay Tempo em milissegundos antes de rolar a visualização. Padrão é 100.
+   */
+  private rolarDepois (delay = 100): void {
+    setTimeout(() => this.rolarParaBaixo(), delay);
+  }
+
+  /**
+   * Cria um objeto de conversa com mensagens do usuário e da IA.
+   * @param userMessage Mensagem enviada pelo usuário.
+   * @param iaMessage Mensagem gerada pela IA.
+   * @returns Objeto de interface de conversa contendo as mensagens e o horário atual.
+   */
+  private criarConversa (userMessage: string, iaMessage: string): ConversaInterface {
+    const agora = moment().format('HH:mm:ss DD/MM/YY');
+    return {
+      userMessage: { time: agora, message: userMessage },
+      iaMessage: { time: agora, message: iaMessage }
+    };
+  }
+
+  /**
+   * Extrai a resposta de um dado fornecido, retornando o valor e a mensagem correspondente.
+   * @param {string | { label_desc: string; label_value: any }} dado - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
+   * @returns {{ valor: any, message: string }} Objeto contendo o valor extraído e a mensagem.
+   */
+  private extrairResposta (dado: string | { label_desc: string; label_value: any }): { valor: any, message: string } {
+    if ( typeof dado === 'string' ) {
+      return { valor: dado, message: dado };
+    }
+    if ( dado ) {
+      return { valor: dado.label_value, message: dado.label_desc };
+    }
+    return { valor: null, message: '' };
+  }
+
+  /**
+   * Envia o roteiro atual para o backend e atualiza a interface do usuário.
+   * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
+   * @description
+   * - host: URL do sistema backend.
+   * - thread_id: Identificador da conversa atual.
+   * - cli_codigo: Código do cliente autenticado.
+   * - pes_codigo: Código da pessoa autenticada.
+   * - roteiro: Lista de perguntas a serem enviadas.
+   */
+  private async enviaRoteiro (): Promise<void> {
+    UtilsService.carregando(true);
+    this.digitando = true;
+
+    const params: any = {
+      host: this.backend.urlSistema,
+      thread_id: this.thread_id,
+      cli_codigo: this.authService.pessoa.value?.cli_codigo,
+      pes_codigo: this.authService.pessoa.value?.pes_codigo,
+      roteiro: this.listaPerguntas
+    };
+
+    let response = await this.backend.apiPost<{
+      roteiro: PerguntaSolicitacaoInterface[],
+      thread_id: string;
+    }>('solicitacao/chat/v2/solicitar', params);
+    if ( response ) {
+      this.listaPerguntas = response.roteiro;
+      this.perguntaSelecionada = this.getPrimeiraPerguntaValida();
+      this.thread_id = response.thread_id;
+    }
+
+    UtilsService.carregando(false);
+    this.digitando = false;
+    setTimeout((): void => this.rolarParaBaixo());
+  }
+
+  /**
+   * Monta uma mensagem de confirmação com as respostas fornecidas.
+   * @param respostas - Lista de objetos contendo a pergunta e a resposta associada.
+   * @returns Uma string formatada com a confirmação dos dados.
+   */
+  private montarMensagemConfirmacao (respostas: { pergunta: string; resposta: any }[]): string {
+    return (
+      '✅ Confirmação dos dados:\n\n' +
+      respostas
+        .map((r: any, index) => `<b>${index + 1}.</b> ${r.pergunta} \n<b>R.</b> ${r.resposta}`)
+        .join('\n\n')
+    );
+  }
+
+  /**
+   * Retorna a primeira pergunta válida da lista de perguntas.
+   * @returns A primeira pergunta que atende à condição ou null se nenhuma for encontrada.
+   */
   private getPrimeiraPerguntaValida (): PerguntaSolicitacaoInterface | null {
-    // percorre a lista inicial como se fosse a "raiz"
-    for ( const pergunta of this.mockListaPerguntas ) {
+    for ( const pergunta of this.listaPerguntas ) {
       if ( this.verificaCondicao(pergunta, null) ) {
         return pergunta;
       }
@@ -248,13 +345,24 @@ export class Home implements OnInit {
     return null;
   }
 
+  /**
+   * Obtém o próximo irmão de uma pergunta na lista de perguntas.
+   * @param alvo Pergunta atual para a qual se deseja encontrar o próximo irmão.
+   * @returns O próximo irmão da pergunta ou null se não houver.
+   */
   private getProximoIrmao (alvo: PerguntaSolicitacaoInterface): PerguntaSolicitacaoInterface | null {
-    const pai = this.getPai(alvo, this.mockListaPerguntas);
-    const lista = pai ? pai.sub_perguntas : this.mockListaPerguntas;
+    const pai = this.getPai(alvo, this.listaPerguntas);
+    const lista = pai ? pai.sub_perguntas : this.listaPerguntas;
     const idx = lista.indexOf(alvo);
     return idx >= 0 && idx < lista.length - 1 ? lista[idx + 1] : null;
   }
 
+  /**
+   * Retorna o pai de uma pergunta alvo dentro de uma lista de perguntas.
+   * @param alvo Pergunta que se deseja encontrar o pai.
+   * @param lista Lista de perguntas onde a busca será realizada.
+   * @returns O pai da pergunta alvo ou null se não for encontrado.
+   */
   private getPai (alvo: PerguntaSolicitacaoInterface, lista: PerguntaSolicitacaoInterface[]): PerguntaSolicitacaoInterface | null {
     for ( const item of lista ) {
       if ( item.sub_perguntas.includes(alvo) ) {
@@ -266,6 +374,11 @@ export class Home implements OnInit {
     return null;
   }
 
+  /**
+   * Obtém a próxima pergunta válida na sequência de perguntas.
+   * @param atual PerguntaSolicitacaoInterface - A pergunta atual para a qual se deseja encontrar a próxima.
+   * @returns PerguntaSolicitacaoInterface | null - Retorna a próxima pergunta válida ou null se não houver.
+   */
   private getProximaPergunta (atual: PerguntaSolicitacaoInterface): PerguntaSolicitacaoInterface | null {
     if ( atual.sub_perguntas && atual.sub_perguntas.length > 0 ) {
       const filhoValido = atual.sub_perguntas.find(sub => this.verificaCondicao(sub, atual.valor));
@@ -274,29 +387,35 @@ export class Home implements OnInit {
 
     let proximoIrmao = this.getProximoIrmao(atual);
     while ( proximoIrmao ) {
-      const pai = this.getPai(proximoIrmao, this.mockListaPerguntas);
+      const pai = this.getPai(proximoIrmao, this.listaPerguntas);
       if ( this.verificaCondicao(proximoIrmao, pai?.valor) ) {
         return proximoIrmao;
       }
       proximoIrmao = this.getProximoIrmao(proximoIrmao);
     }
 
-    let pai = this.getPai(atual, this.mockListaPerguntas);
+    let pai = this.getPai(atual, this.listaPerguntas);
     while ( pai ) {
       let irmaoDoPai = this.getProximoIrmao(pai);
       while ( irmaoDoPai ) {
-        const paiIrmao = this.getPai(irmaoDoPai, this.mockListaPerguntas);
+        const paiIrmao = this.getPai(irmaoDoPai, this.listaPerguntas);
         if ( this.verificaCondicao(irmaoDoPai, paiIrmao?.valor) ) {
           return irmaoDoPai;
         }
         irmaoDoPai = this.getProximoIrmao(irmaoDoPai);
       }
-      pai = this.getPai(pai, this.mockListaPerguntas);
+      pai = this.getPai(pai, this.listaPerguntas);
     }
 
     return null;
   }
 
+  /**
+   * Verifica se uma pergunta deve ser exibida com base em suas condições de exibição.
+   * @param pergunta PerguntaSolicitacaoInterface - Objeto que representa a pergunta a ser verificada.
+   * @param valorPai any - Valor do pai usado para verificar as condições de exibição.
+   * @returns boolean - Retorna true se a pergunta deve ser exibida, caso contrário, false.
+   */
   private verificaCondicao (pergunta: PerguntaSolicitacaoInterface, valorPai: any): boolean {
     if ( pergunta.valor !== null && pergunta.valor !== undefined && pergunta.valor !== '' ) {
       return false;
@@ -330,7 +449,7 @@ export class Home implements OnInit {
   }
 
   /**
-   * Intercepta mudanças de rota e executa ações específicas quando a URL corresponde a '/login' ou '/agendamento/login'.
+   * Intercepta mudanças de rota e executa ações específicas com base na nova URL.
    * @private
    */
   private interceptarMudancaDeRota (): void {
@@ -368,5 +487,29 @@ export class Home implements OnInit {
       });
       this.cd.detectChanges();
     }, 0);
+  }
+
+  /**
+   * Coleta as respostas das perguntas fornecidas.
+   * @param perguntas Lista de perguntas a serem processadas.
+   * @returns Array de objetos contendo a pergunta e a resposta associada.
+   */
+  private coletarRespostas (perguntas: PerguntaSolicitacaoInterface[]): { pergunta: string; resposta: any }[] {
+    let respostas: { pergunta: string; resposta: any }[] = [];
+
+    for ( const p of perguntas ) {
+      if ( p.desc_valor !== undefined && p.desc_valor !== null && p.desc_valor !== '' ) {
+        respostas.push({
+          pergunta: p.pergunta,
+          resposta: p.desc_valor
+        });
+      }
+
+      if ( p.sub_perguntas && p.sub_perguntas.length > 0 ) {
+        respostas = respostas.concat(this.coletarRespostas(p.sub_perguntas));
+      }
+    }
+
+    return respostas;
   }
 }
