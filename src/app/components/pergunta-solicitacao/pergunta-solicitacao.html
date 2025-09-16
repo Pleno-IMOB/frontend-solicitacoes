@@ -1,0 +1,342 @@
+<div [formGroup]="form" class="main-container-ia-message">
+  <img
+    [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
+    alt="logo-empresa">
+  <div class="ia-message px-4 py-2">
+    <p [innerHTML]="perguntaSolicitacao.pergunta" class="pt-2 mb-1"></p>
+    @switch (true) {
+      @case (perguntaSolicitacao.tipo_input === 'TEXT') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+            (keydown.space)="$event.stopPropagation()"
+            formControlName="resposta"
+            matInput
+            class="position-relative input-pergunta"
+            placeholder="Digite aqui"
+            type="text">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'SELECT') {
+        @if (perguntaSolicitacao.options.length > 5) {
+          <mat-form-field class="w-100">
+            <mat-select
+              formControlName="resposta"
+              (selectionChange)="enviarMensagem()">
+              <div class="w-100 p-2">
+                <mat-form-field class="w-100">
+                  <input
+                    #respostaInput
+                    (keydown.space)="$event.stopPropagation()"
+                    formControlName="search"
+                    matInput
+                    class="position-relative input-search"
+                    placeholder="Selecione uma opção"
+                    type="text">
+                  <div class="icon-container position-absolute">
+                    <mat-icon class="search-icon">search</mat-icon>
+                  </div>
+                </mat-form-field>
+                @for (pergunta of filteredOptions; track pergunta) {
+                  <mat-option [value]="pergunta">{{ pergunta?.label_desc }}</mat-option>
+                }
+              </div>
+            </mat-select>
+          </mat-form-field>
+        } @else {
+          <mat-chip-listbox formControlName="resposta">
+            @for (pergunta of filteredOptions; track pergunta) {
+              <mat-chip-option
+                (click)="enviarMensagem()"
+                [value]="pergunta">
+                {{ pergunta?.label_desc }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        }
+      }
+      @case (perguntaSolicitacao.tipo_input === 'INTEGER') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+            (keydown.space)="$event.stopPropagation()"
+            formControlName="resposta"
+            matInput
+            onlyNumbers
+            class="position-relative input-pergunta"
+            placeholder="Digite aqui"
+            type="number">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'FLOAT') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+            formControlName="resposta"
+            matInput
+            [currencyMask]="{ prefix: '', thousands: '.', decimal: ',', align: 'left' }"
+            class="position-relative input-pergunta"
+            placeholder="Digite aqui">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'CURRENCY') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+            (keydown.space)="$event.stopPropagation()"
+            formControlName="resposta"
+            matInput
+            [currencyMask]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }"
+            class="position-relative input-pergunta"
+            placeholder="Informe o valor R$">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'DATE') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            (dateChange)="enviarMensagem()"
+            (click)="picker.open()"
+            placeholder="Escolha a data DD/MM/AAAA"
+            readonly
+            matInput
+            [matDatepicker]="picker"
+            formControlName="date">
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'DATETIME') {
+        @let valido = form.get('date')?.value && form.get('time')?.value;
+        <div class="w-100 row">
+          <mat-form-field class="col-md-5 pr-0">
+            <input
+              (click)="picker.open()"
+              placeholder="Selecione a data DD/MM/AAAA"
+              readonly
+              matInput
+              [matDatepicker]="picker"
+              formControlName="date">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+          <mat-form-field class="col-md-5 pr-0">
+            <input
+              matInput
+              formControlName="time"
+              readonly
+              (click)="timePicker.open()"
+              [matTimepicker]="timePicker"
+              placeholder="Selecione o horário HH:mm">
+            <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+            <mat-timepicker #timePicker />
+          </mat-form-field>
+          <div class="button-container col-md-2">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!valido"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </div>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'TIME') {
+        @let valido = form.get('time')?.value;
+        <div class="w-100 row">
+          <mat-form-field class="col-md-10 pr-0">
+            <input
+              matInput
+              formControlName="time"
+              readonly
+              (click)="timePicker.open()"
+              [matTimepicker]="timePicker"
+              placeholder="Selecione o horário HH:mm">
+            <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+            <mat-timepicker #timePicker />
+          </mat-form-field>
+          <div class="button-container col-md-2">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!valido"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </div>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'CEP') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            plenoMask="cep"
+            (keydown.enter)="(form.get('resposta')?.value && form.get('resposta')?.value?.length === 9 && !UtilsService.loading.value) && enviarMensagem()"
+            formControlName="resposta"
+            matInput
+            class="position-relative input-pergunta"
+            placeholder="Informe o cep do imóvel"
+            type="text">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value || form.get('resposta')?.value?.length < 9 || UtilsService.loading.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'CPF') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            plenoMask="cpfCnpj"
+            (keydown.enter)="(form.get('resposta')?.value && form.get('resposta')?.value?.length === 14 && form.get('resposta')?.value?.length === 18 && !UtilsService.loading.value) && enviarMensagem()"
+            formControlName="resposta"
+            matInput
+            autocomplete="off"
+            class="position-relative input-pergunta"
+            placeholder="Informe o seu CPF/CNPJ"
+            type="text">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value || (form.get('resposta')?.value?.length !== 14 && form.get('resposta')?.value?.length !== 18) || UtilsService.loading.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'TEL') {
+        <mat-form-field class="w-100">
+          <input
+            #respostaInput
+            plenoMask="celularDDD"
+            (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+            (keydown.space)="$event.stopPropagation()"
+            formControlName="resposta"
+            matInput
+            class="position-relative input-pergunta"
+            placeholder="Informe seu celular"
+            type="tel">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+      @case (perguntaSolicitacao.tipo_input === 'FILE') {
+        <mat-form-field class="w-100">
+          <input
+            (keydown.space)="$event.stopPropagation()"
+            (click)="selecionarArquivo()"
+            matInput
+            readonly
+            class="position-relative input-pergunta"
+            placeholder="Selecione arquivos"
+            type="text">
+          <div class="button-container position-absolute">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!form.get('resposta')?.value"
+              matButton="filled">
+              @if (UtilsService.loading.value) {
+                <mat-spinner></mat-spinner>
+              } @else {
+                <mat-icon class="send-icon">send</mat-icon>
+              }
+            </button>
+          </div>
+        </mat-form-field>
+      }
+    }
+    <small class="mb-0">{{ time }}</small>
+  </div>
+  @if (!perguntaSolicitacao.obrigatorio) {
+    <button
+      (click)="enviarMensagem(true)"
+      class="align-self-center bg-white"
+      matButton="outlined">
+      <p class="mb-0">
+        Pular
+      </p>
+    </button>
+  }
+</div>

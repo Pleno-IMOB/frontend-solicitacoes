@@ -1,4 +1,4 @@
-export interface Bairro {
+export interface BairroInterface {
   bai_codigo: number;
   bai_nome: string;
   bai_apelido: string | null;
@@ -7,24 +7,24 @@ export interface Bairro {
   bai_status: string;
 }
 
-export interface Uf {
+export interface UfInterface {
   uf_codigo: number;
   uf_nome: string;
   uf_uf: string;
   uf_codigo_ibge: string | number;
 }
 
-export interface Cidade {
+export interface CidadeInterface {
   cid_codigo: number;
   cid_nome: string;
   cid_cep: string | null;
   cid_ddd: string | null;
   uf_codigo: number;
   cid_codigo_ibge: string | number | null;
-  uf?: Uf;
+  uf?: UfInterface;
 }
 
-export interface CidadeOperacao {
+export interface CidadeOperacaoInterface {
   cid_ope_codigo: number;
   cid_ope_descricao: string | null;
   cid_codigo: number;
@@ -39,11 +39,11 @@ export interface CidadeOperacao {
   cid_ope_mensagem_ferias: string | null;
   localizacao: string;
   descricao_completa: string;
-  cidade: Cidade;
-  uf: Uf;
+  cidade: CidadeInterface;
+  uf: UfInterface;
 }
 
-export interface Pessoa {
+export interface PessoaInterface {
   pes_codigo: number;
   pro_codigo: number | null;
   pes_nome: string;
@@ -126,20 +126,20 @@ export interface Pessoa {
   pes_telefone_formatado: string;
   cpf_ou_cnpj: string;
   pes_cnpj_formatado: string;
-  bairro: Bairro;
-  cidade: Cidade;
-  uf: Uf;
+  bairro: BairroInterface;
+  cidade: CidadeInterface;
+  uf: UfInterface;
 }
 
-export interface ApiData<T> {
+export interface ApiDataInterface<T> {
   code?: number,
-  error: ErrorBackend,
+  error: ErrorBackendInterface,
   validation?: any[],
   success?: boolean,
   data: T
 }
 
-export interface AuthServicePessoa extends Pessoa {
+export interface AuthServicePessoaInterface extends PessoaInterface {
   pes_codigo: number;
   foto: string;
   pes_logo: string;
@@ -148,12 +148,12 @@ export interface AuthServicePessoa extends Pessoa {
   permissoes?: any[];
 }
 
-export interface DataConfig {
+export interface DataConfigInterface {
   toUpper?: boolean;
   toUpperIgnored?: string[];
 }
 
-export interface ErrorBackend {
+export interface ErrorBackendInterface {
   code?: number;
   message?: string;
   validation?: any;
@@ -166,7 +166,7 @@ export interface ErrorBackend {
   ];
 }
 
-export interface Imobiliaria {
+export interface ImobiliariaInterface {
   imob_codigo: number;
   bai_codigo: number;
   imob_empresa: string;
@@ -261,13 +261,13 @@ export interface Imobiliaria {
   ignorar_pague_digital: boolean;
   imob_telefone_formatado: string;
   imob_telefone_wpp_formatado: string;
-  pessoa: Pessoa;
-  estado: Uf;
-  cidade: Cidade;
-  bairro: Bairro;
+  pessoa: PessoaInterface;
+  estado: UfInterface;
+  cidade: CidadeInterface;
+  bairro: BairroInterface;
 }
 
-export interface Usuario {
+export interface UsuarioInterface {
   search?: string;
   usu_codigo: number;
   usu_nome: string;
@@ -280,11 +280,11 @@ export interface Usuario {
   usu_token: string;
   usu_desativado: string;
   timestamp: string;
-  pessoa: Pessoa;
+  pessoa: PessoaInterface;
   imobiliaria: string;
 }
 
-export interface Pergunta {
+export interface PerguntaInterface {
   index: number;
   message: string;
   time: string;
@@ -294,7 +294,7 @@ export interface Pergunta {
   tipoDado?: any;
 }
 
-export interface Resposta {
+export interface RespostaInterface {
   index?: number;
   time?: string;
   message?: string;
@@ -302,16 +302,29 @@ export interface Resposta {
   base64?: string;
   url?: string;
   isAudio?: boolean;
-  anexos?: Anexo[];
+  anexos?: AnexoInterface[];
 }
 
-export interface PerguntaResposta {
+export interface PerguntaRespostaInterface {
   index: number;
-  iaMessage: Pergunta;
-  userMessage: Resposta;
+  iaMessage: PerguntaInterface;
+  userMessage: RespostaInterface;
 }
 
-export interface Anexo {
+export interface ConversaInterface {
+  iaMessage: ConversaMessageInterface;
+  userMessage: ConversaMessageInterface;
+}
+
+export interface ConversaMessageInterface {
+  message: any,
+  time: string,
+  error?: {
+    callback: () => any;
+  }
+}
+
+export interface AnexoInterface {
   base64: string;
   blob: Blob;
   url: string;
@@ -320,8 +333,36 @@ export interface Anexo {
   index: number;
 }
 
-export interface Cliente {
+export interface ClienteInterface {
   cli_codigo: number;
   pes_codigo: number;
-  pessoa: Pessoa;
+  pessoa: PessoaInterface;
+}
+
+export interface PerguntaSolicitacaoInterface {
+  pergunta: string;
+  tipo_input: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME' | 'TIME' | 'CEP' | 'TEL' | 'CPF' | 'FILE';
+  obrigatorio: any;
+  options: OptionRespostaSolicitacaoInterface[],
+  campo: string;
+  valor: any;
+  desc_valor?: any;
+  condicao_exibicao?: any[];
+  sub_perguntas: PerguntaSolicitacaoInterface[];
+}
+
+export interface OptionRespostaSolicitacaoInterface {
+  label_desc: string;
+  label_value: any;
+}
+
+export interface CepResponseApi {
+  uf_uf: string;
+  cid_nome: string;
+  bai_nome: string;
+  logradouro: string;
+  complemento: string;
+  uf_codigo: number;
+  cid_codigo: number;
+  bai_codigo: number;
 }

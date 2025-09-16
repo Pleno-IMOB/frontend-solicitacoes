@@ -123,7 +123,7 @@
           </div>
           <input
             #inputFoto
-            (change)="setaFotoUsuario($event)"
+            (change)="setaFotoUsuarioInterface($event)"
             accept="image/*"
             hidden
             type="file">
@@ -167,7 +167,7 @@
           <mat-label class="text-wrap">Nome do cliente (imobiliária ou proprietário)</mat-label>
           <input
             formControlName="cli_nome"
-            [readonly]="souCliente"
+            [readonly]="souCliente && cpfJaRegistrado"
             matInput
             placeholder="Digite o nome do cliente">
         </mat-form-field>
