@@ -187,7 +187,7 @@ export class Login implements AfterViewInit {
    * @return URL do logo como string.
    */
   protected getLogo (): string {
-    return `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
+    return `${this.backend.hostAPI}vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**

@@ -28,7 +28,7 @@ export class Header {
     protected authService: AuthService,
     private backend: BackendService
   ) {
-    this.logoBase = `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
+    this.logoBase = `${this.backend.hostAPI}vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**

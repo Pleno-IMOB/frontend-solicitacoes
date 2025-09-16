@@ -250,6 +250,8 @@ export class BackendDefaults {
       let domain: string;
       if ( rootDomain === 'sistemaspleno-homolog.com' ) {
         domain = 'sistemaspleno-homolog.com';
+      } else if ( rootDomain === 'sistemaspleno-dev.com' ) {
+        domain = 'sistemaspleno-dev.com';
       } else {
         domain = 'sistemaspleno.com';
       }

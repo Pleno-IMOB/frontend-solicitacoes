@@ -11,14 +11,8 @@ async function executarComandos(executar) {
   }
 }
 
-/**
- * Executa um comando shell e retorna como uma Promise.
- * @param cmd {string}
- * @return {Promise<string>}
- */
 function execShellCommand(cmd) {
   const spinner = ora(cmd).start();
-
   return new Promise((resolve, reject) => {
     const process = exec(cmd);
     process.on('exit', (code) => {
@@ -49,14 +43,46 @@ async function verificarAlteracoesPendentes() {
 }
 
 async function fazerCheckoutBranch(ambiente) {
-  const branch = ambiente === 'HOMOLOGACAO' ? 'develop' : 'master';
-  console.log(chalk.blue(`Fazendo checkout da branch ${branch} para o ambiente ${ambiente}...`));
+  const getCurrentBranch = () => {
+    return new Promise((resolve, reject) => {
+      exec('git rev-parse --abbrev-ref HEAD', (error, stdout) => {
+        if (error) {
+          reject(`Erro ao obter branch atual: ${error}`);
+        } else {
+          resolve(stdout.trim());
+        }
+      });
+    });
+  };
+
+  // Para HOMOLOGACAO_DEV e HOMOLOGACAO, branch develop. Para PRODUCAO, branch master.
+  let branch = ambiente === 'PRODUCAO' ? 'master' : 'develop';
+
+  if (ambiente === 'HOMOLOGACAO' || ambiente === 'HOMOLOGACAO_DEV') {
+    const currentBranch = await getCurrentBranch();
+    if (currentBranch !== 'develop') {
+      const answer = await inquirer.prompt([{
+        type: 'confirm',
+        name: 'switchBranch',
+        message: `Você está na branch '${currentBranch}'. Deseja trocar para 'develop' para o build?`,
+        default: true
+      }]);
+      if (!answer.switchBranch) {
+        branch = currentBranch;
+      }
+    }
+  }
+
   await execShellCommand(`git checkout ${branch}`);
-  console.log(chalk.green(`Branch ${branch} selecionada com sucesso!`));
 }
 
 async function main() {
-  await verificarAlteracoesPendentes();
+  try {
+    // await verificarAlteracoesPendentes();
+  } catch (error) {
+    console.error(chalk.red(error));
+    return;
+  }
 
   const { environments } = await inquirer.prompt([{
     type: 'checkbox',
@@ -64,6 +90,7 @@ async function main() {
     message: 'Escolha o(s) ambiente(s) para deploy:',
     choices: [
       { name: 'HOMOLOGACAO', value: 'HOMOLOGACAO' },
+      { name: 'HOMOLOGACAO_DEV', value: 'HOMOLOGACAO_DEV' },
       { name: 'PRODUCAO', value: 'PRODUCAO' }
     ]
   }]);
@@ -73,6 +100,13 @@ async function main() {
       baseHref: '/agendamento/',
       deployUrl: '/agendamento/',
       remotePath: '/home/graxaveia/domains/sistemaspleno-homolog.com/public_html/agendamento',
+      userSsh: 'graxaveia@172.17.33.88',
+      configuration: 'production'
+    },
+    HOMOLOGACAO_DEV: {
+      baseHref: '/agendamento/',
+      deployUrl: '/agendamento/',
+      remotePath: '/home/graxaveia/domains/sistemaspleno-dev.com/public_html/agendamento',
       userSsh: 'graxaveia@172.17.33.88',
       configuration: 'production'
     },
