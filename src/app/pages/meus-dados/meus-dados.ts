@@ -16,7 +16,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { RecaptchaV3Module, ReCaptchaV3Service } from 'ng-recaptcha';
 import { firstValueFrom } from 'rxjs';
 import { MatCheckbox } from '@angular/material/checkbox';
-import { Cliente } from '../../common/types';
+import { ClienteInterface } from '../../common/types';
 import { MatBadgeModule } from '@angular/material/badge';
 import { fileToBase64 } from '../../common/common';
 import { CommonService } from '../../services/common.service';
@@ -176,7 +176,7 @@ export class MeusDados implements AfterViewInit, OnInit {
    * Atualiza a foto do usuário no formulário com base em um evento de seleção de arquivo.
    * @param event Evento de seleção de arquivo que contém o arquivo de imagem.
    */
-  protected async setaFotoUsuario (event: Event): Promise<void> {
+  protected async setaFotoUsuarioInterface (event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if ( input.files && input.files.length > 0 ) {
       const file = input.files[0];
@@ -210,7 +210,7 @@ export class MeusDados implements AfterViewInit, OnInit {
    */
   private async getAndSetDadosCliente (): Promise<void> {
     UtilsService.carregandoGeral(true);
-    const cliente: Cliente = await this.backend.apiGet(`cliente/${this.authService.pessoa?.value?.cli_codigo}/show`);
+    const cliente: ClienteInterface = await this.backend.apiGet(`cliente/${this.authService.pessoa?.value?.cli_codigo}/show`);
     this.form.patchValue({ cli_nome: cliente.pessoa?.pes_nome, cli_cpfCnpj: cliente.pessoa?.cpf_ou_cnpj });
     UtilsService.carregandoGeral(false);
   }

@@ -1,5 +1,5 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { Resposta } from '../../common/types';
+import { RespostaInterface } from '../../common/types';
 
 @Component({
   selector: 'app-audio-recorder',
@@ -9,6 +9,6 @@ import { Resposta } from '../../common/types';
   standalone: true
 })
 export class AudioRecorder {
-  @Input() audioObj!: Resposta;
+  @Input() audioObj!: RespostaInterface;
   @ViewChild('audioPlayer') audioPlayer!: ElementRef<HTMLAudioElement>;
 }

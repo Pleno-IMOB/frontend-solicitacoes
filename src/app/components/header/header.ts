@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
@@ -13,7 +12,6 @@ import { UtilsService } from '../../services/utils.service';
   imports: [
     MatIconModule,
     MatButtonModule,
-    MatDialogModule,
     MatMenuModule
   ],
   templateUrl: './header.html',
@@ -28,7 +26,7 @@ export class Header {
     protected authService: AuthService,
     private backend: BackendService
   ) {
-    this.logoBase = `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
+    this.logoBase = `${this.backend.hostAPI}vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**

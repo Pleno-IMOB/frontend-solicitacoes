@@ -61,6 +61,7 @@ export class Login implements AfterViewInit {
   protected emailReadOnly: boolean = false;
   protected readonly UtilsService = UtilsService;
   protected pageStep: 'celular' | 'token' | 'cadastro' = 'celular';
+  protected cpfJaRegistrado = false;
   @ViewChild('tokenInput') private tokenInput!: ElementRef<HTMLInputElement>;
 
   constructor (
@@ -160,8 +161,10 @@ export class Login implements AfterViewInit {
 
         if ( response ) {
           this.form.get('cli_nome')?.setValue(response);
+          this.cpfJaRegistrado = true;
         } else {
           this.form.get('cli_nome')?.setValue(null);
+          this.cpfJaRegistrado = false;
         }
 
         UtilsService.carregandoGeral(false);
@@ -173,8 +176,10 @@ export class Login implements AfterViewInit {
 
         if ( response ) {
           this.form.get('cli_nome')?.setValue(response);
+          this.cpfJaRegistrado = true;
         } else {
           this.form.get('cli_nome')?.setValue(null);
+          this.cpfJaRegistrado = false;
         }
 
         UtilsService.carregandoGeral(false);
@@ -187,7 +192,7 @@ export class Login implements AfterViewInit {
    * @return URL do logo como string.
    */
   protected getLogo (): string {
-    return `https://api.sistemaspleno-homolog.com/api/vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
+    return `${this.backend.hostAPI}vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**
@@ -325,7 +330,7 @@ export class Login implements AfterViewInit {
    * Atualiza a foto do usuário no formulário com base em um evento de seleção de arquivo.
    * @param event Evento de seleção de arquivo que contém o arquivo de imagem.
    */
-  protected async setaFotoUsuario (event: Event): Promise<void> {
+  protected async setaFotoUsuarioInterface (event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if ( input.files && input.files.length > 0 ) {
       const file = input.files[0];
