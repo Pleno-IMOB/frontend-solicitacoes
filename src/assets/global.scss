@@ -1,5 +1,5 @@
 @use 'themes/argon/argon.css' as *;
-@import "../node_modules/ngx-toastr/toastr.css";
+@use '../../node_modules/ngx-toastr/toastr.css';
 
 .country-dropdown.show {
   inset: auto auto auto auto !important;

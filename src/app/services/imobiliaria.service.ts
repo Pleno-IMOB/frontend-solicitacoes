@@ -19,7 +19,7 @@ export class ImobiliariaInterfaceService {
    */
   public async getEmpresa (): Promise<ImobiliariaInterface> {
     if ( !this.imobiliaria$ ) {
-      this.imobiliaria$ = await this.backend.apiGet('imobiliaria');
+      this.imobiliaria$ = await this.backend.apiGetExternal(`${this.backend.hostAPI}vistoria/imobiliaria/indexComHost`, { host: this.backend.urlSistema });
     }
     return this.imobiliaria$;
   }

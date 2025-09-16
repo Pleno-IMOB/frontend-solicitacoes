@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
-import { BackendService } from '../../services/backend.service';
 import { UtilsService } from '../../services/utils.service';
 
 @Component({
@@ -20,13 +19,12 @@ import { UtilsService } from '../../services/utils.service';
 })
 export class Header {
   @Input() page: 'agendamento' | 'meus-dados' = 'agendamento';
-  protected logoBase?: string;
+  @Input() logoEmpresa!: string;
+  protected defaultImage = 'assets/images/lazy.gif';
 
   constructor (
-    protected authService: AuthService,
-    private backend: BackendService
+    protected authService: AuthService
   ) {
-    this.logoBase = `${this.backend.hostAPI}vistoria/logo-imobiliaria?host=${this.backend.urlSistema}`;
   }
 
   /**
