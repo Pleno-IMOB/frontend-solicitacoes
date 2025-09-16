@@ -1,86 +1,75 @@
 <app-header></app-header>
 
-<div #scrollContainer class="main-container">
-  @for (perguntaResposta of listaPerguntasRespostas; track perguntaResposta.index) {
-    <div>
-      @switch (true) {
-        @case (!!perguntaResposta?.userMessage?.message) {
-          <app-user-message
-            [messageObj]="perguntaResposta.userMessage"
-            [index]="perguntaResposta.index">
-          </app-user-message>
-        }
-        @case (perguntaResposta?.userMessage?.isAudio) {
-          <app-user-audio
-            [messageObj]="perguntaResposta.userMessage"
-            [index]="perguntaResposta.index">
-          </app-user-audio>
-        }
-        @case (!!perguntaResposta?.userMessage?.anexos) {
-          @for (anexo of perguntaResposta.userMessage.anexos; track anexo.index) {
-            <app-user-arquivo
-              [anexo]="anexo"
-              [index]="perguntaResposta.index">
-            </app-user-arquivo>
-          }
-        }
-      }
-      @if (perguntaResposta?.iaMessage) {
-        <app-ia-message
-          (disparaReenviarMensagem)="reenviarMensagem($event)"
-          [messageObj]="perguntaResposta?.iaMessage"
-          [logoEmpresa]="getLogo()"
-          [index]="perguntaResposta?.index">
-        </app-ia-message>
-      }
-    </div>
-  }
-  @let logado = !!authService.pessoaValue?.cli_codigo && !!authService.pessoaValue?.pes_codigo;
-  @let podeConfirmar = finalizado && !solicitacaoFinalizada;
-  @switch (true) {
-    @case (podeConfirmar && logado) {
-      <button
-        class="btn-confirmar btn-agendamento"
-        color="primary"
-        matButton="filled"
-        type="button"
-        (click)="finalizarAgendamento()">
-        <div class="d-flex flex-row align-items-center">
-          <b>CONFIRMAR AGENDAMENTO</b>
-          <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
-        </div>
-      </button>
-    }
-    @case (podeConfirmar && !logado) {
-      <button
-        class="btn-confirmar"
-        color="primary"
-        matButton="filled"
-        type="button"
-        (click)="login()">
-        <div class="d-flex flex-row align-items-center">
-          <b>ACESSAR MINHA CONTA</b>
-          <mat-icon class="home-btn-icon">login</mat-icon>
-        </div>
-      </button>
-    }
-    @case (finalizado && solicitacaoFinalizada) {
-      <button
-        class="btn-confirmar btn-novo-agendamento"
-        matButton="outlined"
-        type="button"
-        (click)="iniciarNovaSolicitacao()">
-        <div class="d-flex flex-row align-items-center">
-          <b>INICIAR NOVO AGENDAMENTO</b>
-          <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
-        </div>
-      </button>
-    }
-  }
-</div>
+<div class="bottom-messages">
 
-<app-footer
-  (enviaArquivoUsuario)="recebeArquivo($event)"
-  (enviaAudioUsuario)="recebeAudio($event)"
-  (enviaMensagemUsuario)="recebeMensagem($event)">
+  <div #scrollContainer class="main-container">
+    @if (conversaIa.length > 0) {
+      @for (perguntaResposta of conversaIa; track perguntaResposta) {
+        <app-ia-message
+          [mensagemIa]="perguntaResposta?.iaMessage">
+        </app-ia-message>
+        
+        <app-user-message
+          [mensagemUser]="perguntaResposta?.userMessage">
+        </app-user-message>
+      }
+    }
+    @if (perguntaSelecionada && !digitando) {
+      <app-pergunta-solicitacao
+        (enviaRespostaUsuario)="recebeResposta($event)"
+        [perguntaSolicitacao]="perguntaSelecionada"></app-pergunta-solicitacao>
+    } @else if (digitando) {
+      <app-message-loading></app-message-loading>
+    }
+    @let podeConfirmar = finalizado && !solicitacaoFinalizada;
+    @switch (true) {
+      @case (podeConfirmar) {
+        <button
+          class="btn-confirmar btn-agendamento"
+          color="primary"
+          matButton="filled"
+          type="button"
+          [disabled]="UtilsService.loading.value"
+          (click)="finalizarAgendamento()">
+          <div class="d-flex flex-row align-items-center">
+            @if (UtilsService.loading.value) {
+              <b>CRIANDO AGENDAMENTO, AGUARDE...</b>
+              <mat-spinner class="ml-3"></mat-spinner>
+            } @else {
+              <b>CONFIRMAR AGENDAMENTO</b>
+              <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
+            }
+          </div>
+        </button>
+        @if (!UtilsService.loading.value) {
+          <button
+            class="btn-reiniciar-agendamento mt-0"
+            matButton="filled"
+            type="button"
+            [disabled]="UtilsService.loading.value"
+            (click)="iniciarNovaSolicitacao()">
+            <div class="d-flex flex-row align-items-center">
+              <b>NÃO, REINICIAR AGENDAMENTO</b>
+              <mat-icon class="home-btn-icon">close</mat-icon>
+            </div>
+          </button>
+        }
+      }
+      @case (finalizado && solicitacaoFinalizada) {
+        <button
+          class="btn-confirmar btn-novo-agendamento"
+          matButton="outlined"
+          type="button"
+          [disabled]="UtilsService.loading.value"
+          (click)="iniciarNovaSolicitacao()">
+          <div class="d-flex flex-row align-items-center">
+            <b>INICIAR NOVO AGENDAMENTO</b>
+            <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
+          </div>
+        </button>
+      }
+    }
+  </div>
+</div>
+<app-footer>
 </app-footer>

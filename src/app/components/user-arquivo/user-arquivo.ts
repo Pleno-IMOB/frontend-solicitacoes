@@ -1,25 +1,19 @@
 import { Component, Input } from '@angular/core';
-import { MatCardModule } from '@angular/material/card';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { Anexo } from '../../common/types';
-import { MatButtonModule } from '@angular/material/button';
+import { AnexoInterface } from '../../common/types';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-user-arquivo',
   imports: [
-    MatCardModule,
-    MatDividerModule,
-    MatIconModule,
-    MatButtonModule
+    MatIconModule
   ],
   templateUrl: './user-arquivo.html',
   styleUrl: './user-arquivo.scss',
   standalone: true
 })
 export class UserArquivo {
-  @Input() anexo!: Anexo;
+  @Input() anexo!: AnexoInterface;
   @Input() index?: number;
 
   constructor (

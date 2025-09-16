@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
-import { AuthServicePessoa } from '../common/types';
+import { AuthServicePessoaInterface } from '../common/types';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class AuthService {
   private keyPermissoesStorage = `permissoes_${this.sufixStorage}`;
   private keyToken = `auth_token_${this.sufixStorage}`;
   private permissoes$ = new BehaviorSubject<any>(JSON.parse(localStorage.getItem(this.keyPermissoesStorage) ?? 'null'));
-  private pessoa$ = new BehaviorSubject<AuthServicePessoa | null>(
+  private pessoa$ = new BehaviorSubject<AuthServicePessoaInterface | null>(
     JSON.parse(localStorage.getItem(this.keyUserStorage) ?? 'null')
   );
   private authToken$ = new BehaviorSubject<string | null>(localStorage.getItem(this.keyToken) || null);
@@ -28,15 +28,15 @@ export class AuthService {
    * Retrieves the usuario value.
    * @returns {any} The usuario value.
    */
-  public get pessoa (): BehaviorSubject<AuthServicePessoa | null> {
+  public get pessoa (): BehaviorSubject<AuthServicePessoaInterface | null> {
     return this.pessoa$;
   }
 
   /**
    * Retorna o valor atual do objeto pessoa.
-   * @return {AuthServicePessoa | null} O valor atual de pessoa ou null se não estiver definido.
+   * @return {AuthServicePessoaInterface | null} O valor atual de pessoa ou null se não estiver definido.
    */
-  public get pessoaValue (): AuthServicePessoa | null {
+  public get pessoaValue (): AuthServicePessoaInterface | null {
     return this.pessoa$.value;
   }
 
@@ -59,10 +59,10 @@ export class AuthService {
 
   /**
    * Updates the user data and sets the user as authenticated.
-   * @param {Usuario} v - The updated user data.
-   * @return {Usuario} - The updated user data.
+   * @param {UsuarioInterface} v - The updated user data.
+   * @return {UsuarioInterface} - The updated user data.
    */
-  public async atualizarPessoa (v: AuthServicePessoa): Promise<AuthServicePessoa> {
+  public async atualizarPessoa (v: AuthServicePessoaInterface): Promise<AuthServicePessoaInterface> {
     if ( v.auth_token ) {
       this.authToken = v.auth_token;
       delete v?.auth_token;

@@ -10,6 +10,10 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { IMOBILIARIA } from './common/common';
 import { RECAPTCHA_V3_SITE_KEY } from 'ng-recaptcha';
 import { environment } from '../environments/environment';
+import { NgxCurrencyInputMode, provideEnvironmentNgxCurrency } from 'ngx-currency';
+import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
+import { MAT_TIMEPICKER_CONFIG } from '@angular/material/timepicker';
+import { CurrencyPipe } from '@angular/common';
 
 const maskConfig: Partial<NgxMaskConfig> = {
   validation: false
@@ -17,6 +21,7 @@ const maskConfig: Partial<NgxMaskConfig> = {
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    CurrencyPipe,
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes), provideClientHydration(withEventReplay()),
@@ -34,6 +39,26 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([ interceptToken ])
     ),
     provideAnimations(),
-    provideToastr()
+    provideToastr(),
+    provideEnvironmentNgxCurrency({
+      align: 'right',
+      allowNegative: true,
+      allowZero: true,
+      decimal: ',',
+      precision: 2,
+      prefix: 'R$ ',
+      suffix: '',
+      thousands: '.',
+      nullable: true,
+      min: null,
+      max: null,
+      inputMode: NgxCurrencyInputMode.Financial
+    }),
+    provideNativeDateAdapter(),
+    { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' },
+    {
+      provide: MAT_TIMEPICKER_CONFIG,
+      useValue: { interval: '30 minutes' }
+    }
   ]
 };
