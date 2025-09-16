@@ -3,7 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Header } from '../../components/header/header';
 import { Footer } from '../../components/footer/footer';
 import { MatCardModule } from '@angular/material/card';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
@@ -68,8 +68,7 @@ export class Home implements OnInit {
     private dialog: MatDialog,
     protected authService: AuthService,
     private ngZone: NgZone,
-    private toaster: ToastrService,
-    private currencyPipe: CurrencyPipe
+    private toaster: ToastrService
   ) {
   }
 
@@ -131,7 +130,7 @@ export class Home implements OnInit {
     }
 
     UtilsService.carregando(false);
-    setTimeout(() => this.rolarParaBaixo());
+    this.rolarParaBaixo();
   }
 
   /**
@@ -158,7 +157,7 @@ export class Home implements OnInit {
 
     UtilsService.carregando(false);
     this.digitando = false;
-    setTimeout(() => this.rolarParaBaixo());
+    this.rolarParaBaixo();
   }
 
   /**
@@ -166,11 +165,13 @@ export class Home implements OnInit {
    * @param {string | { valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }} event - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
    * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
    */
-  protected async recebeResposta (event: { valor: string | OptionRespostaSolicitacaoInterface | number | AnexoInterface[]; tipo?: string }): Promise<void> {
-    const { valor, message } = this.extrairResposta(event);
+  protected async recebeResposta (event: { valor: OptionRespostaSolicitacaoInterface; tipo?: string }): Promise<void> {
+    const message = event.valor?.label_desc;
+    const valor = event.valor?.label_value;
+
     if ( event.tipo === 'CEP' ) {
       this.UtilsService.carregando(true);
-      const continuarFuncao = await this.buscaCep(event);
+      const continuarFuncao = await this.buscaCep(valor);
       this.UtilsService.carregando(false);
       if ( !continuarFuncao ) {
         return;
@@ -187,9 +188,8 @@ export class Home implements OnInit {
     if ( this.perguntaSelecionada ) {
       this.perguntaSelecionada.valor = valor;
       this.perguntaSelecionada.desc_valor = message;
-      this.rolarParaBaixo(400);
       this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
-      this.rolarParaBaixo();
+      this.rolarParaBaixo(100);
     }
 
     if ( !this.perguntaSelecionada ) {
@@ -199,7 +199,48 @@ export class Home implements OnInit {
       } else {
         this.jaIniciou = true;
         await this.enviaRoteiro();
-        this.rolarParaBaixo();
+      }
+    }
+
+    setTimeout(() => {
+      this.digitando = false;
+      this.rolarParaBaixo();
+    }, 800);
+
+    this.cd.detectChanges();
+  }
+
+  /**
+   * Processa a resposta recebida e atualiza a interface do usuário.
+   * @param {{ valor: AnexoInterface[]; tipo: string }} event - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
+   * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
+   */
+  protected async recebeAnexo (event: { valor: AnexoInterface[]; tipo?: string }): Promise<void> {
+    const listaAnexos = event.valor.map((anexo: AnexoInterface) => anexo.base64);
+    const valor = listaAnexos;
+    const message = `${listaAnexos.length} ${listaAnexos.length > 1 ? 'anexos inseridos.' : 'anexo inserido.'}`;
+
+    if ( message ) {
+      const conversa = this.criarConversa(message, this.perguntaSelecionada?.pergunta || '');
+      this.conversaIa.push(conversa);
+      this.digitando = true;
+      this.rolarParaBaixo(400);
+    }
+
+    if ( this.perguntaSelecionada ) {
+      this.perguntaSelecionada.valor = valor;
+      this.perguntaSelecionada.desc_valor = message;
+      this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
+      this.rolarParaBaixo(100);
+    }
+
+    if ( !this.perguntaSelecionada ) {
+      if ( this.jaIniciou ) {
+        this.digitando = false;
+        await this.mostrarConfirmacaoFinal();
+      } else {
+        this.jaIniciou = true;
+        await this.enviaRoteiro();
       }
     }
 
@@ -238,11 +279,11 @@ export class Home implements OnInit {
 
   /**
    * Busca informações de endereço com base no CEP fornecido e preenche as subperguntas correspondentes.
-   * @param {any} event - Objeto contendo o valor do CEP a ser buscado.
+   * @param {any} cep - Objeto contendo o valor do CEP a ser buscado.
    * @returns {Promise<boolean>} Retorna uma promessa que resolve para true se o CEP for encontrado e processado corretamente, caso contrário, false.
    */
-  protected async buscaCep (event: any): Promise<boolean> {
-    const response: CepResponseApi = await this.backend.apiGetExternal(`https://api.sistemaspleno.com/api/vistoria/v2/address?cep=${event.valor}`, null, () => this.tratarCepErro());
+  protected async buscaCep (cep: any): Promise<boolean> {
+    const response: CepResponseApi = await this.backend.apiGetExternal(`https://api.sistemaspleno.com/api/vistoria/v2/address?cep=${cep}`, null, () => this.tratarCepErro());
 
     if ( response && this.perguntaSelecionada && this.perguntaSelecionada?.tipo_input === 'CEP' ) {
       this.preencherSubperguntasComCep(this.perguntaSelecionada.sub_perguntas, response);
@@ -367,7 +408,7 @@ export class Home implements OnInit {
    * Valida o agendamento atual verificando as condições necessárias e atualizando o estado da aplicação.
    * @returns {Promise<boolean>} Retorna uma promessa que resolve para true se o agendamento for válido, caso contrário, false.
    */
-  private async validarAgendamento (): Promise<boolean> {
+  private async validarAgendamento () {
     if ( !this.verificarAgendamento ) {
       return true;
     }
@@ -433,36 +474,6 @@ export class Home implements OnInit {
   }
 
   /**
-   * Extrai a resposta de um dado fornecido, retornando o valor e a mensagem correspondente.
-   * @param {{ valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }} event - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
-   * @returns {{ valor: any, message: string }} Objeto contendo o valor extraído e a mensagem.
-   */
-  private extrairResposta (event: { valor: any; tipo?: string }): { valor: any, message: any } {
-    const tipo = event.tipo === 'TEL' ||
-      event.tipo === 'TEXT' ||
-      event.tipo === 'INTEGER' ||
-      event.tipo === 'CEP' ||
-      event.tipo === 'PULAR';
-    if ( tipo ) {
-      return { valor: event.valor, message: event.valor };
-    }
-    if ( event.tipo === 'SELECT' || event.tipo === 'DATE' || event.tipo === 'DATETIME' || event.tipo === 'TIME' ) {
-      return { valor: event.valor.label_value, message: event.valor.label_desc };
-    }
-    if ( event.tipo === 'FLOAT' ) {
-      return { valor: event.valor, message: this.currencyPipe.transform(event.valor, 'BRL', '', '1.2-2', 'pt-BR') };
-    }
-    if ( event.tipo === 'CURRENCY' ) {
-      return { valor: event.valor, message: this.currencyPipe.transform(event.valor, 'BRL', 'symbol', '1.2-2', 'pt-BR') };
-    }
-    if ( event.tipo === 'FILE' ) {
-      const listaAnexos = event.valor.map((anexo: AnexoInterface) => anexo.base64);
-      return { valor: listaAnexos, message: `${listaAnexos.length} ${listaAnexos.length > 1 ? 'anexos inseridos.' : 'anexo inserido.'}` };
-    }
-    return { valor: null, message: '' };
-  }
-
-  /**
    * Envia o roteiro atual para o backend e atualiza a interface do usuário.
    * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
    * @description
@@ -496,7 +507,7 @@ export class Home implements OnInit {
 
     UtilsService.carregando(false);
     this.digitando = false;
-    setTimeout((): void => this.rolarParaBaixo());
+    this.rolarParaBaixo();
   }
 
   /**
