@@ -14,6 +14,8 @@ import { ConversaMessageInterface } from '../../common/types';
 })
 export class IaMessage {
   @Input() public mensagemIa?: ConversaMessageInterface;
+  @Input() public logoEmpresa?: string;
+  protected defaultImage = 'assets/images/lazy.gif';
 
   constructor (protected backend: BackendService) {
   }

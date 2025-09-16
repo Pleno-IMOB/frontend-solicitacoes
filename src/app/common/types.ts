@@ -169,14 +169,14 @@ export interface ErrorBackendInterface {
 export interface ImobiliariaInterface {
   imob_codigo: number;
   bai_codigo: number;
-  imob_empresa: string;
+  imob_empresa?: string;
   imob_creci: string;
   imob_cod_cid_dimob: number | null;
-  imob_cpf: string | null;
+  imob_cpf?: string | null;
   imob_inscricao_estadual: string | null;
   imob_inscricao_municipal: string;
   imob_site: string;
-  imob_email: string;
+  imob_email?: string;
   imob_telefone: string;
   imob_cep: string;
   imob_endereco: string;
@@ -185,7 +185,7 @@ export interface ImobiliariaInterface {
   uf_codigo: number;
   cid_codigo: number;
   imob_tipo: string;
-  imob_cnpj: string;
+  imob_cnpj?: string;
   imob_logomarca_enc: string;
   imob_cpf_rfb: string;
   imob_sms: number;
@@ -214,7 +214,7 @@ export interface ImobiliariaInterface {
   imob_numero_aedf: string | null;
   imob_android: string | null;
   imob_ios: string | null;
-  imob_telefone_wpp: string;
+  imob_telefone_wpp?: string;
   imob_imposto_venda: string;
   imob_nota_fiscal_email_contador: string;
   imob_nota_fiscal_certificado: string;

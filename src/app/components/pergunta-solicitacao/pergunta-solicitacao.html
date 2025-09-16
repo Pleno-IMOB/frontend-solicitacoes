@@ -3,7 +3,7 @@
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
     alt="logo-empresa">
   <div class="ia-message px-4 py-2">
-    <p [innerHTML]="perguntaSolicitacao.pergunta" class="pt-2 mb-1"></p>
+    <p [innerHTML]="perguntaSolicitacao.pergunta | nl2br" class="pt-2 mb-1"></p>
     @switch (true) {
       @case (perguntaSolicitacao.tipo_input === 'TEXT') {
         <mat-form-field class="w-100">

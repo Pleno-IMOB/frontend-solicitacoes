@@ -1,20 +1,39 @@
 <footer id="footer">
   <div class="d-flex justify-content-between align-items-center">
     <img
-      alt="Pleno sistemas para imobiliárias"
-      src="https://www.sistemaspleno.com/wp-content/themes/plenoimob/assets/img/logo.svg">
+      #img
+      (error)="img.src = this.defaultImage"
+      [src]="logoEmpresa"
+      alt="logo-empresa"
+      loading="lazy">
     <div class="divider"></div>
     <div class="social-media-container">
-      <a href="https://www.sistemaspleno.com" target="_blank">
-        <mat-icon>language</mat-icon>
-      </a>
-      <a href="https://www.youtube.com/@pleno_sistemas" target="_blank"><i class="fab fa-youtube"></i></a>
-      <a href="https://www.instagram.com/sistemaspleno" target="_blank"><i class="fab fa-instagram"></i></a>
-      <a href="https://br.linkedin.com/company/plenosistemas" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+      @if (telefoneFormatado) {
+        <a
+          [href]="'https://wa.me/55' + telefoneFormatado + '?text=Olá!%20vim%20da%20página%20de%20agendamentos,%20gostaria%20de%20mais%20informações.'"
+          target="_blank">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      }
+
+      @if (imobiliaria?.imob_email) {
+        <a [href]="'mailto:' + imobiliaria?.imob_email" target="_blank"><i class="far fa-envelope"></i></a>
+      }
     </div>
   </div>
-  <div class="pt-2">
-    <p class="m-0 dados-pleno">Pleno Sistemas</p>
-    <p class="m-0 dados-pleno">CNPJ: 18.742.753/0001-38</p>
+  <div class="w-100 pt-2 d-flex justify-content-between align-items-end">
+    <div>
+      <p class="m-0 dados-pleno">{{ imobiliaria?.imob_empresa }}</p>
+      @if (imobiliaria?.imob_cnpj) {
+        <p class="m-0 dados-pleno">CNPJ: {{ imobiliaria?.imob_cnpj }}</p>
+      } @else if (imobiliaria?.imob_cpf) {
+        <p class="m-0 dados-pleno">CPF: {{ imobiliaria?.imob_cpf }}</p>
+      }
+    </div>
+    <div>
+      <p class="m-0 dados-pleno">
+        Desenvolvido por <a href="https://sistemaspleno.com" target="_blank">Pleno Sistemas</a>
+      </p>
+    </div>
   </div>
 </footer>
