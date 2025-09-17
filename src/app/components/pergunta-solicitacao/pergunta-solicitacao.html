@@ -176,6 +176,30 @@
           </div>
         </div>
       }
+      @case (perguntaSolicitacao.tipo_input === 'TIME') {
+        @let valido = form.get('time')?.value;
+        <div class="w-100 row">
+          <mat-form-field class="col-md-10 pr-0">
+            <input
+              matInput
+              formControlName="time"
+              readonly
+              (click)="timePicker.open()"
+              [matTimepicker]="timePicker"
+              placeholder="Selecione o horário HH:mm">
+            <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+            <mat-timepicker #timePicker />
+          </mat-form-field>
+          <div class="button-container col-md-2">
+            <button
+              (click)="enviarMensagem()"
+              [disabled]="!valido"
+              matButton="filled">
+              <mat-icon class="send-icon">send</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
       @case (perguntaSolicitacao.tipo_input === 'CEP') {
         <mat-form-field class="w-100">
           <input

@@ -54,6 +54,7 @@ export class Home implements OnInit {
   protected digitando = false;
   protected readonly UtilsService = UtilsService;
   private listaPerguntas: PerguntaSolicitacaoInterface[] = [];
+  private verificarAgendamento = true;
   private jaIniciou = false;
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
@@ -89,6 +90,12 @@ export class Home implements OnInit {
 
     this.digitando = false;
     this.toaster.error('Nenhum endereço encontrado. Verifique os dados informados.', 'Oops!');
+  }
+
+  public async callbackError (callback: any) {
+    this.conversaIa?.pop();
+    this.digitando = true;
+    return callback();
   }
 
   /**
@@ -172,31 +179,31 @@ export class Home implements OnInit {
       const conversa = this.criarConversa(message, this.perguntaSelecionada?.pergunta || '');
       this.conversaIa.push(conversa);
       this.digitando = true;
-      this.rolarDepois(400);
+      this.rolarParaBaixo(400);
     }
 
     if ( this.perguntaSelecionada ) {
       this.perguntaSelecionada.valor = valor;
       this.perguntaSelecionada.desc_valor = message;
-      this.rolarDepois(400);
+      this.rolarParaBaixo(400);
       this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
-      this.rolarDepois();
+      this.rolarParaBaixo();
     }
 
     if ( !this.perguntaSelecionada ) {
       if ( this.jaIniciou ) {
         this.digitando = false;
-        this.mostrarConfirmacaoFinal();
+        await this.mostrarConfirmacaoFinal();
       } else {
         this.jaIniciou = true;
         await this.enviaRoteiro();
-        this.rolarDepois();
+        this.rolarParaBaixo();
       }
     }
 
     setTimeout(() => {
       this.digitando = false;
-      this.rolarDepois();
+      this.rolarParaBaixo();
     }, 800);
 
     this.cd.detectChanges();
@@ -311,7 +318,11 @@ export class Home implements OnInit {
    * Exibe a confirmação final das respostas coletadas e atualiza a interface do usuário.
    * @returns {void}
    */
-  private mostrarConfirmacaoFinal (): void {
+  private async mostrarConfirmacaoFinal (): Promise<void> {
+    if ( !(await this.validarAgendamento()) ) {
+      return;
+    }
+
     const resumo = this.coletarRespostas(this.listaPerguntas);
     const confirmacao = this.criarConversa(
       '',
@@ -327,12 +338,50 @@ export class Home implements OnInit {
     }, 200);
   }
 
-  /**
-   * Rola a visualização para baixo após um atraso especificado.
-   * @param delay Tempo em milissegundos antes de rolar a visualização. Padrão é 100.
-   */
-  private rolarDepois (delay = 100): void {
-    setTimeout(() => this.rolarParaBaixo(), delay);
+  private async validarAgendamento () {
+    if ( !this.verificarAgendamento ) {
+      return true;
+    }
+
+    this.digitando = true;
+    this.rolarParaBaixo();
+
+    const params: any = {
+      host: this.backend.urlSistema,
+      thread_id: this.thread_id,
+      cli_codigo: this.authService.pessoa.value?.cli_codigo,
+      pes_codigo: this.authService.pessoa.value?.pes_codigo,
+      roteiro: this.listaPerguntas
+    };
+
+    const roteiro = await this.backend.apiPost<{
+      roteiro: PerguntaSolicitacaoInterface[],
+      thread_id: string;
+    }>(`solicitacao/chat/v2/verificarAgendamento`, params, () => null).catch(() => null);
+    this.digitando = false;
+
+    if ( !roteiro ) {
+      this.conversaIa.push({
+        iaMessage: {
+          message: 'Não foi possível processar a requisição!',
+          time: moment().format('HH:mm:ss DD/MM/YY'),
+          error: {
+            callback: () => this.callbackError(this.validarAgendamento.bind(this))
+          }
+        }
+      } as ConversaInterface);
+
+      return false;
+    }
+
+    if ( roteiro?.roteiro?.length && roteiro?.roteiro?.length !== this.listaPerguntas?.length ) {
+      this.perguntaSelecionada = roteiro.roteiro[this.listaPerguntas.length];
+      this.listaPerguntas = roteiro.roteiro;
+      this.verificarAgendamento = false;
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -363,8 +412,7 @@ export class Home implements OnInit {
     if ( tipo ) {
       return { valor: event.valor, message: event.valor };
     }
-    console.log(event);
-    if ( event.tipo === 'SELECT' || event.tipo === 'DATE' || event.tipo === 'DATETIME' ) {
+    if ( event.tipo === 'SELECT' || event.tipo === 'DATE' || event.tipo === 'DATETIME' || event.tipo === 'TIME' ) {
       return { valor: event.valor.label_value, message: event.valor.label_desc };
     }
     if ( event.tipo === 'FLOAT' ) {
@@ -585,7 +633,7 @@ export class Home implements OnInit {
    * Rola a visualização para o final do container de conversa.
    * @return Não retorna valor.
    */
-  private rolarParaBaixo (): void {
+  private rolarParaBaixo (delay: number = 0): void {
     setTimeout(() => {
       const container = this.conversaContainer.nativeElement;
       container.scrollTo({
@@ -593,7 +641,7 @@ export class Home implements OnInit {
         behavior: 'smooth'
       });
       this.cd.detectChanges();
-    }, 0);
+    }, delay);
   }
 
   /**

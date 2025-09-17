@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
 import { BackendService } from '../../services/backend.service';
+import { ConversaMessageInterface } from '../../common/types';
 
 @Component({
   selector: 'app-ia-message',
@@ -22,7 +23,7 @@ import { BackendService } from '../../services/backend.service';
   standalone: true
 })
 export class IaMessage {
-  @Input() public mensagemIa?: { message: string, time: string };
+  @Input() public mensagemIa?: ConversaMessageInterface;
 
   constructor (
     protected backend: BackendService

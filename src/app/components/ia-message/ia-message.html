@@ -4,6 +4,13 @@
     alt="logo-empresa">
   <div class="ia-message px-4 py-2">
     <p [innerHtml]="((mensagemIa?.message || '') | nl2br)" class="mb-1"></p>
-    <small class="mb-0">{{ mensagemIa?.time }}</small>
+
+    @if (mensagemIa?.error?.callback) {
+      <button class="d-block mb-2 btn btn-outline-danger btn-sm" (click)="mensagemIa?.error?.callback()">
+        <i class="far fa-paper-plane"></i>
+        Tentar novamente
+      </button>
+    }
+    <small [class.text-danger]="mensagemIa?.error?.callback" class="mb-0">{{ mensagemIa?.time }} </small>
   </div>
 </div>

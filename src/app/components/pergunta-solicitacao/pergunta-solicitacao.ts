@@ -125,8 +125,23 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     if ( this.perguntaSolicitacao.tipo_input === 'DATETIME' ) {
       const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
       const datetime = {
-        label_value: `${moment(this.form.get('date')?.value).format('YY/MM/DD')} ${time}`,
-        label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')} ${time}`
+        label_value: `${moment(this.form.get('date')?.value).format('YYYY-MM-DD')} ${time}`,
+        label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YYYY')} - ${time}`
+      };
+      this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
+      setTimeout(() => this.matSelect?.close());
+    } else if ( this.perguntaSolicitacao.tipo_input === 'DATE' ) {
+      const datetime = {
+        label_value: `${moment(this.form.get('date')?.value).format('YYYY-MM-DD')}`,
+        label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')}`
+      };
+      this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
+      setTimeout(() => this.matSelect?.close());
+    } else if ( this.perguntaSolicitacao.tipo_input === 'TIME' ) {
+      const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
+      const datetime = {
+        label_value: time,
+        label_desc: time
       };
       this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
       setTimeout(() => this.matSelect?.close());

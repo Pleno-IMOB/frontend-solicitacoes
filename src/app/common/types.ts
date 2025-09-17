@@ -312,8 +312,16 @@ export interface PerguntaRespostaInterface {
 }
 
 export interface ConversaInterface {
-  iaMessage: { message: string, time: string };
-  userMessage: { message: string | number, time: string };
+  iaMessage: ConversaMessageInterface;
+  userMessage: ConversaMessageInterface;
+}
+
+export interface ConversaMessageInterface {
+  message: any,
+  time: string,
+  error?: {
+    callback: () => any;
+  }
 }
 
 export interface AnexoInterface {
@@ -333,7 +341,7 @@ export interface ClienteInterface {
 
 export interface PerguntaSolicitacaoInterface {
   pergunta: string;
-  tipo_input: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME' | 'CEP' | 'TEL';
+  tipo_input: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME' | 'TIME' | 'CEP' | 'TEL';
   obrigatorio: any;
   options: OptionRespostaSolicitacaoInterface[],
   campo: string;
