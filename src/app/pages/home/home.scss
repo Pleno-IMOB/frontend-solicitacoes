@@ -1,14 +1,20 @@
-.main-container {
+.bottom-messages {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  min-height: calc(100vh - 138px);
+  max-height: calc(100vh - 138px);
+  background-color: #f2f2f5;
+  overflow-y: auto;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
   background-color: #f2f2f5;
   padding: calc(90px + 2vh) 3vw 2vh;
-  height: auto;
-  min-height: calc(100vh - 138px);
-  max-height: calc(100vh - 138px);
-  overflow-y: auto;
+  overflow-y: scroll;
 
   div {
     display: flex;
@@ -70,4 +76,8 @@
     width: 24px !important;
     font-size: 24px !important;
   }
+}
+
+.main-container {
+  scroll-behavior: smooth;
 }

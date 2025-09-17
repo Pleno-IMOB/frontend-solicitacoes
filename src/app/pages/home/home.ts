@@ -3,12 +3,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { Header } from '../../components/header/header';
 import { Footer } from '../../components/footer/footer';
 import { MatCardModule } from '@angular/material/card';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { ConversaInterface, PerguntaRespostaInterface, PerguntaSolicitacaoInterface } from '../../common/types';
+import { ConversaInterface, OptionRespostaSolicitacaoInterface, PerguntaRespostaInterface, PerguntaSolicitacaoInterface } from '../../common/types';
 import moment from 'moment';
 import { BackendService } from '../../services/backend.service';
 import { Login } from '../login/login';
@@ -62,7 +62,8 @@ export class Home implements OnInit {
     private backend: BackendService,
     private dialog: MatDialog,
     protected authService: AuthService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private currencyPipe: CurrencyPipe
   ) {
   }
 
@@ -127,6 +128,17 @@ export class Home implements OnInit {
       this.thread_id = response.thread_id;
     }
 
+    // this.perguntaSelecionada = {
+    //   pergunta: 'Olá, poderia me informar o tipo de vistoria que deseja agendar?',
+    //   tipo_input: 'DATETIME',
+    //   obrigatorio: 1,
+    //   options: [],
+    //   campo: 'tip_vis_codigo',
+    //   valor: 26,
+    //   sub_perguntas: [],
+    //   desc_valor: 'Saída'
+    // };
+
     UtilsService.carregando(false);
     this.digitando = false;
     setTimeout(() => this.rolarParaBaixo());
@@ -134,28 +146,33 @@ export class Home implements OnInit {
 
   /**
    * Processa a resposta recebida e atualiza a interface do usuário.
-   * @param {string | { label_desc: string; label_value: any }} dado - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
+   * @param {string | { valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }} event - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
    * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
    */
-  protected async recebeResposta (
-    dado: string | { label_desc: string; label_value: any }
-  ): Promise<void> {
-    const { valor, message } = this.extrairResposta(dado);
+  protected async recebeResposta (event: { valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }): Promise<void> {
+    console.log(event);
+    const { valor, message } = this.extrairResposta(event);
+    console.log(valor, message);
 
     if ( message ) {
       const conversa = this.criarConversa(message, this.perguntaSelecionada?.pergunta || '');
       this.conversaIa.push(conversa);
-      this.rolarDepois();
+      this.digitando = true;
+      this.rolarDepois(400);
+      this.rolarDepois(400);
     }
 
     if ( this.perguntaSelecionada ) {
       this.perguntaSelecionada.valor = valor;
       this.perguntaSelecionada.desc_valor = message;
+      this.rolarDepois(400);
       this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
+      this.rolarDepois();
     }
 
     if ( !this.perguntaSelecionada ) {
       if ( this.jaIniciou ) {
+        this.digitando = false;
         this.mostrarConfirmacaoFinal();
       } else {
         this.jaIniciou = true;
@@ -163,6 +180,11 @@ export class Home implements OnInit {
         this.rolarDepois();
       }
     }
+
+    setTimeout(() => {
+      this.digitando = false;
+      this.rolarDepois();
+    }, 800);
 
     this.cd.detectChanges();
   }
@@ -258,25 +280,39 @@ export class Home implements OnInit {
    * @param iaMessage Mensagem gerada pela IA.
    * @returns Objeto de interface de conversa contendo as mensagens e o horário atual.
    */
-  private criarConversa (userMessage: string, iaMessage: string): ConversaInterface {
+  private criarConversa (userMessage: string | number, iaMessage: string): ConversaInterface {
     const agora = moment().format('HH:mm:ss DD/MM/YY');
+    const valor = typeof userMessage === 'string' ? userMessage : userMessage;
     return {
-      userMessage: { time: agora, message: userMessage },
+      userMessage: { time: agora, message: valor || '' },
       iaMessage: { time: agora, message: iaMessage }
     };
   }
 
   /**
    * Extrai a resposta de um dado fornecido, retornando o valor e a mensagem correspondente.
-   * @param {string | { label_desc: string; label_value: any }} dado - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
+   * @param {{ valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }} event - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
    * @returns {{ valor: any, message: string }} Objeto contendo o valor extraído e a mensagem.
    */
-  private extrairResposta (dado: string | { label_desc: string; label_value: any }): { valor: any, message: string } {
-    if ( typeof dado === 'string' ) {
-      return { valor: dado, message: dado };
+  private extrairResposta (event: { valor: any; tipo?: string }): { valor: any, message: any } {
+    console.log(event);
+    const tipo = event.tipo === 'DATE' ||
+      event.tipo === 'DATETIME' ||
+      event.tipo === 'CEP' ||
+      event.tipo === 'TEL' ||
+      event.tipo === 'TEXT' ||
+      event.tipo === 'INTEGER';
+    if ( tipo ) {
+      return { valor: event.valor, message: event.valor };
     }
-    if ( dado ) {
-      return { valor: dado.label_value, message: dado.label_desc };
+    if ( event.tipo === 'SELECT' ) {
+      return { valor: event.valor.label_value, message: event.valor.label_desc };
+    }
+    if ( event.tipo === 'FLOAT' ) {
+      return { valor: event.valor, message: this.currencyPipe.transform(event.valor, 'BRL', '', '1.2-2', 'pt-BR') };
+    }
+    if ( event.tipo === 'CURRENCY' ) {
+      return { valor: event.valor, message: this.currencyPipe.transform(event.valor, 'BRL', 'symbol', '1.2-2', 'pt-BR') };
     }
     return { valor: null, message: '' };
   }
@@ -422,6 +458,10 @@ export class Home implements OnInit {
     }
 
     if ( !pergunta.condicao_exibicao || pergunta.condicao_exibicao.length === 0 ) {
+      return true;
+    }
+
+    if ( pergunta.condicao_exibicao[0] === true && valorPai ) {
       return true;
     }
 

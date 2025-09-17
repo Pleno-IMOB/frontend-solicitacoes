@@ -1,14 +1,21 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { PerguntaSolicitacaoInterface } from '../../common/types';
-import { MatFormField, MatInput } from '@angular/material/input';
+import { OptionRespostaSolicitacaoInterface, PerguntaSolicitacaoInterface } from '../../common/types';
+import { MatFormField, MatInput, MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BackendService } from '../../services/backend.service';
 import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 import { MatOption, MatSelect } from '@angular/material/select';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
 import { MatChipListbox, MatChipOption } from '@angular/material/chips';
+import { OnlyNumbers } from '../../directives/onlyNumbers';
+import { NgxCurrencyDirective } from 'ngx-currency';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatTimepicker, MatTimepickerInput, MatTimepickerToggle } from '@angular/material/timepicker';
+import { MascaraDirective } from '../../services/mascara/mascara.directive';
 
 @Component({
   selector: 'app-pergunta-solicitacao',
@@ -17,12 +24,23 @@ import { MatChipListbox, MatChipOption } from '@angular/material/chips';
     MatInput,
     ReactiveFormsModule,
     MatFormField,
+    MatFormFieldModule,
     MatButton,
     MatIcon,
     MatSelect,
     MatOption,
     MatChipOption,
-    MatChipListbox
+    MatChipListbox,
+    OnlyNumbers,
+    MatInputModule,
+    NgxCurrencyDirective,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+    MatTimepickerInput,
+    MatTimepickerToggle,
+    MatTimepicker,
+    MascaraDirective
   ],
   templateUrl: './pergunta-solicitacao.html',
   styleUrl: './pergunta-solicitacao.scss',
@@ -30,7 +48,10 @@ import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 })
 export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   @Input() public perguntaSolicitacao!: PerguntaSolicitacaoInterface;
-  @Output() enviaRespostaUsuario: EventEmitter<string> = new EventEmitter<string>();
+  @Output() enviaRespostaUsuario = new EventEmitter<{
+    valor: string | OptionRespostaSolicitacaoInterface;
+    tipo: string;
+  }>();
   @ViewChild(MatSelect) matSelect?: MatSelect;
   protected form: FormGroup;
   protected filteredOptions: any[] = [];
@@ -44,6 +65,8 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   ) {
     this.form = this.formBuilder.group({
       resposta: [ null ],
+      date: [ null ],
+      time: [ null ],
       search: [ null ]
     });
   }
@@ -81,10 +104,22 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     this.searchSub?.unsubscribe();
   }
 
-  protected enviarMensagem (): void {
-    this.showForm = false;
-    this.enviaRespostaUsuario.emit(this.form.get('resposta')?.value);
-    setTimeout(() => this.matSelect?.close());
+  protected enviarMensagem (tipoInput?: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME'): void {
+    console.log(this.form.get('resposta')?.value);
+    if ( tipoInput === 'DATETIME' ) {
+      this.showForm = false;
+      const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
+      const datetime = {
+        label_value: `${moment(this.form.get('date')?.value).format('YY/MM/DD')} ${time}`,
+        label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')} ${time}`
+      };
+      this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
+      setTimeout(() => this.matSelect?.close());
+    } else {
+      this.showForm = false;
+      this.enviaRespostaUsuario.emit({ valor: this.form.get('resposta')?.value, tipo: this.perguntaSolicitacao.tipo_input });
+      setTimeout(() => this.matSelect?.close());
+    }
   }
 
   private removeAccents (value: string): string {

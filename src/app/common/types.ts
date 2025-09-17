@@ -313,7 +313,7 @@ export interface PerguntaRespostaInterface {
 
 export interface ConversaInterface {
   iaMessage: { message: string, time: string };
-  userMessage: { message: string, time: string };
+  userMessage: { message: string | number, time: string };
 }
 
 export interface AnexoInterface {
@@ -332,10 +332,10 @@ export interface ClienteInterface {
 }
 
 export interface PerguntaSolicitacaoInterface {
-  id: number;
+  id?: number;
   pergunta: string;
-  tipo_input: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME';
-  obrigatorio: boolean;
+  tipo_input: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME' | 'CEP' | 'TEL';
+  obrigatorio: any;
   options: OptionRespostaSolicitacaoInterface[],
   campo: string;
   valor: any;

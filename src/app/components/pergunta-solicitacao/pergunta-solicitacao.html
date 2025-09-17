@@ -3,7 +3,7 @@
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
     alt="logo-empresa">
   <div class="ia-message px-4 py-2">
-    <p class="pt-2 mb-1">{{ perguntaSolicitacao.pergunta }}</p>
+    <p [innerHTML]="perguntaSolicitacao.pergunta" class="pt-2 mb-1"></p>
     @if (showForm) {
       @switch (true) {
         @case (perguntaSolicitacao.tipo_input === 'TEXT') {
@@ -64,10 +64,12 @@
         @case (perguntaSolicitacao.tipo_input === 'INTEGER') {
           <mat-form-field class="w-100">
             <input
-              (keydown.enter)="enviarMensagem()"
+              (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+              (keydown.space)="$event.stopPropagation()"
               formControlName="resposta"
               matInput
-              class="position-relative"
+              onlyNumbers
+              class="position-relative input-pergunta"
               placeholder="Responda aqui.."
               type="number">
             <div class="button-container position-absolute">
@@ -83,12 +85,12 @@
         @case (perguntaSolicitacao.tipo_input === 'FLOAT') {
           <mat-form-field class="w-100">
             <input
-              (keydown.enter)="enviarMensagem()"
+              (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
               formControlName="resposta"
               matInput
-              class="position-relative"
-              placeholder="Responda aqui.."
-              type="text">
+              [currencyMask]="{ prefix: '', thousands: '.', decimal: ',', align: 'left' }"
+              class="position-relative input-pergunta"
+              placeholder="Responda aqui..">
             <div class="button-container position-absolute">
               <button
                 (click)="enviarMensagem()"
@@ -102,12 +104,13 @@
         @case (perguntaSolicitacao.tipo_input === 'CURRENCY') {
           <mat-form-field class="w-100">
             <input
-              (keydown.enter)="enviarMensagem()"
+              (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+              (keydown.space)="$event.stopPropagation()"
               formControlName="resposta"
               matInput
-              class="position-relative"
-              placeholder="Responda aqui.."
-              type="text">
+              [currencyMask]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }"
+              class="position-relative input-pergunta"
+              placeholder="Responda aqui..">
             <div class="button-container position-absolute">
               <button
                 (click)="enviarMensagem()"
@@ -121,10 +124,62 @@
         @case (perguntaSolicitacao.tipo_input === 'DATE') {
           <mat-form-field class="w-100">
             <input
-              (keydown.enter)="enviarMensagem()"
+              (dateChange)="enviarMensagem()"
+              (click)="picker.open()"
+              placeholder="DD/MM/AAAA"
+              readonly
+              matInput
+              [matDatepicker]="picker"
+              formControlName="resposta">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'DATETIME') {
+          @let valido = form.get('date')?.value && form.get('time')?.value;
+          <div class="w-100 row">
+            <mat-form-field class="col-md-5 pr-0">
+              <input
+                (click)="picker.open()"
+                placeholder="DD/MM/AAAA"
+                readonly
+                matInput
+                [matDatepicker]="picker"
+                formControlName="date">
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field class="col-md-5 pr-0">
+              <input
+                matInput
+                formControlName="time"
+                readonly
+                (click)="timePicker.open()"
+                [matTimepicker]="timePicker"
+                matTimepickerMin="06:00"
+                matTimepickerMax="12:00">
+              <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+              <mat-timepicker #timePicker />
+            </mat-form-field>
+            <div class="button-container col-md-2">
+              <button
+                (click)="enviarMensagem('DATETIME')"
+                [disabled]="!valido"
+                matButton="filled">
+                <mat-icon class="send-icon">send</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+        @case (perguntaSolicitacao.tipo_input === 'CEP') {
+          <mat-form-field class="w-100">
+            <input
+              plenoMask="cep"
+              (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+              (keydown.space)="$event.stopPropagation()"
               formControlName="resposta"
               matInput
-              class="position-relative"
+              class="position-relative input-pergunta"
               placeholder="Responda aqui.."
               type="text">
             <div class="button-container position-absolute">
@@ -137,13 +192,15 @@
             </div>
           </mat-form-field>
         }
-        @case (perguntaSolicitacao.tipo_input === 'DATETIME') {
+        @case (perguntaSolicitacao.tipo_input === 'TEL') {
           <mat-form-field class="w-100">
             <input
-              (keydown.enter)="enviarMensagem()"
+              plenoMask="celularDDD"
+              (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
+              (keydown.space)="$event.stopPropagation()"
               formControlName="resposta"
               matInput
-              class="position-relative"
+              class="position-relative input-pergunta"
               placeholder="Responda aqui.."
               type="text">
             <div class="button-container position-absolute">

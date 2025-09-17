@@ -18,7 +18,7 @@ import { AuthService } from '../../services/auth.service';
   standalone: true
 })
 export class UserMessage {
-  @Input() public mensagemUser?: { message: string, time: string };
+  @Input() public mensagemUser?: { message: string | number, time: string };
 
   constructor (
     protected authService: AuthService
