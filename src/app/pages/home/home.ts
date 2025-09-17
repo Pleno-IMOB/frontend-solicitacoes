@@ -295,7 +295,6 @@ export class Home implements OnInit {
    * @returns {{ valor: any, message: string }} Objeto contendo o valor extraído e a mensagem.
    */
   private extrairResposta (event: { valor: any; tipo?: string }): { valor: any, message: any } {
-    console.log(event);
     const tipo = event.tipo === 'DATE' ||
       event.tipo === 'DATETIME' ||
       event.tipo === 'CEP' ||

@@ -23,7 +23,7 @@
     @let logado = !!authService.pessoaValue?.cli_codigo && !!authService.pessoaValue?.pes_codigo;
     @let podeConfirmar = finalizado && !solicitacaoFinalizada;
     @switch (true) {
-      @case (podeConfirmar && logado) {
+      @case (podeConfirmar) {
         <button
           class="btn-confirmar btn-agendamento"
           color="primary"
@@ -32,39 +32,29 @@
           [disabled]="UtilsService.loading.value"
           (click)="finalizarAgendamento()">
           <div class="d-flex flex-row align-items-center">
-            <b>CONFIRMAR AGENDAMENTO</b>
             @if (UtilsService.loading.value) {
+              <b>CRIANDO AGENDAMENTO, AGUARDE...</b>
               <mat-spinner class="ml-3"></mat-spinner>
             } @else {
+              <b>CONFIRMAR AGENDAMENTO</b>
               <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
             }
           </div>
         </button>
-        <button
-          class="btn-reiniciar-agendamento mt-0"
-          matButton="filled"
-          type="button"
-          [disabled]="UtilsService.loading.value"
-          (click)="iniciarNovaSolicitacao()">
-          <div class="d-flex flex-row align-items-center">
-            <b>NÃO, REINICIAR AGENDAMENTO</b>
-            <mat-icon class="home-btn-icon">close</mat-icon>
-          </div>
-        </button>
+        @if (!UtilsService.loading.value) {
+          <button
+            class="btn-reiniciar-agendamento mt-0"
+            matButton="filled"
+            type="button"
+            [disabled]="UtilsService.loading.value"
+            (click)="iniciarNovaSolicitacao()">
+            <div class="d-flex flex-row align-items-center">
+              <b>NÃO, REINICIAR AGENDAMENTO</b>
+              <mat-icon class="home-btn-icon">close</mat-icon>
+            </div>
+          </button>
+        }
       }
-      <!--    @case (podeConfirmar && !logado) {-->
-        <!--      <button-->
-        <!--        class="btn-confirmar"-->
-        <!--        color="primary"-->
-        <!--        matButton="filled"-->
-        <!--        type="button"-->
-        <!--        (click)="login()">-->
-        <!--        <div class="d-flex flex-row align-items-center">-->
-        <!--          <b>ACESSAR MINHA CONTA</b>-->
-        <!--          <mat-icon class="home-btn-icon">login</mat-icon>-->
-        <!--        </div>-->
-        <!--      </button>-->
-        <!--    }-->
       @case (finalizado && solicitacaoFinalizada) {
         <button
           class="btn-confirmar btn-novo-agendamento"
