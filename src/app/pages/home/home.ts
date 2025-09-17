@@ -98,6 +98,10 @@ export class Home implements OnInit {
   protected async finalizarAgendamento (): Promise<void> {
     UtilsService.carregando(true);
 
+    while ( !this.authService.pessoa.value?.pes_codigo || !this.authService.pessoa.value?.cli_codigo ) {
+      await this.login();
+    }
+
     const params: any = {
       host: this.backend.urlSistema,
       thread_id: this.thread_id,
@@ -156,7 +160,9 @@ export class Home implements OnInit {
   protected async recebeResposta (event: { valor: string | OptionRespostaSolicitacaoInterface | number; tipo?: string }): Promise<void> {
     const { valor, message } = this.extrairResposta(event);
     if ( event.tipo === 'CEP' ) {
+      this.UtilsService.carregando(true);
       const continuarFuncao = await this.buscaCep(event);
+      this.UtilsService.carregando(false);
       if ( !continuarFuncao ) {
         return;
       }
@@ -350,16 +356,15 @@ export class Home implements OnInit {
    * @returns {{ valor: any, message: string }} Objeto contendo o valor extraído e a mensagem.
    */
   private extrairResposta (event: { valor: any; tipo?: string }): { valor: any, message: any } {
-    const tipo = event.tipo === 'DATE' ||
-      event.tipo === 'DATETIME' ||
-      event.tipo === 'TEL' ||
+    const tipo = event.tipo === 'TEL' ||
       event.tipo === 'TEXT' ||
       event.tipo === 'INTEGER' ||
       event.tipo === 'CEP';
     if ( tipo ) {
       return { valor: event.valor, message: event.valor };
     }
-    if ( event.tipo === 'SELECT' ) {
+    console.log(event);
+    if ( event.tipo === 'SELECT' || event.tipo === 'DATE' || event.tipo === 'DATETIME' ) {
       return { valor: event.valor.label_value, message: event.valor.label_desc };
     }
     if ( event.tipo === 'FLOAT' ) {

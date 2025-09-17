@@ -16,6 +16,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTimepicker, MatTimepickerInput, MatTimepickerToggle } from '@angular/material/timepicker';
 import { MascaraDirective } from '../../services/mascara/mascara.directive';
+import { UtilsService } from '../../services/utils.service';
 
 @Component({
   selector: 'app-pergunta-solicitacao',
@@ -58,6 +59,7 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   protected filteredOptions: any[] = [];
   protected time!: string;
   protected showForm = true;
+  protected readonly UtilsService = UtilsService;
   private searchSub?: Subscription;
 
   constructor (
@@ -119,13 +121,19 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     this.searchSub?.unsubscribe();
   }
 
-  protected enviarMensagem (tipoInput?: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME'): void {
-    if ( tipoInput === 'DATETIME' ) {
-      this.showForm = false;
+  protected enviarMensagem (): void {
+    if ( this.perguntaSolicitacao.tipo_input === 'DATETIME' ) {
       const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
       const datetime = {
         label_value: `${moment(this.form.get('date')?.value).format('YY/MM/DD')} ${time}`,
         label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')} ${time}`
+      };
+      this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
+      setTimeout(() => this.matSelect?.close());
+    } else if ( this.perguntaSolicitacao.tipo_input === 'DATE' ) {
+      const datetime = {
+        label_value: `${moment(this.form.get('date')?.value).format('YY/MM/DD')}`,
+        label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')}`
       };
       this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
       setTimeout(() => this.matSelect?.close());

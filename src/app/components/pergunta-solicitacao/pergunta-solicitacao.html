@@ -136,7 +136,7 @@
             readonly
             matInput
             [matDatepicker]="picker"
-            formControlName="resposta">
+            formControlName="date">
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
@@ -146,7 +146,6 @@
         <div class="w-100 row">
           <mat-form-field class="col-md-5 pr-0">
             <input
-              #respostaInput
               (click)="picker.open()"
               placeholder="Selecione a data DD/MM/AAAA"
               readonly
@@ -158,7 +157,6 @@
           </mat-form-field>
           <mat-form-field class="col-md-5 pr-0">
             <input
-              #respostaInput
               matInput
               formControlName="time"
               readonly
@@ -170,7 +168,7 @@
           </mat-form-field>
           <div class="button-container col-md-2">
             <button
-              (click)="enviarMensagem('DATETIME')"
+              (click)="enviarMensagem()"
               [disabled]="!valido"
               matButton="filled">
               <mat-icon class="send-icon">send</mat-icon>
@@ -183,7 +181,7 @@
           <input
             #respostaInput
             plenoMask="cep"
-            (keydown.enter)="(form.get('resposta')?.value && form.get('resposta')?.value?.length === 9) && enviarMensagem()"
+            (keydown.enter)="(form.get('resposta')?.value && form.get('resposta')?.value?.length === 9 && !UtilsService.loading.value) && enviarMensagem()"
             formControlName="resposta"
             matInput
             class="position-relative input-pergunta"
@@ -192,7 +190,7 @@
           <div class="button-container position-absolute">
             <button
               (click)="enviarMensagem()"
-              [disabled]="!form.get('resposta')?.value || form.get('resposta')?.value?.length < 9"
+              [disabled]="!form.get('resposta')?.value || form.get('resposta')?.value?.length < 9 || UtilsService.loading.value"
               matButton="filled">
               <mat-icon class="send-icon">send</mat-icon>
             </button>
