@@ -8,7 +8,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { ConversaInterface, OptionRespostaSolicitacaoInterface, PerguntaRespostaInterface, PerguntaSolicitacaoInterface } from '../../common/types';
+import { CepResponseApi, ConversaInterface, OptionRespostaSolicitacaoInterface, PerguntaRespostaInterface, PerguntaSolicitacaoInterface } from '../../common/types';
 import moment from 'moment';
 import { BackendService } from '../../services/backend.service';
 import { Login } from '../login/login';
@@ -21,6 +21,7 @@ import { UserMessage } from '../../components/user-message/user-message';
 import { IaMessage } from '../../components/ia-message/ia-message';
 import { MessageLoading } from '../../components/message-loading/message-loading';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-home',
@@ -56,6 +57,9 @@ export class Home implements OnInit {
   private jaIniciou = false;
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
+  private cepAliasMap: Record<string, string[]> = {
+    logradouro: [ 'imo_endereco', 'pes_endereco' ]
+  };
 
   constructor (
     private cd: ChangeDetectorRef,
@@ -63,6 +67,7 @@ export class Home implements OnInit {
     private dialog: MatDialog,
     protected authService: AuthService,
     private ngZone: NgZone,
+    private toaster: ToastrService,
     private currencyPipe: CurrencyPipe
   ) {
   }
@@ -74,6 +79,16 @@ export class Home implements OnInit {
   async ngOnInit (): Promise<void> {
     this.interceptarMudancaDeRota();
     await this.iniciaConversaIA();
+  }
+
+  tratarCepErro () {
+    if ( this.perguntaSelecionada ) {
+      this.perguntaSelecionada.valor = null;
+      this.perguntaSelecionada.desc_valor = null;
+    }
+
+    this.digitando = false;
+    this.toaster.error('Nenhum endereço encontrado. Verifique os dados informados.', 'Oops!');
   }
 
   /**
@@ -128,17 +143,6 @@ export class Home implements OnInit {
       this.thread_id = response.thread_id;
     }
 
-    // this.perguntaSelecionada = {
-    //   pergunta: 'Olá, poderia me informar o tipo de vistoria que deseja agendar?',
-    //   tipo_input: 'DATETIME',
-    //   obrigatorio: 1,
-    //   options: [],
-    //   campo: 'tip_vis_codigo',
-    //   valor: 26,
-    //   sub_perguntas: [],
-    //   desc_valor: 'Saída'
-    // };
-
     UtilsService.carregando(false);
     this.digitando = false;
     setTimeout(() => this.rolarParaBaixo());
@@ -149,16 +153,19 @@ export class Home implements OnInit {
    * @param {string | { valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }} event - Dados recebidos que podem ser uma string ou um objeto com descrição e valor.
    * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
    */
-  protected async recebeResposta (event: { valor: string | OptionRespostaSolicitacaoInterface | number; extra?: string }): Promise<void> {
-    console.log(event);
+  protected async recebeResposta (event: { valor: string | OptionRespostaSolicitacaoInterface | number; tipo?: string }): Promise<void> {
     const { valor, message } = this.extrairResposta(event);
-    console.log(valor, message);
+    if ( event.tipo === 'CEP' ) {
+      const continuarFuncao = await this.buscaCep(event);
+      if ( !continuarFuncao ) {
+        return;
+      }
+    }
 
     if ( message ) {
       const conversa = this.criarConversa(message, this.perguntaSelecionada?.pergunta || '');
       this.conversaIa.push(conversa);
       this.digitando = true;
-      this.rolarDepois(400);
       this.rolarDepois(400);
     }
 
@@ -214,6 +221,17 @@ export class Home implements OnInit {
     window.history.pushState({}, '', ('/agendamento'));
   }
 
+  protected async buscaCep (event: any): Promise<boolean> {
+    const response: CepResponseApi = await this.backend.apiGetExternal(`https://api.sistemaspleno.com/api/vistoria/v2/address?cep=${event.valor}`, null, () => this.tratarCepErro());
+
+    if ( response && this.perguntaSelecionada && this.perguntaSelecionada?.tipo_input === 'CEP' ) {
+      this.preencherSubperguntasComCep(this.perguntaSelecionada.sub_perguntas, response);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Realiza o processo de login exibindo um diálogo e redirecionando após sucesso.
    * @return Promessa que resolve quando o login é concluído.
@@ -244,6 +262,43 @@ export class Home implements OnInit {
    */
   protected iniciarNovaSolicitacao (): void {
     setTimeout((): void => window.location.reload(), 800);
+  }
+
+  private preencherSubperguntasComCep (
+    subPerguntas: PerguntaSolicitacaoInterface[],
+    dadosCep: any
+  ): void {
+    for ( const p of subPerguntas ) {
+      const campoFinal = p.campo.split('.').pop();
+
+      let apiKey: string | null = null;
+      for ( const key in this.cepAliasMap ) {
+        if ( this.cepAliasMap[key].includes(campoFinal || '') ) {
+          apiKey = key;
+          break;
+        }
+      }
+
+      if ( !apiKey && campoFinal && dadosCep.hasOwnProperty(campoFinal) ) {
+        apiKey = campoFinal;
+      }
+
+      if ( apiKey && dadosCep.hasOwnProperty(apiKey) ) {
+        const valor = dadosCep[apiKey];
+
+        if ( valor !== null && valor !== undefined && valor !== '' ) {
+          p.valor = valor;
+          p.desc_valor = valor;
+        } else {
+          p.valor = null;
+          p.desc_valor = null;
+        }
+      }
+
+      if ( p.sub_perguntas && p.sub_perguntas.length > 0 ) {
+        this.preencherSubperguntasComCep(p.sub_perguntas, dadosCep);
+      }
+    }
   }
 
   /**
@@ -297,10 +352,10 @@ export class Home implements OnInit {
   private extrairResposta (event: { valor: any; tipo?: string }): { valor: any, message: any } {
     const tipo = event.tipo === 'DATE' ||
       event.tipo === 'DATETIME' ||
-      event.tipo === 'CEP' ||
       event.tipo === 'TEL' ||
       event.tipo === 'TEXT' ||
-      event.tipo === 'INTEGER';
+      event.tipo === 'INTEGER' ||
+      event.tipo === 'CEP';
     if ( tipo ) {
       return { valor: event.valor, message: event.valor };
     }
@@ -415,11 +470,18 @@ export class Home implements OnInit {
    * @returns PerguntaSolicitacaoInterface | null - Retorna a próxima pergunta válida ou null se não houver.
    */
   private getProximaPergunta (atual: PerguntaSolicitacaoInterface): PerguntaSolicitacaoInterface | null {
+    // 1. Verifica filhos
     if ( atual.sub_perguntas && atual.sub_perguntas.length > 0 ) {
-      const filhoValido = atual.sub_perguntas.find(sub => this.verificaCondicao(sub, atual.valor));
-      if ( filhoValido ) return filhoValido;
+      for ( const filho of atual.sub_perguntas ) {
+        if ( this.verificaCondicao(filho, atual.valor) ) {
+          return filho;
+        }
+        const neto = this.getProximaPergunta(filho);
+        if ( neto ) return neto;
+      }
     }
 
+    // 2. Verifica irmãos
     let proximoIrmao = this.getProximoIrmao(atual);
     while ( proximoIrmao ) {
       const pai = this.getPai(proximoIrmao, this.listaPerguntas);
@@ -429,6 +491,7 @@ export class Home implements OnInit {
       proximoIrmao = this.getProximoIrmao(proximoIrmao);
     }
 
+    // 3. Sobe para o pai e tenta irmãos do pai
     let pai = this.getPai(atual, this.listaPerguntas);
     while ( pai ) {
       let irmaoDoPai = this.getProximoIrmao(pai);

@@ -20,7 +20,6 @@
     } @else if (digitando) {
       <app-message-loading></app-message-loading>
     }
-    @let logado = !!authService.pessoaValue?.cli_codigo && !!authService.pessoaValue?.pes_codigo;
     @let podeConfirmar = finalizado && !solicitacaoFinalizada;
     @switch (true) {
       @case (podeConfirmar) {

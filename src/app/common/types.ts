@@ -332,7 +332,6 @@ export interface ClienteInterface {
 }
 
 export interface PerguntaSolicitacaoInterface {
-  id?: number;
   pergunta: string;
   tipo_input: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME' | 'CEP' | 'TEL';
   obrigatorio: any;
@@ -347,4 +346,15 @@ export interface PerguntaSolicitacaoInterface {
 export interface OptionRespostaSolicitacaoInterface {
   label_desc: string;
   label_value: any;
+}
+
+export interface CepResponseApi {
+  uf_uf: string;
+  cid_nome: string;
+  bai_nome: string;
+  logradouro: string;
+  complemento: string;
+  uf_codigo: number;
+  cid_codigo: number;
+  bai_codigo: number;
 }

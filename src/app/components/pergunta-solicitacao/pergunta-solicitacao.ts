@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { OptionRespostaSolicitacaoInterface, PerguntaSolicitacaoInterface } from '../../common/types';
 import { MatFormField, MatInput, MatInputModule } from '@angular/material/input';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -53,6 +53,7 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     tipo: string;
   }>();
   @ViewChild(MatSelect) matSelect?: MatSelect;
+  @ViewChild('respostaInput') respostaInput?: ElementRef<HTMLInputElement>;
   protected form: FormGroup;
   protected filteredOptions: any[] = [];
   protected time!: string;
@@ -88,16 +89,30 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges (): void {
+    setTimeout(() => this.matSelect?.close());
     this.form.reset();
     this.form.get('resposta')?.clearValidators();
     this.form.get('resposta')?.updateValueAndValidity();
-    setTimeout(() => this.matSelect?.close());
+
     if ( this.perguntaSolicitacao?.obrigatorio ) {
       this.form.get('resposta')?.setValidators([ Validators.required ]);
     }
 
+    const temInput = this.perguntaSolicitacao?.tipo_input === 'TEXT' ||
+      this.perguntaSolicitacao?.tipo_input === 'INTEGER' ||
+      this.perguntaSolicitacao?.tipo_input === 'FLOAT' ||
+      this.perguntaSolicitacao?.tipo_input === 'TEL' ||
+      this.perguntaSolicitacao?.tipo_input === 'CURRENCY' ||
+      this.perguntaSolicitacao?.tipo_input === 'CEP';
+
     this.filteredOptions = this.perguntaSolicitacao?.options ?? [];
     this.showForm = true;
+    this.form.updateValueAndValidity();
+    setTimeout((): void => {
+      if ( temInput && this.respostaInput ) {
+        this.respostaInput.nativeElement.focus();
+      }
+    }, 300);
   }
 
   ngOnDestroy (): void {
@@ -105,7 +120,6 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   }
 
   protected enviarMensagem (tipoInput?: 'TEXT' | 'SELECT' | 'INTEGER' | 'FLOAT' | 'CURRENCY' | 'DATE' | 'DATETIME'): void {
-    console.log(this.form.get('resposta')?.value);
     if ( tipoInput === 'DATETIME' ) {
       this.showForm = false;
       const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
