@@ -1,6 +1,6 @@
 import { FormGroup } from '@angular/forms';
 import format from 'format-number';
-import { DataConfig } from './types';
+import { DataConfigInterface } from './types';
 
 /**
  * Remove acentos e caracteres especiais de uma string.
@@ -26,10 +26,10 @@ export function removeAcento (text: any) {
 /**
  * Limpa e formata os dados de um objeto com base nas configurações fornecidas.
  * @param {any} objeto - O objeto que será processado.
- * @param {DataConfig} [cfg={}] - Configurações opcionais para formatação de dados.
+ * @param {DataConfigInterface} [cfg={}] - Configurações opcionais para formatação de dados.
  * @param {boolean} [removeEmptyArray=false] - Indica se arrays vazios devem ser removidos.
  */
-export function limparDados (objeto: any, cfg: DataConfig = {} as DataConfig, removeEmptyArray = false) {
+export function limparDados (objeto: any, cfg: DataConfigInterface = {} as DataConfigInterface, removeEmptyArray = false) {
   for ( const propriedade in objeto ) {
     if ( objeto.hasOwnProperty(propriedade) && objeto[propriedade] === undefined || objeto[propriedade] === null || objeto[propriedade] === 'null' ) {
       objeto[propriedade] = '';
@@ -428,4 +428,28 @@ export function formatNum (valor: any, precisao?: number, to?: string, prefixo?:
   }
 
   return valor;
+}
+
+/**
+ * Executa uma função assíncrona repetidamente até que uma condição seja atendida ou o número máximo de tentativas seja alcançado.
+ * @param {() => Promise<any>} fn Função assíncrona a ser executada em cada tentativa.
+ * @param {(res: any) => boolean} condition Função que avalia se o resultado atende ao critério desejado.
+ * @param {number} maxRetries Número máximo de tentativas antes de lançar um erro. Padrão é 20.
+ * @param {number} intervalMs Tempo em milissegundos entre as tentativas. Padrão é 1000.
+ * @return {Promise<any>} Retorna uma Promise com o resultado da função que atende à condição especificada.
+ */
+export async function retryUntil<T> (
+  fn: () => Promise<T>,
+  condition: (res: T) => boolean,
+  maxRetries: number = 20,
+  intervalMs: number = 1000
+): Promise<T> {
+  for ( let attempt = 0; attempt < maxRetries; attempt++ ) {
+    const result = await fn();
+    if ( condition(result) ) {
+      return result;
+    }
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  throw new Error('Condição não foi satisfeita após múltiplas tentativas');
 }

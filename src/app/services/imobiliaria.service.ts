@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import { BackendService } from './backend.service';
-import { Imobiliaria } from '../common/types';
+import { ImobiliariaInterface } from '../common/types';
 
 @Injectable({
   providedIn: 'root'
 })
-export class ImobiliariaService {
-  private imobiliaria$?: Imobiliaria;
+export class ImobiliariaInterfaceService {
+  private imobiliaria$?: ImobiliariaInterface;
 
   constructor (
     private backend: BackendService
@@ -15,9 +15,9 @@ export class ImobiliariaService {
 
   /**
    * Recupera informações da empresa de imobiliária.
-   * @return {Promise<Imobiliaria>} Promessa que resolve com os dados da imobiliária.
+   * @return {Promise<ImobiliariaInterface>} Promessa que resolve com os dados da imobiliária.
    */
-  public async getEmpresa (): Promise<Imobiliaria> {
+  public async getEmpresa (): Promise<ImobiliariaInterface> {
     if ( !this.imobiliaria$ ) {
       this.imobiliaria$ = await this.backend.apiGet('imobiliaria');
     }

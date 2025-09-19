@@ -1,13 +1,20 @@
+.bottom-messages {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: calc(100vh - 138px);
+  max-height: calc(100vh - 138px);
+  background-color: #f2f2f5;
+  overflow-y: auto;
+}
+
 .main-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
   background-color: #f2f2f5;
   padding: calc(90px + 2vh) 3vw 2vh;
-  height: auto;
-  min-height: calc(100vh - 287px);
-  max-height: calc(100vh - 287px);
-  overflow-y: auto;
+  overflow-y: scroll;
 
   div {
     display: flex;
@@ -36,6 +43,18 @@
   border: 2px solid #01426a !important;
 }
 
+.btn-reiniciar-agendamento {
+  height: 54px !important;
+  min-height: 54px !important;
+  width: 340px;
+  min-width: 340px;
+  max-width: 340px;
+  align-self: center;
+  background-color: #ff4d52 !important;
+  color: #ffffff !important;
+  border: 2px solid #ff4d52 !important;
+}
+
 .btn-agendamento {
   background-color: #2dce89 !important;
   color: #fff;
@@ -45,4 +64,20 @@
   font-size: 22px;
   height: 22px;
   width: 22px;
+}
+
+:host::ng-deep mat-spinner {
+  height: 24px !important;
+  width: 24px !important;
+  font-size: 24px !important;
+
+  svg {
+    height: 24px !important;
+    width: 24px !important;
+    font-size: 24px !important;
+  }
+}
+
+.main-container {
+  scroll-behavior: smooth;
 }
