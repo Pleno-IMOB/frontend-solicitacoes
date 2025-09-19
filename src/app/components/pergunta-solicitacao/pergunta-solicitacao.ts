@@ -80,49 +80,17 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
    * Inicializa o componente configurando validações e opções filtradas.
    */
   ngOnInit (): void {
-    if ( this.perguntaSolicitacao?.obrigatorio ) {
-      this.form.get('resposta')?.setValidators([ Validators.required ]);
-    }
-
-    this.filteredOptions = this.perguntaSolicitacao?.options ?? [];
-
-    this.searchSub = this.form.get('search')?.valueChanges.subscribe((value: string) => {
-      this.filteredOptions = this.perguntaSolicitacao.options.filter(opt =>
-        this.removeAccents(opt.label_desc).includes(this.removeAccents(value || ''))
-      );
-    });
-
-    this.time = moment().format('HH:mm:ss DD/MM/YY');
+    this.inicializaPerguntaSolicitacao();
   }
 
   /**
    * Atualiza o formulário e suas validações quando há mudanças nas propriedades de entrada.
    */
   ngOnChanges (): void {
-    setTimeout(() => this.matSelect?.close());
-    this.form.reset();
-    this.form.get('resposta')?.clearValidators();
-    this.form.get('resposta')?.updateValueAndValidity();
-
-    if ( this.perguntaSolicitacao?.obrigatorio ) {
-      this.form.get('resposta')?.setValidators([ Validators.required ]);
-    }
-
-    const temInput = this.perguntaSolicitacao?.tipo_input === 'TEXT' ||
-      this.perguntaSolicitacao?.tipo_input === 'INTEGER' ||
-      this.perguntaSolicitacao?.tipo_input === 'FLOAT' ||
-      this.perguntaSolicitacao?.tipo_input === 'TEL' ||
-      this.perguntaSolicitacao?.tipo_input === 'CURRENCY' ||
-      this.perguntaSolicitacao?.tipo_input === 'CPF' ||
-      this.perguntaSolicitacao?.tipo_input === 'CEP';
-
-    this.filteredOptions = this.perguntaSolicitacao?.options ?? [];
+    this.reiniciaPerguntaSolicitacao();
+    this.inicializaPerguntaSolicitacao();
     this.form.updateValueAndValidity();
-    setTimeout((): void => {
-      if ( temInput && this.respostaInput ) {
-        this.respostaInput.nativeElement.focus();
-      }
-    }, 300);
+    this.focaProximoInput();
   }
 
   /**
@@ -135,46 +103,61 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
   /**
    * Envia a resposta do usuário com base no tipo de entrada da pergunta.
    * @param pular Indica se a resposta deve ser pulada.
+   * datetime Armazena o valor e a descrição formatados de data e hora.
    */
   protected enviarMensagem (pular: boolean = false): void {
-    if ( !pular ) {
-      if ( this.perguntaSolicitacao.tipo_input === 'DATETIME' ) {
+    if ( pular ) {
+      this.enviaRespostaUsuario.emit({ valor: 'Não informado.', tipo: 'PULAR' });
+      return;
+    }
+
+    let datetime: { label_value: string; label_desc: string } | null = null;
+
+    switch ( this.perguntaSolicitacao.tipo_input ) {
+      case 'DATETIME': {
         const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
-        const datetime = {
-          label_value: `${moment(this.form.get('date')?.value).format('YYYY-MM-DD')} ${time}`,
-          label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YYYY')} - ${time}`
+        const date = moment(this.form.get('date')?.value);
+        datetime = {
+          label_value: `${date.format('YYYY-MM-DD')} ${time}`,
+          label_desc: `${date.format('DD/MM/YYYY')} - ${time}`
         };
-        this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
-        setTimeout(() => this.matSelect?.close());
-      } else if ( this.perguntaSolicitacao.tipo_input === 'DATE' ) {
-        const datetime = {
-          label_value: `${moment(this.form.get('date')?.value).format('YYYY-MM-DD')}`,
-          label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')}`
+        break;
+      }
+
+      case 'DATE': {
+        const date = moment(this.form.get('date')?.value);
+        datetime = {
+          label_value: date.format('YYYY-MM-DD'),
+          label_desc: date.format('DD/MM/YY')
         };
-        this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
-        setTimeout(() => this.matSelect?.close());
-      } else if ( this.perguntaSolicitacao.tipo_input === 'TIME' ) {
+        break;
+      }
+
+      case 'TIME': {
         const time = moment(this.form.get('time')?.value).format('HH:mm:ss');
-        const datetime = {
+        datetime = {
           label_value: time,
           label_desc: time
         };
-        this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
-        setTimeout(() => this.matSelect?.close());
-      } else if ( this.perguntaSolicitacao.tipo_input as any === 'DATE' ) {
-        const datetime = {
-          label_value: `${moment(this.form.get('date')?.value).format('YY/MM/DD')}`,
-          label_desc: `${moment(this.form.get('date')?.value).format('DD/MM/YY')}`
-        };
-        this.enviaRespostaUsuario.emit({ valor: datetime, tipo: this.perguntaSolicitacao.tipo_input });
-        setTimeout(() => this.matSelect?.close());
-      } else {
-        this.enviaRespostaUsuario.emit({ valor: this.form.get('resposta')?.value, tipo: this.perguntaSolicitacao.tipo_input });
-        setTimeout(() => this.matSelect?.close());
+        break;
       }
-    } else {
-      this.enviaRespostaUsuario.emit({ valor: 'Não informado.', tipo: 'PULAR' });
-      setTimeout(() => this.matSelect?.close());
+
+      default: {
+        this.enviaRespostaUsuario.emit({
+          valor: this.form.get('resposta')?.value,
+          tipo: this.perguntaSolicitacao.tipo_input
+        });
+        this.forcaFecharInputSelect();
+        return;
+      }
+    }
+
+    if ( datetime ) {
+      this.enviaRespostaUsuario.emit({
+        valor: datetime,
+        tipo: this.perguntaSolicitacao.tipo_input
+      });
+      this.forcaFecharInputSelect();
     }
   }
 
@@ -235,6 +218,57 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     document.body.appendChild(input);
     input.click();
     setTimeout(() => document.body.removeChild(input), 0);
+  }
+
+  /**
+   * Fecha o seletor de opções se estiver aberto.
+   */
+  private forcaFecharInputSelect (): void {
+    if ( this.matSelect ) {
+      setTimeout((): void => this.matSelect?.close());
+    }
+  }
+
+  /**
+   * Foca no próximo campo de entrada após um atraso.
+   */
+  private focaProximoInput (): void {
+    setTimeout((): void => {
+      if ( this.respostaInput ) {
+        this.respostaInput.nativeElement.focus();
+      }
+    }, 300);
+  }
+
+  /**
+   * Reinicia o formulário e fecha o seletor de opções.
+   * @private
+   */
+  private reiniciaPerguntaSolicitacao (): void {
+    this.forcaFecharInputSelect();
+    this.form.reset();
+    this.form.get('resposta')?.clearValidators();
+    this.form.get('resposta')?.updateValueAndValidity();
+  }
+
+  /**
+   * Inicializa a pergunta da solicitação configurando validações e opções filtradas.
+   * @private
+   */
+  private inicializaPerguntaSolicitacao (): void {
+    if ( this.perguntaSolicitacao?.obrigatorio ) {
+      this.form.get('resposta')?.setValidators([ Validators.required ]);
+    }
+
+    this.filteredOptions = this.perguntaSolicitacao?.options ?? [];
+
+    this.searchSub = this.form.get('search')?.valueChanges.subscribe((value: string): void => {
+      this.filteredOptions = this.perguntaSolicitacao.options.filter(opt =>
+        this.removeAccents(opt.label_desc).includes(this.removeAccents(value || ''))
+      );
+    });
+
+    this.time = moment().format('HH:mm:ss DD/MM/YY');
   }
 
   /**
