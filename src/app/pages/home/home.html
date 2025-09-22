@@ -8,7 +8,7 @@
         <app-ia-message
           [mensagemIa]="perguntaResposta?.iaMessage">
         </app-ia-message>
-        
+
         <app-user-message
           [mensagemUser]="perguntaResposta?.userMessage">
         </app-user-message>
@@ -33,10 +33,10 @@
           (click)="finalizarAgendamento()">
           <div class="d-flex flex-row align-items-center">
             @if (UtilsService.loading.value) {
-              <b>CRIANDO AGENDAMENTO, AGUARDE...</b>
+              <b>CRIANDO SOLICITAÇÃO, AGUARDE...</b>
               <mat-spinner class="ml-3"></mat-spinner>
             } @else {
-              <b>CONFIRMAR AGENDAMENTO</b>
+              <b>CONFIRMAR SOLICITAÇÃO</b>
               <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
             }
           </div>
@@ -49,7 +49,7 @@
             [disabled]="UtilsService.loading.value"
             (click)="iniciarNovaSolicitacao()">
             <div class="d-flex flex-row align-items-center">
-              <b>NÃO, REINICIAR AGENDAMENTO</b>
+              <b>NÃO, REINICIAR SOLICITAÇÃO</b>
               <mat-icon class="home-btn-icon">close</mat-icon>
             </div>
           </button>
@@ -63,7 +63,7 @@
           [disabled]="UtilsService.loading.value"
           (click)="iniciarNovaSolicitacao()">
           <div class="d-flex flex-row align-items-center">
-            <b>INICIAR NOVO AGENDAMENTO</b>
+            <b>INICIAR NOVA SOLICITAÇÃO</b>
             <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
           </div>
         </button>
