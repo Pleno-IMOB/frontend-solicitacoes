@@ -26,11 +26,16 @@
           } @else {
             <mat-icon>account_circle</mat-icon>
           }
-          <small class="mb-0 text-truncate w-100">{{ authService.pessoaValue?.pes_nome }}</small>
+          <small class="mb-0 text-truncate w-100">
+            {{ authService.pessoaValue?.pes_nome }}</small>
         </div>
       </button>
     } @else {
-      <button color="primary" matButton="text" class="button-account" (click)="login()">
+      <button
+        color="primary"
+        matButton="text"
+        class="button-account"
+        (click)="login()">
         <div class="d-flex justify-content-center align-items-center">
           <mat-icon>account_circle</mat-icon>
           <small class="mb-0">LOGIN</small>

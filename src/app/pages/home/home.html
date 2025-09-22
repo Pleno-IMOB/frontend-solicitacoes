@@ -17,6 +17,7 @@
     @if (perguntaSelecionada && !digitando) {
       <app-pergunta-solicitacao
         (enviaRespostaUsuario)="recebeResposta($event)"
+        (enviaRespostaAnexo)="recebeAnexo($event)"
         [perguntaSolicitacao]="perguntaSelecionada"></app-pergunta-solicitacao>
     } @else if (digitando) {
       <app-message-loading></app-message-loading>
@@ -33,10 +34,10 @@
           (click)="finalizarAgendamento()">
           <div class="d-flex flex-row align-items-center">
             @if (UtilsService.loading.value) {
-              <b>CRIANDO SOLICITAÇÃO, AGUARDE...</b>
+              <b>CRIANDO AGENDAMENTO, AGUARDE...</b>
               <mat-spinner class="ml-3"></mat-spinner>
             } @else {
-              <b>CONFIRMAR SOLICITAÇÃO</b>
+              <b>CONFIRMAR AGENDAMENTO</b>
               <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
             }
           </div>
@@ -49,7 +50,7 @@
             [disabled]="UtilsService.loading.value"
             (click)="iniciarNovaSolicitacao()">
             <div class="d-flex flex-row align-items-center">
-              <b>NÃO, REINICIAR SOLICITAÇÃO</b>
+              <b>NÃO, REINICIAR AGENDAMENTO</b>
               <mat-icon class="home-btn-icon">close</mat-icon>
             </div>
           </button>
@@ -63,7 +64,7 @@
           [disabled]="UtilsService.loading.value"
           (click)="iniciarNovaSolicitacao()">
           <div class="d-flex flex-row align-items-center">
-            <b>INICIAR NOVA SOLICITAÇÃO</b>
+            <b>INICIAR NOVO AGENDAMENTO</b>
             <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
           </div>
         </button>
