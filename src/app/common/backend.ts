@@ -260,13 +260,6 @@ export class BackendDefaults {
       this.baseURL = `${protocol}://api.${domain}/api/${this.endpoint}`;
       this.hostAPI = `${protocol}://api.${domain}/api/`;
       this.serviceAPI = `${protocol}://services.${domain}/api/`;
-
-      const currentHost = this.getDomainFromURL();
-      if ( currentHost !== domain ) {
-        const url = window.location.href;
-        window.location.href = url.replace(currentHost, domain);
-        throw new Error('Redirecionando');
-      }
     }
   }
 
