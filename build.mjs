@@ -97,23 +97,23 @@ async function main() {
 
   const configs = {
     HOMOLOGACAO: {
-      baseHref: '/agendamento/',
-      deployUrl: '/agendamento/',
-      remotePath: '/home/graxaveia/domains/sistemaspleno-homolog.com/public_html/agendamento',
+      baseHref: '/solicitar/',
+      deployUrl: '/solicitar/',
+      remotePath: '/home/graxaveia/domains/sistemaspleno-homolog.com/public_html/solicitar',
       userSsh: 'graxaveia@172.17.33.88',
       configuration: 'production'
     },
     HOMOLOGACAO_DEV: {
-      baseHref: '/agendamento/',
-      deployUrl: '/agendamento/',
-      remotePath: '/home/graxaveia/domains/sistemaspleno-dev.com/public_html/agendamento',
+      baseHref: '/solicitar/',
+      deployUrl: '/solicitar/',
+      remotePath: '/home/graxaveia/domains/sistemaspleno-dev.com/public_html/solicitar',
       userSsh: 'graxaveia@172.17.33.88',
       configuration: 'production'
     },
     PRODUCAO: {
-      baseHref: '/agendamento/',
-      deployUrl: '/agendamento/',
-      remotePath: '/home/graxaveia/domains/sistemaspleno.com/public_html/agendamento',
+      baseHref: '/solicitar/',
+      deployUrl: '/solicitar/',
+      remotePath: '/home/graxaveia/domains/sistemaspleno.com/public_html/solicitar',
       userSsh: 'graxaveia@172.17.33.88',
       configuration: 'production'
     }
