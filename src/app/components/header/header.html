@@ -2,8 +2,11 @@
   <div class="d-flex align-items-center justify-content-between h-100">
     <div class="d-flex empresa-container">
       <img
-        [src]="logoBase"
-        alt="logo-empresa">
+        #img
+        (error)="img.src = this.defaultImage"
+        [src]="logoEmpresa"
+        alt="logo-empresa"
+        loading="lazy">
       <div class="d-flex flex-column align-items-start justify-content-center pt-1">
         <h5 class="mb-0 online-msg">Online</h5>
       </div>
@@ -26,11 +29,16 @@
           } @else {
             <mat-icon>account_circle</mat-icon>
           }
-          <small class="mb-0 text-truncate w-100">{{ authService.pessoaValue?.pes_nome }}</small>
+          <small class="mb-0 text-truncate w-100">
+            {{ authService.pessoaValue?.pes_nome }}</small>
         </div>
       </button>
     } @else {
-      <button color="primary" matButton="text" class="button-account" (click)="login()">
+      <button
+        color="primary"
+        matButton="text"
+        class="button-account"
+        (click)="login()">
         <div class="d-flex justify-content-center align-items-center">
           <mat-icon>account_circle</mat-icon>
           <small class="mb-0">LOGIN</small>

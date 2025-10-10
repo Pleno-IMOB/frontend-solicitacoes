@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
+import { ImobiliariaInterfaceService } from '../../services/imobiliaria.service';
+import { ImobiliariaInterface } from '../../common/types';
 
 @Component({
   selector: 'app-footer',
@@ -12,5 +14,30 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './footer.scss',
   standalone: true
 })
-export class Footer {
+export class Footer implements OnInit {
+  @Input() logoEmpresa!: string;
+  protected imobiliaria: ImobiliariaInterface | null = null;
+  protected defaultImage = 'assets/images/lazy.gif';
+
+  constructor (
+    private imobiliariaService: ImobiliariaInterfaceService
+  ) {
+  }
+
+  /**
+   * Formata o telefone removendo todos os caracteres não numéricos.
+   * @returns {string} O telefone formatado contendo apenas números.
+   */
+  get telefoneFormatado (): string {
+    const telefoneOriginal = this.imobiliaria?.imob_telefone_wpp || '';
+    return telefoneOriginal.replace(/\D+/g, '');
+  }
+
+  /**
+   * Inicializa o componente carregando os dados da imobiliária.
+   * @returns {Promise<void>} Promessa que resolve quando a inicialização estiver completa.
+   */
+  async ngOnInit (): Promise<void> {
+    this.imobiliaria = await this.imobiliariaService.getEmpresa();
+  }
 }

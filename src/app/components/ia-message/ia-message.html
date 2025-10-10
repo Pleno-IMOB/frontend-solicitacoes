@@ -1,11 +1,13 @@
 <div class="main-container-ia-message">
   <img
-    [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
-    alt="logo-empresa">
-  <div
-    class="ia-message px-4 py-2">
+    #img
+    (error)="img.src = this.defaultImage"
+    [src]="logoEmpresa"
+    alt="logo-empresa"
+    loading="lazy">
+  <div class="ia-message px-4 py-2">
     <p
-      [innerHtml]="((mensagemIa?.message || '') | nl2br)"
+      [innerHTML]="((mensagemIa?.message || '') | nl2br)"
       class="mb-1"></p>
     @if (mensagemIa?.error?.callback) {
       <button
