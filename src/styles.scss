@@ -3,9 +3,9 @@
 @use '@angular/material' as mat;
 @use 'assets/theming' as *;
 @use 'assets/global' as *;
-@import 'assets/fonts/font';
-@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-@import "../node_modules/ngx-toastr/toastr.css";
+@use 'assets/fonts/font' as *;
+@use '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+@use '../node_modules/ngx-toastr/toastr.css';
 
 html, body {
   height: 100%;

@@ -1,4 +1,4 @@
-<app-header></app-header>
+<app-header [logoEmpresa]="logoEmpresa"></app-header>
 
 <div class="bottom-messages">
 
@@ -6,6 +6,7 @@
     @if (conversaIa.length > 0) {
       @for (perguntaResposta of conversaIa; track perguntaResposta) {
         <app-ia-message
+          [logoEmpresa]="logoEmpresa"
           [mensagemIa]="perguntaResposta?.iaMessage">
         </app-ia-message>
 
@@ -16,6 +17,7 @@
     }
     @if (perguntaSelecionada && !digitando) {
       <app-pergunta-solicitacao
+        (enviaRespostaAnexo)="recebeAnexo($event)"
         (enviaRespostaUsuario)="recebeResposta($event)"
         [perguntaSolicitacao]="perguntaSelecionada"></app-pergunta-solicitacao>
     } @else if (digitando) {
@@ -25,31 +27,31 @@
     @switch (true) {
       @case (podeConfirmar) {
         <button
+          (click)="finalizarAgendamento()"
+          [disabled]="UtilsService.loading.value"
           class="btn-confirmar btn-agendamento"
           color="primary"
           matButton="filled"
-          type="button"
-          [disabled]="UtilsService.loading.value"
-          (click)="finalizarAgendamento()">
+          type="button">
           <div class="d-flex flex-row align-items-center">
             @if (UtilsService.loading.value) {
-              <b>CRIANDO SOLICITAÇÃO, AGUARDE...</b>
+              <b>CRIANDO AGENDAMENTO, AGUARDE...</b>
               <mat-spinner class="ml-3"></mat-spinner>
             } @else {
-              <b>CONFIRMAR SOLICITAÇÃO</b>
+              <b>CONFIRMAR AGENDAMENTO</b>
               <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
             }
           </div>
         </button>
         @if (!UtilsService.loading.value) {
           <button
+            (click)="iniciarNovaSolicitacao()"
+            [disabled]="UtilsService.loading.value"
             class="btn-reiniciar-agendamento mt-0"
             matButton="filled"
-            type="button"
-            [disabled]="UtilsService.loading.value"
-            (click)="iniciarNovaSolicitacao()">
+            type="button">
             <div class="d-flex flex-row align-items-center">
-              <b>NÃO, REINICIAR SOLICITAÇÃO</b>
+              <b>NÃO, REINICIAR AGENDAMENTO</b>
               <mat-icon class="home-btn-icon">close</mat-icon>
             </div>
           </button>
@@ -57,13 +59,13 @@
       }
       @case (finalizado && solicitacaoFinalizada) {
         <button
+          (click)="iniciarNovaSolicitacao()"
+          [disabled]="UtilsService.loading.value"
           class="btn-confirmar btn-novo-agendamento"
           matButton="outlined"
-          type="button"
-          [disabled]="UtilsService.loading.value"
-          (click)="iniciarNovaSolicitacao()">
+          type="button">
           <div class="d-flex flex-row align-items-center">
-            <b>INICIAR NOVA SOLICITAÇÃO</b>
+            <b>INICIAR NOVO AGENDAMENTO</b>
             <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
           </div>
         </button>
@@ -71,5 +73,5 @@
     }
   </div>
 </div>
-<app-footer>
+<app-footer [logoEmpresa]="logoEmpresa">
 </app-footer>
