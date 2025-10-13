@@ -1,4 +1,4 @@
-<header>
+<header [id]="backend.isHostAberto ? 'header-dark' : ''">
   <div class="d-flex align-items-center justify-content-between h-100">
     <div class="d-flex empresa-container">
       <img
@@ -14,10 +14,13 @@
     @if (authService.pessoaValue?.pes_codigo) {
       <button color="primary" matButton="text" [matMenuTriggerFor]="menu" class="px-0">
         <mat-menu #menu="matMenu">
-          <button mat-menu-item (click)="redirecionaParaMinhaConta()">
-            <mat-icon class="color-pleno">account_circle</mat-icon>
-            <p class="mb-0">Meus dados</p>
-          </button>
+          @if (!backend.isHostAberto) {
+            <button mat-menu-item (click)="redirecionaParaMinhaConta()">
+              <mat-icon class="color-pleno">account_circle</mat-icon>
+              <p class="mb-0">Meus dados</p>
+            </button>
+          }
+
           <button (click)="openLogoutModal()" mat-menu-item>
             <mat-icon class="color-pleno">logout</mat-icon>
             <p class="mb-0">Sair</p>

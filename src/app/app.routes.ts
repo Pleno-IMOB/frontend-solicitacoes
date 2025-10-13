@@ -4,9 +4,9 @@ import { Home } from './pages/home/home';
 export const routes: Routes = [
   { path: '*', redirectTo: 'home', pathMatch: 'full' },
   { path: '', component: Home },
-  { path: 'agendamento', component: Home },
+  { path: 'solicitar', component: Home },
   { path: 'login', component: Home },
-  { path: 'agendamento/login', component: Home },
+  { path: 'solicitar/login', component: Home },
   { path: 'meus-dados', component: Home },
-  { path: 'agendamento/meus-dados', component: Home }
+  { path: 'solicitar/meus-dados', component: Home }
 ];

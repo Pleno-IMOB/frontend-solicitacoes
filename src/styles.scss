@@ -193,3 +193,18 @@ small {
 .swal2-success-line-tip, .swal2-success-line-long {
   font-size: 16px !important;
 }
+
+#main-dark {
+  a {
+    color: #00D194 !important;
+  }
+
+  .mat-mdc-chip-set .mdc-evolution-chip {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+
+    span {
+      color: #00D194 !important;
+      font-weight: 600 !important;
+    }
+  }
+}

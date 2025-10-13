@@ -66,7 +66,7 @@ export class Login implements AfterViewInit {
 
   constructor (
     private formBuilder: FormBuilder,
-    private backend: BackendService,
+    protected backend: BackendService,
     private authService: AuthService,
     private matDialogRef: MatDialogRef<any>,
     private recaptchaV3Service: ReCaptchaV3Service,
@@ -83,20 +83,26 @@ export class Login implements AfterViewInit {
       nome: [ null, [ Validators.required, Validators.minLength(4) ] ],
       email: [ null, [ Validators.required, Validators.email ] ],
       sou_cliente: [ false ],
-      cli_nome: [ null, [ Validators.required, Validators.minLength(4) ] ],
-      cli_cpfCnpj: [ null, [ Validators.required, Validadores.cpfCnpj ] ]
+      cli_nome: [ null ],
+      cli_cpfCnpj: [ null ]
     });
 
-    this.form.get('sou_cliente')?.valueChanges.subscribe((valor: boolean): void => {
-      this.souCliente = valor;
+    if ( this.backend.isHostAberto ) {
+      this.form.removeControl('sou_cliente');
+      this.form.removeControl('cli_nome');
+      this.form.removeControl('cli_cpfCnpj');
+    } else {
+      this.form.get('sou_cliente')?.valueChanges.subscribe((valor: boolean): void => {
+        this.souCliente = valor;
 
-      if ( valor ) {
-        const nome = this.form.get('nome')?.value;
-        if ( nome ) {
-          this.form.get('cli_nome')?.setValue(nome);
+        if ( valor ) {
+          const nome = this.form.get('nome')?.value;
+          if ( nome ) {
+            this.form.get('cli_nome')?.setValue(nome);
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   /**
@@ -111,13 +117,16 @@ export class Login implements AfterViewInit {
 
       this.cdr.detectChanges();
     }
-    this.form.get('cli_cpfCnpj')?.valueChanges.subscribe(async (valor: string): Promise<void> => {
-      if ( UtilsService.loadingGeral.value || valor?.length < 14 ) {
-        return;
-      } else {
-        await this.buscarPorCpfCnpj(this.form.get('cli_cpfCnpj'));
-      }
-    });
+
+    if ( !this.backend.isHostAberto ) {
+      this.form.get('cli_cpfCnpj')?.valueChanges.subscribe(async (valor: string): Promise<void> => {
+        if ( UtilsService.loadingGeral.value || valor?.length < 14 ) {
+          return;
+        } else {
+          await this.buscarPorCpfCnpj(this.form.get('cli_cpfCnpj'));
+        }
+      });
+    }
   }
 
   /**
