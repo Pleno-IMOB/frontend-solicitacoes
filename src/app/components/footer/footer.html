@@ -1,5 +1,5 @@
-<footer id="footer">
-  <div class="d-flex justify-content-between align-items-center">
+<footer [id]="backend.isHostAberto ? 'footer-dark' : ''">
+  <div class="d-flex justify-content-between align-items-center container-footer">
     <img
       #img
       (error)="img.src = this.defaultImage"
@@ -21,9 +21,9 @@
       }
     </div>
   </div>
-  <div class="w-100 pt-2 d-flex justify-content-between align-items-end">
+  <div class="w-100 pt-2 d-flex justify-content-between align-items-end subcontainer-footer">
     <div>
-      <p class="m-0 dados-pleno">{{ imobiliaria?.imob_empresa }}</p>
+      <p class="m-0 dados-pleno"><b>{{ imobiliaria?.imob_empresa }}</b></p>
       @if (imobiliaria?.imob_cnpj) {
         <p class="m-0 dados-pleno">CNPJ: {{ imobiliaria?.imob_cnpj }}</p>
       } @else if (imobiliaria?.imob_cpf) {
@@ -32,7 +32,7 @@
     </div>
     <div>
       <p class="m-0 dados-pleno">
-        Desenvolvido por <a href="https://sistemaspleno.com" target="_blank">Pleno Sistemas</a>
+        Desenvolvido por <b><a href="https://sistemaspleno.com" target="_blank">Pleno Sistemas</a></b>
       </p>
     </div>
   </div>

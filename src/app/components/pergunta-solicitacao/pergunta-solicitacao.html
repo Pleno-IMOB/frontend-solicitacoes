@@ -1,4 +1,6 @@
-<div [formGroup]="form" class="main-container-ia-message">
+<div
+  [formGroup]="form" [id]="backend.isHostAberto ? 'pergunta-dark' : ''"
+  class="main-container-ia-message">
   <img
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
     alt="logo-empresa">

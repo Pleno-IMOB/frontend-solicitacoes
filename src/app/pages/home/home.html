@@ -1,8 +1,8 @@
 <app-header [logoEmpresa]="logoEmpresa"></app-header>
 
-<div class="bottom-messages">
+<div [id]="backend.isHostAberto ? 'main-dark' : ''" class="bottom-messages">
 
-  <div #scrollContainer class="main-container">
+  <div #scrollContainer class="main-container w-100">
     @if (conversaIa.length > 0) {
       @for (perguntaResposta of conversaIa; track perguntaResposta) {
         <app-ia-message

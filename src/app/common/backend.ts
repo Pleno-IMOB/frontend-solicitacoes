@@ -39,6 +39,11 @@ export class BackendDefaults {
     return window.location.host.includes('plenoimob') || window.location.host.includes('sistemaspleno');
   }
 
+  public get isHostAberto (): boolean {
+    return this.urlSistema === 'procurar-empresas.vivendodevistorias.com.br' ||
+      this.urlSistema === 'procurar-oportunidades.vivendodevistorias.com.br';
+  }
+
   /**
    * Obtém o endereço IP público do usuário.
    * @returns {Promise<any>} Promessa que resolve com o endereço IP.

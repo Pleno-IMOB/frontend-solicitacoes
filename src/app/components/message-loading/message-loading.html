@@ -1,5 +1,5 @@
 <div
-  [id]="'message-loading'"
+  [id]="backend.isHostAberto ? 'message-loading-dark' : ''"
   class="main-container-ia-message">
   <img
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"

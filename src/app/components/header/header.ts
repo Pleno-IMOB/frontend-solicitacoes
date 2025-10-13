@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { UtilsService } from '../../services/utils.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'app-header',
@@ -23,7 +24,8 @@ export class Header {
   protected defaultImage = 'assets/images/lazy.gif';
 
   constructor (
-    protected authService: AuthService
+    protected authService: AuthService,
+    protected backend: BackendService
   ) {
   }
 

@@ -2,10 +2,9 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  min-height: calc(100vh - 138px);
-  max-height: calc(100vh - 138px);
+  min-height: calc(100vh - 139px);
+  max-height: calc(100vh - 139px);
   background-color: #f2f2f5;
-  overflow-y: auto;
 }
 
 .main-container {
@@ -13,8 +12,8 @@
   flex-direction: column;
   gap: 12px;
   background-color: #f2f2f5;
-  padding: calc(90px + 2vh) 3vw 2vh;
-  overflow-y: scroll;
+  padding: calc(90px + 2vh) 3vw 3vh;
+  overflow-y: auto;
 
   div {
     display: flex;
@@ -78,6 +77,10 @@
   }
 }
 
-.main-container {
-  scroll-behavior: smooth;
+#main-dark {
+  background-color: #0A0A0A;
+
+  .main-container {
+    background-color: #0A0A0A;
+  }
 }

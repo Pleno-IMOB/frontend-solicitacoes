@@ -65,7 +65,7 @@ export class Home implements OnInit {
 
   constructor (
     private cd: ChangeDetectorRef,
-    private backend: BackendService,
+    protected backend: BackendService,
     private dialog: MatDialog,
     protected authService: AuthService,
     private ngZone: NgZone,
@@ -102,7 +102,8 @@ export class Home implements OnInit {
    * @return {Promise<void>} Promessa que resolve quando a operação é concluída.
    */
   protected async finalizarAgendamento (): Promise<void> {
-    while ( !this.authService.pessoa.value?.pes_codigo || !this.authService.pessoa.value?.cli_codigo ) {
+    const boolean = this.backend.isHostAberto ? (!this.authService.pessoa.value?.pes_codigo) : (!this.authService.pessoa.value?.cli_codigo || !this.authService.pessoa.value?.pes_codigo);
+    while ( boolean ) {
       await this.login();
     }
 
@@ -241,9 +242,11 @@ export class Home implements OnInit {
 
     if ( !this.perguntaSelecionada ) {
       if ( this.jaIniciou ) {
+        console.log('111121');
         this.digitando = false;
         await this.mostrarConfirmacaoFinal();
       } else {
+        console.log('111122');
         this.jaIniciou = true;
         await this.enviaRoteiro();
       }
@@ -315,7 +318,8 @@ export class Home implements OnInit {
 
     const result = await firstValueFrom(dialog.afterClosed());
     if ( result ) {
-      if ( this.authService.pessoa.value?.pes_codigo && this.authService.pessoa.value?.cli_codigo ) {
+      const boolean = this.backend.isHostAberto ? (this.authService.pessoa.value?.pes_codigo) : (this.authService.pessoa.value?.cli_codigo && this.authService.pessoa.value?.pes_codigo);
+      if ( boolean ) {
         UtilsService.notifySuccess('', 'Login efetuado com sucesso!');
       }
     }
@@ -421,10 +425,11 @@ export class Home implements OnInit {
   }
 
   /**
-   * Valida o agendamento atual verificando as condições necessárias e atualizando o estado da aplicação.
+   * Valida o agendamento verificando se as condições necessárias estão atendidas.
    * @returns {Promise<boolean>} Retorna uma promessa que resolve para true se o agendamento for válido, caso contrário, false.
+   * @description
    */
-  private async validarAgendamento () {
+  private async validarAgendamento (): Promise<boolean> {
     if ( !this.verificarAgendamento ) {
       return true;
     }
@@ -516,9 +521,13 @@ export class Home implements OnInit {
       thread_id: string;
     }>('solicitacao/chat/v2/solicitar', params);
     if ( response ) {
-      this.listaPerguntas = response.roteiro;
-      this.perguntaSelecionada = this.getPrimeiraPerguntaValida();
-      this.thread_id = response.thread_id;
+      if ( this.backend.isHostAberto ) {
+        await this.mostrarConfirmacaoFinal();
+      } else {
+        this.listaPerguntas = response?.roteiro;
+        this.perguntaSelecionada = this.getPrimeiraPerguntaValida();
+        this.thread_id = response.thread_id;
+      }
     }
 
     UtilsService.carregando(false);

@@ -2,3 +2,18 @@ img {
   background-color: white;
   object-fit: cover;
 }
+
+#dark-user-message {
+  .user-message {
+    background-color: #00b580;
+    border: 1px solid #333333;
+
+    p {
+      color: #fafafa;
+    }
+
+    small {
+      color: #fafafa;
+    }
+  }
+}
