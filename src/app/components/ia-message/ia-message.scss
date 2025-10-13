@@ -25,3 +25,22 @@
     overflow-wrap: break-word;
   }
 }
+
+#ia-message-dark {
+  .ia-message {
+    background-color: #141414;
+    border: 1px solid #333333;
+  }
+
+  p {
+    color: #fafafa;
+  }
+
+  a {
+    color: #00D194 !important;
+  }
+
+  small {
+    color: #b6b6b6;
+  }
+}

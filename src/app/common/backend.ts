@@ -40,6 +40,15 @@ export class BackendDefaults {
   }
 
   /**
+   * Verifica se o host atual é um dos hosts abertos.
+   * @returns {boolean} Verdadeiro se o host for 'procurar-empresas.vivendodevistorias.com.br' ou 'procurar-oportunidades.vivendodevistorias.com.br'.
+   */
+  public get isHostAberto (): boolean {
+    return this.urlSistema.includes('procurar-empresas.') ||
+      this.urlSistema.includes('procurar-oportunidades.');
+  }
+
+  /**
    * Obtém o endereço IP público do usuário.
    * @returns {Promise<any>} Promessa que resolve com o endereço IP.
    */

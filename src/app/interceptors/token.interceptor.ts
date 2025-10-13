@@ -83,12 +83,12 @@ function handle401Error (
         catchError((err) => {
           isRefreshingRef.value = false;
           authService.logout().then();
-          window.history.pushState({}, '', ('/agendamento/login'));
+          window.history.pushState({}, '', ('/solicitar/login'));
           return throwError(() => err);
         })
       );
     } else {
-      window.history.pushState({}, '', ('/agendamento/login'));
+      window.history.pushState({}, '', ('/solicitar/login'));
     }
   }
 

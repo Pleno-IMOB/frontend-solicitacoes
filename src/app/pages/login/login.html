@@ -130,7 +130,13 @@
         </div>
 
         <mat-form-field class="w-100" [class]="nomeReadOnly ? 'input-readonly' : ''">
-          <mat-label>Nome do solicitante (você)</mat-label>
+          <mat-label>
+            @if (backend.isHostAberto) {
+              Nome
+            } @else {
+              Nome do solicitante (você)
+            }
+          </mat-label>
           <input
             formControlName="nome"
             matInput
@@ -139,7 +145,13 @@
         </mat-form-field>
 
         <mat-form-field class="w-100" [class]="emailReadOnly ? 'input-readonly' : ''">
-          <mat-label>E-mail do solicitante</mat-label>
+          <mat-label>
+            @if (backend.isHostAberto) {
+              E-mail
+            } @else {
+              E-mail do solicitante
+            }
+          </mat-label>
           <input
             formControlName="email"
             matInput
@@ -147,30 +159,32 @@
             [readonly]="emailReadOnly">
         </mat-form-field>
 
-        <h5 class="text-center mb-3">
-          Agora, informe o cliente (imobiliária ou proprietário) que você está representando:
-        </h5>
+        @if (!backend.isHostAberto) {
+          <h5 class="text-center mb-3">
+            Agora, informe o cliente (imobiliária ou proprietário) que você está representando:
+          </h5>
 
-        <mat-checkbox class="mb-2" formControlName="sou_cliente"><h5 class="py-2">Eu sou o cliente</h5>
-        </mat-checkbox>
+          <mat-checkbox class="mb-2" formControlName="sou_cliente"><h5 class="py-2">Eu sou o cliente</h5>
+          </mat-checkbox>
 
-        <mat-form-field class="w-100">
-          <mat-label>CPF ou CNPJ do cliente</mat-label>
-          <input
-            formControlName="cli_cpfCnpj"
-            plenoMask="cpfCnpj"
-            matInput
-            placeholder="Digite o CPF ou CNPJ do cliente">
-        </mat-form-field>
+          <mat-form-field class="w-100">
+            <mat-label>CPF ou CNPJ do cliente</mat-label>
+            <input
+              formControlName="cli_cpfCnpj"
+              plenoMask="cpfCnpj"
+              matInput
+              placeholder="Digite o CPF ou CNPJ do cliente">
+          </mat-form-field>
 
-        <mat-form-field class="w-100" [class]="souCliente ? 'input-readonly' : ''">
-          <mat-label class="text-wrap">Nome do cliente (imobiliária ou proprietário)</mat-label>
-          <input
-            formControlName="cli_nome"
-            [readonly]="souCliente && cpfJaRegistrado"
-            matInput
-            placeholder="Digite o nome do cliente">
-        </mat-form-field>
+          <mat-form-field class="w-100" [class]="souCliente ? 'input-readonly' : ''">
+            <mat-label class="text-wrap">Nome do cliente (imobiliária ou proprietário)</mat-label>
+            <input
+              formControlName="cli_nome"
+              [readonly]="souCliente && cpfJaRegistrado"
+              matInput
+              placeholder="Digite o nome do cliente">
+          </mat-form-field>
+        }
 
         <div class="w-100 d-flex btn-container">
           <button
