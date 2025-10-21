@@ -1,4 +1,6 @@
-<div class="main-container-ia-message">
+<div
+  [id]="backend.isHostAberto ? 'ia-message-dark':''"
+  class="main-container-ia-message">
   <img
     #img
     (error)="img.src = this.defaultImage"

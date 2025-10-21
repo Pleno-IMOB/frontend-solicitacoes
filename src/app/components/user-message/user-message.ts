@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'app-user-message',
@@ -12,7 +13,8 @@ export class UserMessage {
   @Input() public mensagemUser?: { message: string | number, time: string };
 
   constructor (
-    protected authService: AuthService
+    protected authService: AuthService,
+    protected backend: BackendService
   ) {
   }
 }

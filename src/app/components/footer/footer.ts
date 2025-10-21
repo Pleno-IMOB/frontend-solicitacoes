@@ -3,6 +3,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
 import { ImobiliariaInterfaceService } from '../../services/imobiliaria.service';
 import { ImobiliariaInterface } from '../../common/types';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'app-footer',
@@ -20,7 +21,8 @@ export class Footer implements OnInit {
   protected defaultImage = 'assets/images/lazy.gif';
 
   constructor (
-    private imobiliariaService: ImobiliariaInterfaceService
+    private imobiliariaService: ImobiliariaInterfaceService,
+    protected backend: BackendService
   ) {
   }
 

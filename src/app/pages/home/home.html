@@ -1,8 +1,8 @@
 <app-header [logoEmpresa]="logoEmpresa"></app-header>
 
-<div class="bottom-messages">
+<div [id]="backend.isHostAberto ? 'main-dark' : ''" class="bottom-messages">
 
-  <div #scrollContainer class="main-container">
+  <div #scrollContainer class="main-container w-100">
     @if (conversaIa.length > 0) {
       @for (perguntaResposta of conversaIa; track perguntaResposta) {
         <app-ia-message
@@ -35,10 +35,22 @@
           type="button">
           <div class="d-flex flex-row align-items-center">
             @if (UtilsService.loading.value) {
-              <b>CRIANDO AGENDAMENTO, AGUARDE...</b>
+              <b>
+                @if (backend.isHostAberto) {
+                  CRIANDO, AGUARDE...
+                } @else {
+                  CRIANDO AGENDAMENTO, AGUARDE...
+                }
+              </b>
               <mat-spinner class="ml-3"></mat-spinner>
             } @else {
-              <b>CONFIRMAR AGENDAMENTO</b>
+              <b>
+                @if (backend.isHostAberto) {
+                  CONFIRMAR
+                } @else {
+                  CONFIRMAR AGENDAMENTO
+                }
+              </b>
               <mat-icon class="home-btn-icon">assignment_turned_in</mat-icon>
             }
           </div>
@@ -51,7 +63,13 @@
             matButton="filled"
             type="button">
             <div class="d-flex flex-row align-items-center">
-              <b>NÃO, REINICIAR AGENDAMENTO</b>
+              <b>
+                @if (backend.isHostAberto) {
+                  NÃO, REINICIAR
+                } @else {
+                  NÃO, REINICIAR AGENDAMENTO
+                }
+              </b>
               <mat-icon class="home-btn-icon">close</mat-icon>
             </div>
           </button>
@@ -65,7 +83,13 @@
           matButton="outlined"
           type="button">
           <div class="d-flex flex-row align-items-center">
-            <b>INICIAR NOVO AGENDAMENTO</b>
+            <b>
+              @if (backend.isHostAberto) {
+                INICIAR NOVO
+              } @else {
+                INICIAR NOVO AGENDAMENTO
+              }
+            </b>
             <mat-icon class="home-btn-icon">arrow_forward</mat-icon>
           </div>
         </button>

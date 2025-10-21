@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideEnvironmentNgxMask(maskConfig),
     {
       provide: 'INTERCEPTOR_HOST',
-      useValue: IMOBILIARIA('realcheck.sistemaspleno.com')
+      useValue: IMOBILIARIA('procurar-empresas.vivendodevistorias.com.br')
     },
     {
       provide: RECAPTCHA_V3_SITE_KEY,

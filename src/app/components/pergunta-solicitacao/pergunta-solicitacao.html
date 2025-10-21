@@ -1,4 +1,6 @@
-<div [formGroup]="form" class="main-container-ia-message">
+<div
+  [formGroup]="form" [id]="backend.isHostAberto ? 'pergunta-dark' : ''"
+  class="main-container-ia-message">
   <img
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
     alt="logo-empresa">
@@ -234,7 +236,7 @@
             formControlName="resposta"
             matInput
             class="position-relative input-pergunta"
-            placeholder="Informe o cep do imóvel"
+            placeholder="Informe o cep"
             type="text">
           <div class="button-container position-absolute">
             <button
@@ -332,7 +334,7 @@
   @if (!perguntaSolicitacao.obrigatorio) {
     <button
       (click)="enviarMensagem(true)"
-      class="align-self-center bg-white"
+      class="align-self-center bg-white pular-btn"
       matButton="outlined">
       <p class="mb-0">
         Pular

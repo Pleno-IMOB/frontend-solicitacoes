@@ -5,6 +5,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { UtilsService } from '../../services/utils.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   selector: 'app-header',
@@ -18,12 +19,13 @@ import { UtilsService } from '../../services/utils.service';
   styleUrl: './header.scss'
 })
 export class Header {
-  @Input() page: 'agendamento' | 'meus-dados' = 'agendamento';
+  @Input() page: 'solicitar' | 'meus-dados' = 'solicitar';
   @Input() logoEmpresa!: string;
   protected defaultImage = 'assets/images/lazy.gif';
 
   constructor (
-    protected authService: AuthService
+    protected authService: AuthService,
+    protected backend: BackendService
   ) {
   }
 
@@ -54,13 +56,13 @@ export class Header {
    * Redireciona o usuário para a página de login.
    */
   protected login (): void {
-    window.history.pushState({}, '', ('/agendamento/login'));
+    window.history.pushState({}, '', ('/solicitar/login'));
   }
 
   /**
    * Redireciona o usuário para a página "Meus Dados".
    */
   protected redirecionaParaMinhaConta (): void {
-    window.history.pushState({}, '', ('/agendamento/meus-dados'));
+    window.history.pushState({}, '', ('/solicitar/meus-dados'));
   }
 }
