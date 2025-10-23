@@ -21,6 +21,7 @@ import { base64ToBlob, fileToBase64 } from '../../common/common';
 import Swal from 'sweetalert2';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { CurrencyPipe } from '@angular/common';
+import { SafePipe } from '../../directives/safe.pipe';
 import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
 
 @Component({
@@ -47,6 +48,7 @@ import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
     NgxCurrencyDirective,
     OnlyNumbers,
     ReactiveFormsModule,
+    SafePipe,
     Nl2BrPipe
   ],
   templateUrl: './pergunta-solicitacao.html',

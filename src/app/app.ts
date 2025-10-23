@@ -61,11 +61,7 @@ export class App implements OnInit, OnDestroy {
    * Atualiza o título da página e o favicon para a interface de vistorias.
    */
   private trocaLogoParaVdv (): void {
-    if ( this.backend.urlSistema.includes('procurar-empresas.') ) {
-      this.titleService.setTitle('VDV - Empresas');
-    } else {
-      this.titleService.setTitle('VDV - Oportunidades');
-    }
+    this.titleService.setTitle('VDV - Conexão');
     this.setFavicon('assets/images/favicon-vdv.png');
   }
 
