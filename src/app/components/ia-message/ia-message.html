@@ -8,13 +8,11 @@
     alt="logo-empresa"
     loading="lazy">
   <div class="ia-message px-4 py-2">
-    <p
-      [innerHTML]="((mensagemIa?.message || '') | nl2br)"
-      class="mb-1"></p>
+    <p [innerHTML]="(mensagemIa?.message || '') | nl2br | safe:'html'"></p>
     @if (mensagemIa?.error?.callback) {
       <button
-        class="d-block mb-2 btn btn-outline-danger btn-sm"
-        (click)="mensagemIa?.error?.callback()">
+        (click)="mensagemIa?.error?.callback()"
+        class="d-block mb-2 btn btn-outline-danger btn-sm">
         <i class="far fa-paper-plane"></i>
         Tentar novamente
       </button>

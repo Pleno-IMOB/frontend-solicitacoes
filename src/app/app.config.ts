@@ -28,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideEnvironmentNgxMask(maskConfig),
     {
       provide: 'INTERCEPTOR_HOST',
-      useValue: IMOBILIARIA('procurar-empresas.vivendodevistorias.com.br')
+      useValue: IMOBILIARIA('conexao.vivendodevistorias.com.br')
     },
     {
       provide: RECAPTCHA_V3_SITE_KEY,
