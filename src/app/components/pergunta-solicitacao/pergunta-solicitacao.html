@@ -5,7 +5,7 @@
     [src]="`${backend.hostAPI}vistoria/logo-imobiliaria?host=${backend.urlSistema}`"
     alt="logo-empresa">
   <div class="ia-message px-4 py-2">
-    <p [innerHTML]="perguntaSolicitacao.pergunta | nl2br" class="pt-2 mb-1"></p>
+    <p [innerHTML]="(perguntaSolicitacao.pergunta | nl2br | safe : 'html')" class="pt-2 mb-1"></p>
     @switch (true) {
       @case (perguntaSolicitacao.tipo_input === 'TEXT') {
         <mat-form-field class="w-100">
@@ -13,9 +13,9 @@
             #respostaInput
             (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
             (keydown.space)="$event.stopPropagation()"
+            class="position-relative input-pergunta"
             formControlName="resposta"
             matInput
-            class="position-relative input-pergunta"
             placeholder="Digite aqui"
             type="text">
           <div class="button-container position-absolute">
@@ -36,16 +36,16 @@
         @if (perguntaSolicitacao.options.length > 5) {
           <mat-form-field class="w-100">
             <mat-select
-              formControlName="resposta"
-              (selectionChange)="enviarMensagem()">
+              (selectionChange)="enviarMensagem()"
+              formControlName="resposta">
               <div class="w-100 p-2">
                 <mat-form-field class="w-100">
                   <input
                     #respostaInput
                     (keydown.space)="$event.stopPropagation()"
+                    class="position-relative input-search"
                     formControlName="search"
                     matInput
-                    class="position-relative input-search"
                     placeholder="Selecione uma opção"
                     type="text">
                   <div class="icon-container position-absolute">
@@ -76,10 +76,10 @@
             #respostaInput
             (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
             (keydown.space)="$event.stopPropagation()"
+            class="position-relative input-pergunta"
             formControlName="resposta"
             matInput
             onlyNumbers
-            class="position-relative input-pergunta"
             placeholder="Digite aqui"
             type="number">
           <div class="button-container position-absolute">
@@ -101,10 +101,10 @@
           <input
             #respostaInput
             (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
-            formControlName="resposta"
-            matInput
             [currencyMask]="{ prefix: '', thousands: '.', decimal: ',', align: 'left' }"
             class="position-relative input-pergunta"
+            formControlName="resposta"
+            matInput
             placeholder="Digite aqui">
           <div class="button-container position-absolute">
             <button
@@ -126,10 +126,10 @@
             #respostaInput
             (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
             (keydown.space)="$event.stopPropagation()"
-            formControlName="resposta"
-            matInput
             [currencyMask]="{ prefix: 'R$ ', thousands: '.', decimal: ',', align: 'left' }"
             class="position-relative input-pergunta"
+            formControlName="resposta"
+            matInput
             placeholder="Informe o valor R$">
           <div class="button-container position-absolute">
             <button
@@ -149,14 +149,14 @@
         <mat-form-field class="w-100">
           <input
             #respostaInput
-            (dateChange)="enviarMensagem()"
             (click)="picker.open()"
-            placeholder="Escolha a data DD/MM/AAAA"
-            readonly
-            matInput
+            (dateChange)="enviarMensagem()"
             [matDatepicker]="picker"
-            formControlName="date">
-          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            formControlName="date"
+            matInput
+            placeholder="Escolha a data DD/MM/AAAA"
+            readonly>
+          <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
       }
@@ -166,23 +166,23 @@
           <mat-form-field class="col-md-5 pr-0">
             <input
               (click)="picker.open()"
-              placeholder="Selecione a data DD/MM/AAAA"
-              readonly
-              matInput
               [matDatepicker]="picker"
-              formControlName="date">
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              formControlName="date"
+              matInput
+              placeholder="Selecione a data DD/MM/AAAA"
+              readonly>
+            <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
             <mat-datepicker #picker></mat-datepicker>
           </mat-form-field>
           <mat-form-field class="col-md-5 pr-0">
             <input
-              matInput
-              formControlName="time"
-              readonly
               (click)="timePicker.open()"
               [matTimepicker]="timePicker"
-              placeholder="Selecione o horário HH:mm">
-            <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+              formControlName="time"
+              matInput
+              placeholder="Selecione o horário HH:mm"
+              readonly>
+            <mat-timepicker-toggle [for]="timePicker" matIconSuffix />
             <mat-timepicker #timePicker />
           </mat-form-field>
           <div class="button-container col-md-2">
@@ -204,13 +204,13 @@
         <div class="w-100 row">
           <mat-form-field class="col-md-10 pr-0">
             <input
-              matInput
-              formControlName="time"
-              readonly
               (click)="timePicker.open()"
               [matTimepicker]="timePicker"
-              placeholder="Selecione o horário HH:mm">
-            <mat-timepicker-toggle matIconSuffix [for]="timePicker" />
+              formControlName="time"
+              matInput
+              placeholder="Selecione o horário HH:mm"
+              readonly>
+            <mat-timepicker-toggle [for]="timePicker" matIconSuffix />
             <mat-timepicker #timePicker />
           </mat-form-field>
           <div class="button-container col-md-2">
@@ -231,12 +231,12 @@
         <mat-form-field class="w-100">
           <input
             #respostaInput
-            plenoMask="cep"
             (keydown.enter)="(form.get('resposta')?.value && form.get('resposta')?.value?.length === 9 && !UtilsService.loading.value) && enviarMensagem()"
+            class="position-relative input-pergunta"
             formControlName="resposta"
             matInput
-            class="position-relative input-pergunta"
             placeholder="Informe o cep"
+            plenoMask="cep"
             type="text">
           <div class="button-container position-absolute">
             <button
@@ -256,13 +256,13 @@
         <mat-form-field class="w-100">
           <input
             #respostaInput
-            plenoMask="cpfCnpj"
             (keydown.enter)="(form.get('resposta')?.value && form.get('resposta')?.value?.length === 14 && form.get('resposta')?.value?.length === 18 && !UtilsService.loading.value) && enviarMensagem()"
-            formControlName="resposta"
-            matInput
             autocomplete="off"
             class="position-relative input-pergunta"
+            formControlName="resposta"
+            matInput
             placeholder="Informe o seu CPF/CNPJ"
+            plenoMask="cpfCnpj"
             type="text">
           <div class="button-container position-absolute">
             <button
@@ -282,13 +282,13 @@
         <mat-form-field class="w-100">
           <input
             #respostaInput
-            plenoMask="celularDDD"
             (keydown.enter)="form.get('resposta')?.value && enviarMensagem()"
             (keydown.space)="$event.stopPropagation()"
+            class="position-relative input-pergunta"
             formControlName="resposta"
             matInput
-            class="position-relative input-pergunta"
             placeholder="Informe seu celular"
+            plenoMask="celularDDD"
             type="tel">
           <div class="button-container position-absolute">
             <button
@@ -307,12 +307,12 @@
       @case (perguntaSolicitacao.tipo_input === 'FILE') {
         <mat-form-field class="w-100">
           <input
-            (keydown.space)="$event.stopPropagation()"
             (click)="selecionarArquivo()"
-            matInput
-            readonly
+            (keydown.space)="$event.stopPropagation()"
             class="position-relative input-pergunta"
+            matInput
             placeholder="Selecione arquivos"
+            readonly
             type="text">
           <div class="button-container position-absolute">
             <button

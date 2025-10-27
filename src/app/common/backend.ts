@@ -41,11 +41,11 @@ export class BackendDefaults {
 
   /**
    * Verifica se o host atual é um dos hosts abertos.
-   * @returns {boolean} Verdadeiro se o host for 'procurar-empresas.vivendodevistorias.com.br' ou 'procurar-oportunidades.vivendodevistorias.com.br'.
+   * @returns {boolean} Verdadeiro se o host for 'conexao.vivendodevistorias.com.br''.
    */
   public get isHostAberto (): boolean {
-    return this.urlSistema.includes('procurar-empresas.') ||
-      this.urlSistema.includes('procurar-oportunidades.');
+    return this.urlSistema.includes('conexaovdv.sistemaspleno') ||
+      this.urlSistema.includes('conexao.vivendodevistorias');
   }
 
   /**
