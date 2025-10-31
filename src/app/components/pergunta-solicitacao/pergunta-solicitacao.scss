@@ -1,10 +1,9 @@
 .main-container-ia-message {
   display: flex;
   gap: 12px;
-  padding-right: 10vw;
   justify-content: flex-start;
   align-items: flex-start;
-  width: 100%;
+  max-width: 50%;
 
   img {
     width: 45px;
@@ -146,6 +145,7 @@
 
 ::ng-deep iframe {
   width: 600px;
+  max-width: 100%;
   margin: 0 auto;
   aspect-ratio: 16 / 9;
   border-radius: 12px;
@@ -153,9 +153,30 @@
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
+@media (max-width: 1200px) {
+  .main-container-ia-message {
+    max-width: 70%;
+  }
+}
+
+
+@media (max-width: 800px) {
+  .main-container-ia-message,
+  .main-container-user-message {
+    max-width: 100%;
+    width: 100%;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
+
 @media (max-width: 500px) {
   ::ng-deep iframe {
     width: 270px;
+    max-width: 100%;
     margin: 0 auto;
     aspect-ratio: 16 / 9;
     border-radius: 12px;

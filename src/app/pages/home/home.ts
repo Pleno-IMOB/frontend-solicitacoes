@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, ElementRef, NgZone, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, NgZone, OnInit, ViewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { Header } from '../../components/header/header';
 import { Footer } from '../../components/footer/footer';
 import { MatCardModule } from '@angular/material/card';
-import { CommonModule } from '@angular/common';
+import { APP_BASE_HREF, CommonModule } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { MatIconModule } from '@angular/material/icon';
@@ -64,6 +64,7 @@ export class Home implements OnInit {
   };
 
   constructor (
+    @Inject(APP_BASE_HREF) public baseHref: string,
     private cd: ChangeDetectorRef,
     protected backend: BackendService,
     private dialog: MatDialog,
@@ -190,14 +191,14 @@ export class Home implements OnInit {
       const conversa = this.criarConversa(message, this.perguntaSelecionada?.pergunta || '');
       this.conversaIa.push(conversa);
       this.digitando = true;
-      this.rolarParaBaixo(400);
+      this.rolarParaBaixo(200);
     }
 
     if ( this.perguntaSelecionada ) {
       this.perguntaSelecionada.valor = valor;
       this.perguntaSelecionada.desc_valor = message;
       this.perguntaSelecionada = this.getProximaPergunta(this.perguntaSelecionada);
-      this.rolarParaBaixo(100);
+      this.rolarParaBaixo(200);
     }
 
     if ( !this.perguntaSelecionada ) {
@@ -284,7 +285,7 @@ export class Home implements OnInit {
       }
     }
 
-    window.history.pushState({}, '', ('/solicitar'));
+    window.history.pushState({}, '', `${this.baseHref}`);
   }
 
   /**
@@ -326,7 +327,7 @@ export class Home implements OnInit {
       }
     }
 
-    window.history.pushState({}, '', ('/solicitar'));
+    window.history.pushState({}, '', `${this.baseHref}`);
   }
 
   /**
@@ -668,13 +669,13 @@ export class Home implements OnInit {
       originalPushState.apply(this, args);
       const url = args[2] as string;
 
-      if ( url === '/login' || url === '/solicitar/login' ) {
+      if ( url === `${self.baseHref}login` ) {
         self.ngZone.run(() => {
           self.login().then();
         });
       }
 
-      if ( url === '/meus-dados' || url === '/solicitar/meus-dados' ) {
+      if ( url === `${self.baseHref}meus-dados` ) {
         self.ngZone.run(() => {
           self.meusDados().then();
         });
@@ -689,10 +690,27 @@ export class Home implements OnInit {
   private rolarParaBaixo (delay: number = 0): void {
     setTimeout(() => {
       const container = this.conversaContainer.nativeElement;
-      container.scrollTo({
-        top: container.scrollHeight,
-        behavior: 'smooth'
-      });
+
+      const btnConfirmar = container.querySelector('.btn-confirmar') as HTMLElement;
+      if ( btnConfirmar ) {
+        btnConfirmar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.cd.detectChanges();
+        return;
+      }
+
+      const mensagensIa = container.querySelectorAll('.main-container-ia-message');
+      if ( mensagensIa.length > 0 ) {
+        const ultimaMensagem = mensagensIa[mensagensIa.length - 1] as HTMLElement;
+        const header = document.querySelector('header') as HTMLElement;
+        const headerHeight = header ? header.offsetHeight + 5 : 0;
+        const scrollPosition = ultimaMensagem.offsetTop - headerHeight;
+        container.scrollTo({ top: scrollPosition, behavior: 'smooth' });
+      } else {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
       this.cd.detectChanges();
     }, delay);
   }

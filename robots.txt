@@ -1,2 +1,22 @@
+# Facebook, Instagram e WhatsApp
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Facebot
+Allow: /
+
+# Twitter
+User-agent: Twitterbot
+Allow: /
+
+# LinkedIn
+User-agent: LinkedInBot
+Allow: /
+
+# Bing
+User-agent: bingbot
+Allow: /
+
+# Outros mecanismos e redes sociais
 User-agent: *
-Disallow: /
+Allow: /

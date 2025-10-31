@@ -10,7 +10,7 @@
     <div class="social-media-container">
       @if (telefoneFormatado) {
         <a
-          [href]="'https://wa.me/55' + telefoneFormatado + '?text=Olá!%20vim%20da%20página%20de%20oportunidades,%20gostaria%20de%20mais%20informações.'"
+          [href]="formataLink()"
           target="_blank">
           <i class="fab fa-whatsapp"></i>
         </a>

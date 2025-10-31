@@ -59,11 +59,11 @@
             </mat-select>
           </mat-form-field>
         } @else {
-          <mat-chip-listbox formControlName="resposta">
+          <mat-chip-listbox>
             @for (pergunta of filteredOptions; track pergunta) {
               <mat-chip-option
-                (click)="enviarMensagem()"
-                [value]="pergunta">
+                (click)="clickChip(pergunta)"
+                selectable="false">
                 {{ pergunta?.label_desc }}
               </mat-chip-option>
             }

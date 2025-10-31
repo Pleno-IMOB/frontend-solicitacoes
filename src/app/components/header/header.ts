@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Inject, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -6,6 +6,7 @@ import Swal, { SweetAlertResult } from 'sweetalert2';
 import { AuthService } from '../../services/auth.service';
 import { UtilsService } from '../../services/utils.service';
 import { BackendService } from '../../services/backend.service';
+import { APP_BASE_HREF } from '@angular/common';
 
 @Component({
   selector: 'app-header',
@@ -24,6 +25,7 @@ export class Header {
   protected defaultImage = 'assets/images/lazy.gif';
 
   constructor (
+    @Inject(APP_BASE_HREF) public baseHref: string,
     protected authService: AuthService,
     protected backend: BackendService
   ) {
@@ -56,13 +58,13 @@ export class Header {
    * Redireciona o usuário para a página de login.
    */
   protected login (): void {
-    window.history.pushState({}, '', ('/solicitar/login'));
+    window.history.pushState({}, '', `${this.baseHref}login`);
   }
 
   /**
    * Redireciona o usuário para a página "Meus Dados".
    */
   protected redirecionaParaMinhaConta (): void {
-    window.history.pushState({}, '', ('/solicitar/meus-dados'));
+    window.history.pushState({}, '', `${this.baseHref}meus-dados`);
   }
 }

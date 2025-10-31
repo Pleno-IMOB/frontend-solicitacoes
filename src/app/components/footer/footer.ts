@@ -42,4 +42,12 @@ export class Footer implements OnInit {
   async ngOnInit (): Promise<void> {
     this.imobiliaria = await this.imobiliariaService.getEmpresa();
   }
+
+  /**
+   * Formata e retorna um link do WhatsApp com o número de telefone formatado e uma mensagem inicial.
+   * @returns {string} Link formatado do WhatsApp.
+   */
+  protected formataLink (): string {
+    return `https://wa.me/55${this.telefoneFormatado}?text=Olá! Vim da página: ${window.location.href}`;
+  }
 }

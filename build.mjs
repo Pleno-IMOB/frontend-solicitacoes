@@ -27,21 +27,6 @@ function execShellCommand(cmd) {
   });
 }
 
-async function verificarAlteracoesPendentes() {
-  return new Promise((resolve, reject) => {
-    exec('git status --porcelain', (error, stdout) => {
-      if (error) {
-        reject(`Erro ao verificar alterações pendentes: ${error}`);
-      }
-      if (stdout.trim()) {
-        reject('Há alterações pendentes no Git. Por favor, faça o commit ou stash antes de continuar.');
-      } else {
-        resolve();
-      }
-    });
-  });
-}
-
 async function fazerCheckoutBranch(ambiente) {
   const getCurrentBranch = () => {
     return new Promise((resolve, reject) => {
@@ -95,6 +80,8 @@ async function main() {
     ]
   }]);
 
+  const endpoints = ['solicitar', 'buscar'];
+
   const configs = {
     HOMOLOGACAO: {
       baseHref: '/solicitar/',
@@ -120,38 +107,42 @@ async function main() {
   };
 
   for (const env of environments) {
-    try {
-      // Fazer checkout da branch correta
-      await fazerCheckoutBranch(env);
+    // Fazer checkout da branch correta
+    await fazerCheckoutBranch(env);
 
-      console.log(chalk.blue(`Iniciando processo de build para o ambiente ${env}...`));
+    for (const endpoint of endpoints) {
+      try {
+        const folderBuild = `dist/${endpoint}`;
 
-      // Configuração do ambiente selecionado
-      const config = configs[env];
-      const buildCommands = [
-        `rm -rf dist/frontend-solicitacoes`,
-        `ng build --base-href ${config.baseHref} --deploy-url ${config.deployUrl} --configuration ${config.configuration}`,
-        `cp .htaccess dist/frontend-solicitacoes`,
-        `cd dist/frontend-solicitacoes; zip -rq upload.zip * .[^.]*`
-      ];
+        console.log(chalk.blue(`\n🚀 Iniciando build do endpoint "${endpoint}" para ${env}...`));
 
-      // Realizar build
-      await executarComandos(buildCommands);
+        // Configuração do ambiente selecionado
+        const config = configs[env];
+        const buildCommands = [
+          `rm -rf dist`,
+          `ng build --base-href /${endpoint}/ --deploy-url /${endpoint}/ --configuration ${config.configuration} --output-path=${folderBuild}`,
+          `cp .htaccess ${folderBuild}`,
+          `cd ${folderBuild}; zip -rq upload.zip * .[^.]*`
+        ];
 
-      console.log(chalk.blue(`Realizando deploy para o ambiente ${env}...`));
+        // Realizar build
+        await executarComandos(buildCommands);
 
-      // Comandos de deploy
-      const deployCommands = [
-        `rsync --progress -avz dist/frontend-solicitacoes/upload.zip ${config.userSsh}:${config.remotePath}`,
-        `ssh ${config.userSsh} "cd ${config.remotePath} && rm -rf *.txt assets/ *.ico *.html *.js *.woff *.woff2 *.ttf *.eot *.css *.png; unzip -oq upload.zip; rm upload.zip"`
-      ];
+        // Comandos de deploy
+        console.log(chalk.blue(`Realizando deploy para o ambiente ${env}...`));
+        const deployCommands = [
+          `rsync --progress -avz ${folderBuild}/upload.zip ${config.userSsh}:${config.remotePath.replace('solicitar', endpoint)}`,
+          `ssh ${config.userSsh} "cd ${config.remotePath.replace('solicitar', endpoint)} && rm -rf *.txt assets/ *.ico *.html *.js *.woff *.woff2 *.ttf *.eot *.css *.png; unzip -oq upload.zip; rm upload.zip"`
+        ];
 
-      await executarComandos(deployCommands);
-      console.log(chalk.green(`Deploy para ${env} concluído com sucesso!`));
-    } catch (error) {
-      console.error(chalk.red(`Erro durante o processo no ambiente ${env}: ${error}`));
+        await executarComandos(deployCommands);
+        console.log(chalk.green(`✅ Deploy do endpoint "${endpoint}" para ${env} concluído com sucesso!`));
+      } catch (error) {
+        console.error(chalk.red(`Erro durante o processo no endpoint "${endpoint}" no ambiente ${env}: ${error}`));
+      }
     }
   }
 
+  await executarComandos([`rm -rf dist/ .angular/`]);
   console.log(chalk.green('Todos os processos de build e deploy foram concluídos com sucesso!'));
 }
