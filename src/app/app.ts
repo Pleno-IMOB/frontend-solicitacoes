@@ -40,7 +40,7 @@ export class App implements OnInit, OnDestroy {
    * Inicializa o componente carregando a imobiliária.
    * @return {Promise<void>}
    */
-  async ngOnInit (): Promise<void> {
+  public async ngOnInit (): Promise<void> {
     this.imobiliaria = await this.imobiliariaService.getEmpresa();
 
     if ( this.backend.isHostAberto ) {
@@ -53,7 +53,7 @@ export class App implements OnInit, OnDestroy {
   /**
    * Cancela a inscrição do erroSub.
    */
-  ngOnDestroy (): void {
+  public ngOnDestroy (): void {
     this.erroSub.unsubscribe();
   }
 

@@ -13,7 +13,7 @@ import { environment } from '../environments/environment';
 import { NgxCurrencyInputMode, provideEnvironmentNgxCurrency } from 'ngx-currency';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_TIMEPICKER_CONFIG } from '@angular/material/timepicker';
-import { CurrencyPipe } from '@angular/common';
+import { APP_BASE_HREF, CurrencyPipe } from '@angular/common';
 
 const maskConfig: Partial<NgxMaskConfig> = {
   validation: false
@@ -59,6 +59,13 @@ export const appConfig: ApplicationConfig = {
     {
       provide: MAT_TIMEPICKER_CONFIG,
       useValue: { interval: '30 minutes' }
+    },
+    {
+      provide: APP_BASE_HREF,
+      useFactory: () => {
+        const path = window.location.pathname.split('/')[1];
+        return path ? `/${path}/` : '/';
+      }
     }
   ]
 };

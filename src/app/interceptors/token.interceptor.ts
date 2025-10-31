@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
 import { BackendService } from '../services/backend.service';
+import { APP_BASE_HREF } from '@angular/common';
 
 let isRefreshing = false;
 const refreshTokenSubject = new BehaviorSubject<string | null>(null);
@@ -83,12 +84,14 @@ function handle401Error (
         catchError((err) => {
           isRefreshingRef.value = false;
           authService.logout().then();
-          window.history.pushState({}, '', ('/solicitar/login'));
+          const baseHref = inject(APP_BASE_HREF);
+          window.history.pushState({}, '', `${baseHref}login`);
           return throwError(() => err);
         })
       );
     } else {
-      window.history.pushState({}, '', ('/solicitar/login'));
+      const baseHref = inject(APP_BASE_HREF);
+      window.history.pushState({}, '', `${baseHref}login`);
     }
   }
 

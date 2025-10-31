@@ -31,8 +31,6 @@ import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
     MatFormFieldModule,
     MascaraDirective,
     MatButton,
-    MatChipListbox,
-    MatChipOption,
     MatDatepickerModule,
     MatIcon,
     MatIconModule,
@@ -49,7 +47,9 @@ import { Nl2BrPipe } from '../../directives/Nl2BrPipe';
     OnlyNumbers,
     ReactiveFormsModule,
     SafePipe,
-    Nl2BrPipe
+    Nl2BrPipe,
+    MatChipListbox,
+    MatChipOption
   ],
   templateUrl: './pergunta-solicitacao.html',
   styleUrl: './pergunta-solicitacao.scss',
@@ -114,8 +114,14 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
    * Envia a resposta do usuário com base no tipo de entrada da pergunta.
    * @param pular Indica se a resposta deve ser pulada.
    */
-  protected enviarMensagem (pular: boolean = false): void {
+  protected enviarMensagem (pular: boolean = false) {
     let valorResposta: { label_value: string; label_desc: string } | null;
+
+    const resposta = this.form.get('resposta')?.value;
+    if ( resposta?.label_action ) {
+      window.open(resposta.label_action, '_blank');
+      return;
+    }
 
     if ( pular ) {
       valorResposta = {
@@ -256,6 +262,16 @@ export class PerguntaSolicitacao implements OnInit, OnChanges, OnDestroy {
     document.body.appendChild(input);
     input.click();
     setTimeout(() => document.body.removeChild(input), 0);
+  }
+
+  /**
+   * Define o valor da resposta com base na pergunta selecionada e envia uma mensagem.
+   * @param {PerguntaSolicitacaoInterface} pergunta Objeto da pergunta selecionada.
+   * @returns {void} Não retorna nenhum valor.
+   */
+  protected clickChip (pergunta: PerguntaSolicitacaoInterface): void {
+    this.form.get('resposta')?.setValue(pergunta);
+    this.enviarMensagem();
   }
 
   /**

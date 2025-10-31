@@ -17,3 +17,23 @@ img {
     }
   }
 }
+
+@media (max-width: 1200px) {
+  .main-container-ia-message {
+    max-width: 70%;
+  }
+}
+
+
+@media (max-width: 800px) {
+  .main-container-ia-message,
+  .main-container-user-message {
+    max-width: 100%;
+    width: 100%;
+
+    img {
+      width: 30px;
+      height: 30px;
+    }
+  }
+}
