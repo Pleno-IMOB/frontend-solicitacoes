@@ -578,12 +578,14 @@ export class Home implements OnInit {
    * @returns O pai da pergunta alvo ou null se não for encontrado.
    */
   private getPai (alvo: PerguntaSolicitacaoInterface, lista: PerguntaSolicitacaoInterface[]): PerguntaSolicitacaoInterface | null {
-    for ( const item of lista ) {
-      if ( item.sub_perguntas.includes(alvo) ) {
+    for ( const item of lista || [] ) {
+      if ( item?.sub_perguntas?.includes(alvo) ) {
         return item;
       }
-      const pai = this.getPai(alvo, item.sub_perguntas);
-      if ( pai ) return pai;
+      const pai = this.getPai(alvo, item?.sub_perguntas || []);
+      if ( pai ) {
+        return pai;
+      }
     }
     return null;
   }
