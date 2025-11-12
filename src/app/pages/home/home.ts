@@ -55,7 +55,6 @@ export class Home implements OnInit {
   protected readonly UtilsService = UtilsService;
   protected logoEmpresa = '';
   private listaPerguntas: PerguntaSolicitacaoInterface[] = [];
-  private verificarAgendamento = true;
   private jaIniciou = false;
   @ViewChild('scrollContainer') private conversaContainer!: ElementRef;
   private thread_id: string = '';
@@ -433,10 +432,6 @@ export class Home implements OnInit {
    * @description
    */
   private async validarAgendamento (): Promise<boolean> {
-    if ( !this.verificarAgendamento ) {
-      return true;
-    }
-
     this.digitando = true;
     this.rolarParaBaixo();
 
@@ -472,7 +467,6 @@ export class Home implements OnInit {
       const currentIdx = this.listaPerguntas.length;
       this.listaPerguntas = roteiro.roteiro;
       this.perguntaSelecionada = this.listaPerguntas.find((item, idx) => idx >= currentIdx && !item.valor) || null;
-      this.verificarAgendamento = false;
 
       if ( this.perguntaSelecionada?.campo ) {
         return false;
