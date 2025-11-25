@@ -229,6 +229,8 @@ export class Login implements AfterViewInit {
   protected async confirmarTokenDoCelular (): Promise<void> {
     const tokenControl = this.form.get('token');
     const nomeControl = this.form.get('nome');
+    const cliNome = this.form.get('cli_nome');
+    const cliCpfCnpj = this.form.get('cli_cpfCnpj');
     const emailControl = this.form.get('email');
     const response: any = await this.backend.apiPost(`login/validarTokenLoginAgendamento`, {
       ...this.form.value,
@@ -242,6 +244,8 @@ export class Login implements AfterViewInit {
       tokenControl?.setErrors(null);
       nomeControl?.setValue(response?.pes_nome);
       emailControl?.setValue(response?.pes_email);
+      cliNome?.setValue(response?.cliente?.pes_nome);
+      cliCpfCnpj?.setValue(response?.cliente?.pes_cnpj || response?.cliente?.pes_cpf);
       this.form.get('pes_logo')?.setValue(response?.pes_logo);
       this.nomeReadOnly = !!nomeControl?.value;
       this.emailReadOnly = !!emailControl?.value;
